@@ -1,4 +1,4 @@
-import { Direction } from '@/libs/enums/common.enum';
+import { Direction } from '../../enums/common.enum';
 import { AgentRequestStatus } from '../../enums/member.enum';
 
 export interface AgentRequestInput {
