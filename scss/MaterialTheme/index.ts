@@ -2,7 +2,7 @@ import { createTheme } from '@mui/material/styles';
 import shadow from './shadow';
 import typography from './typography';
 
-const theme = createTheme({
+const light = createTheme({
   palette: {
     mode: 'light',
 
@@ -220,4 +220,4 @@ const theme = createTheme({
   },
 });
 
-export default theme;
+export default light;
