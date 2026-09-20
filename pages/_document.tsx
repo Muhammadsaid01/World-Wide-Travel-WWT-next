@@ -11,12 +11,12 @@ export default function Document() {
         {/* SEO */}
         <meta
           name="keywords"
-          content="WWT, Wonder World Travel, travel, travel packages, tours, travel agents, Korea travel, world travel"
+          content="WWT, World Wide Travel, travel, travel packages, tours, travel agents, Korea travel, world travel"
         />
 
         <meta
           name="description"
-          content="WWT — Wonder World Travel. Discover travel packages, connect with trusted travel agents, find travel mates, and plan your next journey around the world."
+          content="WWT — World Wide Travel. Discover travel packages, connect with trusted travel agents, find travel mates, and plan your next journey around the world."
         />
       </Head>
 
