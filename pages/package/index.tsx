@@ -1,5 +1,14 @@
-const PackageList = () => {
-	return <div>PackageList</div>
+import Head from 'next/head';
+import PackageList from '@/libs/components/package/PackageList';
+import withLayout from '@/libs/components/layout/withLayout';
 
-};
-export default PackageList;
+function PackagesPage() {
+	return (
+		<>
+			<Head><title>Travel Packages | WWT</title></Head>
+			<PackageList />
+		</>
+	);
+}
+
+export default withLayout(PackagesPage);
