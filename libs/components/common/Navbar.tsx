@@ -1,7 +1,11 @@
 import { useRef, useState } from 'react';
+import { useReactiveVar } from '@apollo/client';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { Button, Collapse, Container, IconButton } from '@mui/material';
+import { Avatar, Button, Collapse, Container, IconButton, Menu, MenuItem } from '@mui/material';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import { currentUserVar } from '@/apollo/store';
+import { logout } from '@/libs/auth';
 import MenuIcon from '@mui/icons-material/Menu';
 import CloseIcon from '@mui/icons-material/Close';
 import LanguageIcon from '@mui/icons-material/Language';
@@ -18,9 +22,49 @@ const navigation = [
 ] as const;
 
 export default function Navbar() {
+	const currentUser = useReactiveVar(currentUserVar);
+	const [accountAnchor, setAccountAnchor] = useState<HTMLButtonElement | null>(null);
 	const [menuOpen, setMenuOpen] = useState(false);
 	const menuToggle = useRef<HTMLButtonElement>(null);
 	const router = useRouter();
+
+	function handleLogout() {
+		setAccountAnchor(null);
+		setMenuOpen(false);
+		try {
+			logout();
+		} finally {
+			void router.push('/');
+		}
+	}
+
+	function accountControl(location: 'desktop' | 'mobile') {
+		if (!currentUser) {
+			return (
+				<Button component={Link} href="/account/login" className="wwt-login" variant="contained" onClick={() => setMenuOpen(false)}>
+					Login
+				</Button>
+			);
+		}
+
+		const id = `wwt-account-${location}`;
+		const open = accountAnchor?.id === id;
+		return (
+			<Button
+				id={id}
+				className="wwt-account"
+				aria-label={`Account menu for ${currentUser.memberNick}`}
+				aria-haspopup="menu"
+				aria-controls={open ? 'wwt-account-menu' : undefined}
+				aria-expanded={open}
+				onClick={(event) => setAccountAnchor(event.currentTarget)}
+				startIcon={<Avatar className="wwt-account-avatar" src={currentUser.memberImage || undefined} />}
+				endIcon={<ExpandMoreIcon />}
+			>
+				<span className="wwt-account-nick">{currentUser.memberNick}</span>
+			</Button>
+		);
+	}
 
 	function links() {
 		return navigation.map(({ label, href }) =>
@@ -72,9 +116,7 @@ export default function Navbar() {
 					<IconButton disabled aria-label="Notifications (coming soon)">
 						<NotificationsNoneIcon />
 					</IconButton>
-					<Button className="wwt-login" variant="contained" disabled>
-						Login
-					</Button>
+					{accountControl('desktop')}
 				</div>
 				<IconButton
 					ref={menuToggle}
@@ -103,12 +145,24 @@ export default function Navbar() {
 						<IconButton disabled aria-label="Notifications (coming soon)">
 							<NotificationsNoneIcon />
 						</IconButton>
-						<Button variant="contained" disabled>
-							Login
-						</Button>
+						{accountControl('mobile')}
 					</div>
 				</Container>
 			</Collapse>
+			<Menu
+				id="wwt-account-menu"
+				anchorEl={accountAnchor}
+				open={Boolean(currentUser && accountAnchor)}
+				onClose={() => setAccountAnchor(null)}
+				onKeyDown={(event) => event.stopPropagation()}
+				anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+				transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+				slotProps={{ list: { 'aria-labelledby': accountAnchor?.id } }}
+			>
+				{/* Profile components are placeholders; no profile page route exists yet. */}
+				<MenuItem disabled aria-label="My Profile (coming soon)">My Profile (coming soon)</MenuItem>
+				<MenuItem onClick={handleLogout}>Logout</MenuItem>
+			</Menu>
 		</header>
 	);
 }

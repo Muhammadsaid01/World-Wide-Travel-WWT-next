@@ -104,6 +104,21 @@
 	display: none;
 }
 
+.wwt-account.MuiButton-root {
+	text-transform: none;
+	flex-shrink: 0;
+}
+.wwt-account-avatar.MuiAvatar-root {
+	width: 28px;
+	height: 28px;
+}
+.wwt-account-nick {
+	max-width: 96px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
 .wwt-footer {
 	margin-top: 0;
 	padding-top: 64px;
