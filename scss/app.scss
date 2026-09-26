@@ -15,6 +15,7 @@
 .wwt-page-content {
 	flex: 1;
 	min-width: 0;
+	padding-top: 76px;
 }
 
 .wwt-skip-link {
@@ -32,8 +33,16 @@
 }
 
 .wwt-navbar {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	width: 100%;
+	z-index: 1000;
+
 	background: var(--wwt-paper);
 	border-bottom: 1px solid var(--wwt-divider);
+	box-shadow: 0 1px 8px rgba(0, 0, 0, 0.04);
 	color: var(--wwt-primary);
 }
 
@@ -189,11 +198,15 @@
 }
 
 @media (max-width: 1100px) {
+	.wwt-page-content {
+		padding-top: 60px;
+	}
 	.wwt-navbar-inner.MuiContainer-root {
 		min-height: 60px;
 		gap: 8px;
 		justify-content: space-between;
 	}
+
 	// Mobile links and actions appear only inside the expanded Collapse.
 	.wwt-desktop-nav,
 	.wwt-navbar-actions {

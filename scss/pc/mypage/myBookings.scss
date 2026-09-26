@@ -21,7 +21,12 @@
 		display: grid;
 		grid-template-columns: 220px minmax(0, 1fr);
 		gap: 48px;
-		padding-top: 64px;
+		padding-top: 68px;
+	}
+	.my-bookings-sidebar {
+		position: sticky;
+		top: 110px;
+		align-self: flex-start;
 	}
 	.my-bookings-sidebar {
 		border-right: 1px solid #e5e7eb;
@@ -50,7 +55,8 @@
 		.is-active {
 			background: #e9eef4;
 			font-weight: 700;
-			span {
+			> .my-bookings-active-dot {
+				flex-shrink: 0;
 				width: 6px;
 				height: 6px;
 				border-radius: 50%;
@@ -67,14 +73,14 @@
 		justify-content: space-between;
 		gap: 20px;
 		border-bottom: 1px solid #e5e7eb;
-		padding-bottom: 30px;
-		margin-bottom: 28px;
+		padding-bottom: 36px;
+		margin-bottom: 32px;
 		h1 {
-			font-size: clamp(40px, 4.5vw, 58px);
+			font-size: clamp(56px, 4.7vw, 60px);
 			font-weight: 700;
 			letter-spacing: -2px;
 			line-height: 1.15;
-			margin-bottom: 16px;
+			margin-bottom: 20px;
 		}
 		p {
 			font-size: 16px;
@@ -97,16 +103,18 @@
 		flex-wrap: wrap;
 		align-items: center;
 		gap: 12px;
-		margin-bottom: 28px;
+		margin-bottom: 32px;
 	}
 	.my-bookings-tabs {
 		display: flex;
-		gap: 6px;
+		gap: 8px;
 		max-width: 100%;
 		overflow-x: auto;
 		.MuiButton-root {
 			min-width: auto;
-			padding: 9px 14px;
+			padding: 9px 20px;
+			min-height: 40px;
+			flex-shrink: 0;
 			border-radius: 50px;
 			background: #edeeef;
 			color: #43474f;
@@ -123,7 +131,8 @@
 		}
 	}
 	.my-bookings-search {
-		flex: 1 1 220px;
+		flex: 1 1 250px;
+		min-width: 0;
 		max-width: 270px;
 		margin-left: auto;
 		.MuiTextField-root {
@@ -138,8 +147,8 @@
 		.MuiOutlinedInput-root {
 			border-radius: 8px;
 			background: #f0f2f4;
-			font-size: 13px;
-			min-height: 42px;
+			font-size: 14px;
+			min-height: 44px;
 		}
 		fieldset {
 			border-color: transparent;
@@ -152,7 +161,7 @@
 	.my-booking-card {
 		display: grid;
 		grid-template-columns: 25% minmax(0, 1fr);
-		min-height: 250px;
+		min-height: 270px;
 		border: 1px solid #d5d9df;
 		border-radius: 12px;
 		background: #fff;
@@ -167,7 +176,7 @@
 		position: relative;
 		width: 100%;
 		height: 100%;
-		min-height: 250px;
+		min-height: 270px;
 		background: #edeeef;
 		img {
 			object-fit: cover;
@@ -185,11 +194,11 @@
 	}
 	.my-booking-status {
 		position: absolute;
-		left: 12px;
+		left: 16px;
 		top: 16px;
 		border-radius: 50px;
-		padding: 7px 10px;
-		font-size: 9px;
+		padding: 7px 12px;
+		font-size: 11px;
 		letter-spacing: 0.8px;
 		font-weight: 700;
 		background: #eef1f5;
@@ -219,13 +228,13 @@
 		}
 	}
 	.my-booking-content {
-		padding: 24px;
+		padding: 28px;
 		min-width: 0;
 		display: flex;
 		flex-direction: column;
 		overflow-wrap: anywhere;
 		h2 {
-			font-size: 28px;
+			font-size: 30px;
 			font-weight: 700;
 			line-height: 1.25;
 			margin: 12px 0;
@@ -238,7 +247,7 @@
 		gap: 8px 16px;
 		color: #6b7280;
 		text-transform: uppercase;
-		font-size: 10px;
+		font-size: 13px;
 		letter-spacing: 0.5px;
 		span {
 			display: flex;
@@ -246,7 +255,7 @@
 			align-items: center;
 		}
 		svg {
-			font-size: 13px;
+			font-size: 15px;
 			flex-shrink: 0;
 		}
 	}
@@ -254,7 +263,7 @@
 		display: flex;
 		flex-wrap: wrap;
 		gap: 10px 16px;
-		font-size: 12px;
+		font-size: 13px;
 		color: #6b7280;
 		margin-bottom: 24px;
 		span {
@@ -281,7 +290,7 @@
 		align-items: center;
 		flex-wrap: wrap;
 		gap: 16px;
-		padding-top: 18px;
+		padding-top: 24px;
 		border-top: 1px solid #e5e7eb;
 		margin-top: auto;
 		.MuiButton-root {
@@ -289,28 +298,28 @@
 			min-height: 44px;
 			border-radius: 6px;
 			text-transform: none;
-			font-size: 12px;
+			font-size: 13px;
 		}
 		.Mui-disabled {
-			border: 1px solid #9baabd;
+			border: 1.5px solid #65798f;
 			color: #65798f;
 		}
 	}
 	.my-booking-total-label {
-		font-size: 9px;
+		font-size: 11px;
 		letter-spacing: 1.5px;
 		text-transform: uppercase;
 		color: #6b7280;
 		margin-bottom: 4px;
 	}
 	.my-booking-amount {
-		font-size: 22px;
+		font-size: 24px;
 		font-weight: 700;
 	}
 	.my-bookings-pagination {
 		display: flex;
 		justify-content: center;
-		margin-top: 40px;
+		margin-top: 48px;
 		.MuiPagination-ul {
 			gap: 4px;
 		}

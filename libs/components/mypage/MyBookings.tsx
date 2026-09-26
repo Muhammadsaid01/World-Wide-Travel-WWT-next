@@ -160,7 +160,7 @@ function MyBookingsContent({ authenticated, allowed }: { authenticated: boolean;
 										aria-current="page"
 									>
 										{item}
-										<span />
+										<span className="my-bookings-active-dot" aria-hidden="true" />
 									</Button>
 								) : (
 									<Button key={item} disabled>
