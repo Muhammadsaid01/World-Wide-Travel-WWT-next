@@ -53,3 +53,16 @@ export interface Bookings {
 	list: Booking[];
 	metaCounter?: TotalCounter[];
 }
+
+export type BookingHandoff = Pick<
+	Booking,
+	| '_id'
+	| 'bookingCode'
+	| 'memberId'
+	| 'bookingStatus'
+	| 'peopleCount'
+	| 'totalPrice'
+	| 'discountAmount'
+	| 'finalPrice'
+	| 'currency'
+>;

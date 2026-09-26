@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { IconButton } from '@mui/material';
 import FavoriteBorder from '@mui/icons-material/FavoriteBorder';
 import Star from '@mui/icons-material/Star';
@@ -56,8 +57,9 @@ export default function PackageCard({ item }: { item: PackageListItem }) {
 						{item.packageReviewCount > 0 ? <>{item.packageRating.toFixed(1)}</> : <span>No reviews yet</span>}
 					</p>
 				</div>
-				{/* No detail route is implemented yet; titles are intentionally not links. */}
-				<h3 title={item.packageTitle}>{item.packageTitle}</h3>
+				<h3 title={item.packageTitle}>
+					<Link href={`/package/${item._id}`}>{item.packageTitle}</Link>
+				</h3>
 				<p className="home-duration">
 					<AccessTime />
 					{item.packageDays} days / {item.packageNights} nights

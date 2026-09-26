@@ -1,7 +1,9 @@
+import type { TravelerInput } from './traveler.input';
 import { BookingStatus } from '../../enums/booking.enum';
 import { Direction } from '../../enums/common.enum';
 
 export interface BookingInput {
+	travelers: Omit<TravelerInput, 'bookingId'>[];
 	packageId: string;
 	scheduleId: string;
 
@@ -14,7 +16,7 @@ export interface BookingInput {
 	contactName: string;
 	contactPhone: string;
 
-	currency?: string;
+	currency: string;
 
 	contactEmail?: string;
 	specialRequest?: string;

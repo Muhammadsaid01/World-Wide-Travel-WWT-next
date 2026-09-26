@@ -1,4 +1,6 @@
-import { gql } from '@apollo/client';
+import type { BookingInput } from '@/libs/types/booking/booking.input';
+import type { BookingHandoff } from '@/libs/types/booking/booking';
+import { gql, type TypedDocumentNode } from '@apollo/client';
 
 export const LOGIN = gql`
 	mutation Login($input: LoginInput!) {
@@ -46,6 +48,22 @@ export const SIGN_UP = gql`
 			memberPoint
 			memberRank
 			accessToken
+		}
+	}
+`;
+
+export const CREATE_BOOKING: TypedDocumentNode<{ createBooking: BookingHandoff }, { input: BookingInput }> = gql`
+	mutation CreateBooking($input: BookingInput!) {
+		createBooking(input: $input) {
+			_id
+			bookingCode
+			memberId
+			bookingStatus
+			peopleCount
+			totalPrice
+			discountAmount
+			finalPrice
+			currency
 		}
 	}
 `;
