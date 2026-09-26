@@ -1,3 +1,4 @@
+import type { BookingsInquiry } from '@/libs/types/booking/booking.input';
 import type { Payment } from '@/libs/types/booking/payment';
 import type { BookingHandoff } from '@/libs/types/booking/booking';
 import { gql, type TypedDocumentNode } from '@apollo/client';
@@ -298,6 +299,48 @@ export const GET_MY_PAYMENTS: TypedDocumentNode<
 			paymentStatus
 			paymentAmount
 			currency
+		}
+	}
+`;
+
+// Direction is a numeric TS enum, but GraphQL variables use its registered names.
+export type MyBookingsInput = Omit<BookingsInquiry, 'direction' | 'search'> & {
+	direction?: keyof typeof Direction;
+	search?: Pick<NonNullable<BookingsInquiry['search']>, 'bookingStatus' | 'text'>;
+};
+export const GET_MY_BOOKINGS: TypedDocumentNode<
+	{
+		getMyBookings: { list: PaymentBooking[]; metaCounter?: { total: number }[] | null };
+	},
+	{ input: MyBookingsInput }
+> = gql`
+	query GetMyBookings($input: BookingsInquiry!) {
+		getMyBookings(input: $input) {
+			list {
+				_id
+				bookingCode
+				memberId
+				bookingStatus
+				peopleCount
+				totalPrice
+				discountAmount
+				finalPrice
+				currency
+				packageData {
+					_id
+					packageTitle
+					packageImages
+					destinationCity
+					destinationCountry
+				}
+				scheduleData {
+					startDate
+					endDate
+				}
+			}
+			metaCounter {
+				total
+			}
 		}
 	}
 `;

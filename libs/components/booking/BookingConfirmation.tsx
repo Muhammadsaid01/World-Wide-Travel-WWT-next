@@ -115,8 +115,7 @@ export default function BookingConfirmation({
 					</div>
 				</Paper>
 				<div className="confirmation-actions">
-					{/* Connect the My Booking route once it is implemented. */}
-					<Button type="button" variant="contained" disabled className="confirmation-view-booking">
+					<Button component={Link} href="/mypage/my-bookings" variant="contained" className="confirmation-view-booking">
 						View My Booking
 					</Button>
 					<Button component={Link} href="/" variant="outlined">
