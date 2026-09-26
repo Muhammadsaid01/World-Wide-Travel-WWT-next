@@ -90,3 +90,52 @@
 		padding: 16px;
 	}
 }
+
+.payment-content {
+	min-width: 0;
+}
+.payment-methods {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 12px;
+	margin-top: 24px;
+	.payment-method {
+		min-width: 0;
+		min-height: 64px;
+		padding: 12px 8px;
+		border-radius: 10px;
+		text-transform: none;
+		font-weight: 700;
+		border-color: #dce2e9;
+		&.is-selected {
+			border-color: currentColor;
+			box-shadow: inset 0 0 0 1px currentColor;
+			background: #f0f4f8;
+		}
+	}
+}
+.payment-card-placeholder {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 16px;
+	padding: 40px 24px;
+	text-align: center;
+	background: #f8fafc;
+	border: 1px dashed #cbd5e1;
+	border-radius: 12px;
+}
+.payment-price-row {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: space-between;
+	gap: 8px;
+}
+@media (max-width: 600px) {
+	.payment-methods {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+	.payment-card-placeholder {
+		padding: 24px 16px;
+	}
+}

@@ -246,7 +246,14 @@ export const VALIDATE_COUPON: TypedDocumentNode<{ validateCoupon: CouponValidati
 		}
 	`;
 
-export const GET_MY_BOOKING: TypedDocumentNode<{ getMyBooking: BookingHandoff }, { bookingId: string }> = gql`
+export type PaymentBooking = BookingHandoff & {
+	packageData?: Pick<
+		TravelPackage,
+		'_id' | 'packageTitle' | 'packageImages' | 'destinationCity' | 'destinationCountry'
+	> | null;
+	scheduleData?: Pick<PackageSchedule, 'startDate' | 'endDate'> | null;
+};
+export const GET_MY_BOOKING: TypedDocumentNode<{ getMyBooking: PaymentBooking }, { bookingId: string }> = gql`
 	query GetMyBooking($bookingId: String!) {
 		getMyBooking(bookingId: $bookingId) {
 			_id
@@ -257,6 +264,17 @@ export const GET_MY_BOOKING: TypedDocumentNode<{ getMyBooking: BookingHandoff },
 			totalPrice
 			discountAmount
 			finalPrice
+			packageData {
+				_id
+				packageTitle
+				packageImages
+				destinationCity
+				destinationCountry
+			}
+			scheduleData {
+				startDate
+				endDate
+			}
 			currency
 		}
 	}
