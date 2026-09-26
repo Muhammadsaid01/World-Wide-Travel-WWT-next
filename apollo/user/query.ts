@@ -1,3 +1,4 @@
+import type { Payment } from '@/libs/types/booking/payment';
 import type { BookingHandoff } from '@/libs/types/booking/booking';
 import { gql, type TypedDocumentNode } from '@apollo/client';
 import type { Direction } from '@/libs/enums/common.enum';
@@ -275,6 +276,27 @@ export const GET_MY_BOOKING: TypedDocumentNode<{ getMyBooking: PaymentBooking },
 				startDate
 				endDate
 			}
+			currency
+		}
+	}
+`;
+
+export const GET_MY_PAYMENTS: TypedDocumentNode<
+	{
+		getMyPayments: Pick<
+			Payment,
+			'_id' | 'bookingId' | 'paymentMethod' | 'paymentStatus' | 'paymentAmount' | 'currency'
+		>[];
+	},
+	Record<string, never>
+> = gql`
+	query GetMyPayments {
+		getMyPayments {
+			_id
+			bookingId
+			paymentMethod
+			paymentStatus
+			paymentAmount
 			currency
 		}
 	}

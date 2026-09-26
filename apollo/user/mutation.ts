@@ -1,3 +1,5 @@
+import type { Payment } from '@/libs/types/booking/payment';
+import type { PaymentInput } from '@/libs/types/booking/payment.input';
 import type { BookingInput } from '@/libs/types/booking/booking.input';
 import type { BookingHandoff } from '@/libs/types/booking/booking';
 import { gql, type TypedDocumentNode } from '@apollo/client';
@@ -63,6 +65,27 @@ export const CREATE_BOOKING: TypedDocumentNode<{ createBooking: BookingHandoff }
 			totalPrice
 			discountAmount
 			finalPrice
+			currency
+		}
+	}
+`;
+
+export const CREATE_PAYMENT: TypedDocumentNode<
+	{
+		createPayment: Pick<
+			Payment,
+			'_id' | 'bookingId' | 'paymentMethod' | 'paymentStatus' | 'paymentAmount' | 'currency'
+		>;
+	},
+	{ input: PaymentInput }
+> = gql`
+	mutation CreatePayment($input: PaymentInput!) {
+		createPayment(input: $input) {
+			_id
+			bookingId
+			paymentMethod
+			paymentStatus
+			paymentAmount
 			currency
 		}
 	}

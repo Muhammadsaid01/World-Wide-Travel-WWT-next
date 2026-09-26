@@ -1,30 +1,21 @@
-import { useState } from 'react';
-import CreditCardOutlined from '@mui/icons-material/CreditCardOutlined';
-import ArrowBack from '@mui/icons-material/ArrowBack';
-import AccountBalanceOutlined from '@mui/icons-material/AccountBalanceOutlined';
-import { PaymentMethod, BookingStatus } from '@/libs/enums/booking.enum';
+import { currentUserVar } from '@/apollo/store';
+import { GET_MY_BOOKING, GET_MY_PAYMENTS } from '@/apollo/user/query';
+import withLayout from '@/libs/components/layout/withLayout';
 import PackageImage from '@/libs/components/package/PackageImage';
 import { formatScheduleDate } from '@/libs/components/package/PackageSchedules';
+import { BookingStatus, PaymentMethod, PaymentStatus } from '@/libs/enums/booking.enum';
+import { useQuery, useReactiveVar } from '@apollo/client';
+import AccountBalanceOutlined from '@mui/icons-material/AccountBalanceOutlined';
+import Apple from '@mui/icons-material/Apple';
+import ArrowBack from '@mui/icons-material/ArrowBack';
+import CheckCircle from '@mui/icons-material/CheckCircle';
+import CreditCardOutlined from '@mui/icons-material/CreditCardOutlined';
+import Google from '@mui/icons-material/Google';
+import { Alert, Button, Divider, Paper, Skeleton, Stack, Step, StepLabel, Stepper, Typography } from '@mui/material';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { useQuery, useReactiveVar } from '@apollo/client';
-import {
-	Alert,
-	Button,
-	Divider,
-	Paper,
-	Skeleton,
-	Snackbar,
-	Stack,
-	Step,
-	StepLabel,
-	Stepper,
-	Typography,
-} from '@mui/material';
-import { currentUserVar } from '@/apollo/store';
-import { GET_MY_BOOKING } from '@/apollo/user/query';
-import withLayout from '@/libs/components/layout/withLayout';
+import { useState } from 'react';
 
 const methodLabels: Record<PaymentMethod, string> = {
 	[PaymentMethod.CARD]: 'Card',
@@ -39,17 +30,20 @@ const methodLabels: Record<PaymentMethod, string> = {
 	[PaymentMethod.BANK_TRANSFER]: 'Bank Transfer',
 };
 
+function MethodMark({ method }: { method: PaymentMethod }) {
+	if (method === PaymentMethod.CARD) return <CreditCardOutlined />;
+	if (method === PaymentMethod.BANK_TRANSFER) return <AccountBalanceOutlined />;
+	if (method === PaymentMethod.APPLEPAY) return <Apple />;
+	if (method === PaymentMethod.GOOGLEPAY) return <Google />;
+	return <span className={`payment-brand payment-brand--${method.toLowerCase()}`}>{methodLabels[method]}</span>;
+}
+
 function PaymentPage() {
-	const [selectedMethod, setSelectedMethod] = useState<PaymentMethod.CARD | null>(PaymentMethod.CARD);
-	const [notice, setNotice] = useState<{ message: string; key: number } | null>(null);
-	function showNotice(message: string) {
-		setNotice((previous) => ({ message, key: (previous?.key ?? 0) + 1 }));
-	}
+	const selectedMethod = PaymentMethod.CARD;
+	const [unavailableMethod, setUnavailableMethod] = useState<PaymentMethod | null>(null);
+	const [payUnavailable, setPayUnavailable] = useState(false);
 	function selectMethod(method: PaymentMethod) {
-		if (method === PaymentMethod.CARD) {
-			setSelectedMethod(PaymentMethod.CARD);
-			setNotice(null);
-		} else showNotice('This payment method is currently unavailable.');
+		setUnavailableMethod(method === PaymentMethod.CARD ? null : method);
 	}
 
 	const router = useRouter();
@@ -61,11 +55,25 @@ function PaymentPage() {
 		fetchPolicy: 'no-cache',
 		notifyOnNetworkStatusChange: true,
 	});
+	const payments = useQuery(GET_MY_PAYMENTS, {
+		skip: !user || !router.isReady || !id,
+		fetchPolicy: 'network-only',
+		notifyOnNetworkStatusChange: true,
+	});
+	const attempts = payments.data?.getMyPayments.filter((payment) => payment.bookingId === id) ?? [];
+	const existing = attempts.find(
+		(payment) =>
+			payment.paymentStatus === PaymentStatus.PENDING ||
+			payment.paymentStatus === PaymentStatus.PAID ||
+			payment.paymentStatus === PaymentStatus.REFUNDED,
+	);
+	const currentPayment = existing;
 	const booking = data?.getMyBooking;
+
 	const money = (amount: number) =>
 		`${booking?.currency ?? ''} ${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 	return (
-		<div className="booking-page">
+		<div className="booking-page payment-page">
 			<Head>
 				<title>Payment | WWT</title>
 			</Head>
@@ -76,13 +84,7 @@ function PaymentPage() {
 			>
 				Back to Package
 			</Button>
-			<Stepper activeStep={1} alternativeLabel className="booking-progress">
-				{['Traveler Info', 'Payment', 'Confirmation'].map((label) => (
-					<Step key={label}>
-						<StepLabel>{label}</StepLabel>
-					</Step>
-				))}
-			</Stepper>
+
 			<Typography component="h1" variant="h4">
 				Payment
 			</Typography>
@@ -116,51 +118,122 @@ function PaymentPage() {
 			) : (
 				<div className="booking-layout payment-layout">
 					<Stack spacing={3} className="payment-content">
+						<Stepper activeStep={1} alternativeLabel className="booking-progress">
+							{['Traveler Info', 'Payment', 'Confirmation'].map((label) => (
+								<Step key={label}>
+									<StepLabel>{label}</StepLabel>
+								</Step>
+							))}
+						</Stepper>
 						<Paper variant="outlined" className="booking-panel">
 							<Typography component="h2" variant="h6">
-								Choose a payment method
+								Payment method
 							</Typography>
 							<Typography color="text.secondary" variant="body2">
-								Select how you would like to pay.
+								Choose how you would like to pay.
 							</Typography>
 							<div className="payment-methods" role="group" aria-label="Payment methods">
 								{Object.values(PaymentMethod).map((method) => (
-									<Button
-										key={method}
-										type="button"
-										variant="outlined"
-										className={`payment-method${selectedMethod === method ? ' is-selected' : ''}`}
-										aria-pressed={selectedMethod === method}
-										onClick={() => selectMethod(method)}
-										startIcon={
-											method === PaymentMethod.CARD ? (
-												<CreditCardOutlined />
-											) : method === PaymentMethod.BANK_TRANSFER ? (
-												<AccountBalanceOutlined />
-											) : undefined
-										}
-									>
-										{methodLabels[method]}
-									</Button>
+									<div key={method} className="payment-method-option">
+										<Button
+											fullWidth
+											type="button"
+											variant="outlined"
+											className={`payment-method${method === selectedMethod ? ' is-selected' : ''}`}
+											aria-pressed={method === selectedMethod}
+											aria-describedby={unavailableMethod === method ? `unavailable-${method}` : undefined}
+											onClick={() => selectMethod(method)}
+										>
+											<span className="payment-method-mark" aria-hidden="true">
+												<MethodMark method={method} />
+											</span>
+											<span>{methodLabels[method]}</span>
+											{method === selectedMethod && (
+												<CheckCircle className="payment-selection-mark" aria-label="Selected" />
+											)}
+										</Button>
+										{unavailableMethod === method && (
+											<p id={`unavailable-${method}`} className="payment-unavailable" role="status">
+												This method is unavailable.
+											</p>
+										)}
+									</div>
 								))}
 							</div>
 						</Paper>
-						{selectedMethod === PaymentMethod.CARD && (
+						<Paper variant="outlined" className="booking-panel">
+							<Typography component="h2" variant="h6">
+								Card Information
+							</Typography>
+							{
+								<>
+									<Typography color="text.secondary">
+										Card processing is not integrated. Card details cannot be entered or charged.
+									</Typography>
+									<div className="payment-card-fields">
+										{(
+											[
+												['Cardholder Name', 'Name on card'],
+												['Card Number', '•••• •••• •••• ••••'],
+												['Expiry Date', 'MM/YY'],
+												['CVC', '•••'],
+											] as const
+										).map(([label, placeholder]) => (
+											<div key={label} className="payment-card-field">
+												<Typography variant="body2">{label}</Typography>
+												<div className="payment-field-preview" aria-disabled="true">
+													{placeholder}
+												</div>
+											</div>
+										))}
+									</div>
+								</>
+							}
+						</Paper>
+						{payments.loading ? (
+							<Skeleton height={70} />
+						) : payments.error ? (
+							<Alert
+								severity="error"
+								action={
+									<Button
+										onClick={() => {
+											void payments.refetch().catch(() => undefined);
+										}}
+									>
+										Retry
+									</Button>
+								}
+							>
+								Existing payments could not be loaded.
+							</Alert>
+						) : null}
+						{currentPayment && (
 							<Paper variant="outlined" className="booking-panel">
 								<Typography component="h2" variant="h6">
-									Card payment
+									Payment record
 								</Typography>
-								{/* Replace this non-interactive placeholder with provider-hosted fields.
-       Never introduce raw card credentials into WWT state or GraphQL. */}
-								<div className="payment-card-placeholder">
-									<CreditCardOutlined color="primary" fontSize="large" />
-									<Typography variant="subtitle1">Card details will be collected by our payment provider</Typography>
-									<Typography variant="body2" color="text.secondary">
-										Card entry is not available yet. There is nothing to enter or submit here.
-									</Typography>
-								</div>
+								<Typography>Reference: {currentPayment._id}</Typography>
+								<Typography>Method: {methodLabels[currentPayment.paymentMethod]}</Typography>
+								<Typography>Status: {currentPayment.paymentStatus}</Typography>
+								<Typography>
+									Amount: {currentPayment.currency}{' '}
+									{currentPayment.paymentAmount.toLocaleString('en-US', {
+										minimumFractionDigits: 2,
+										maximumFractionDigits: 2,
+									})}
+								</Typography>
+								<Typography color="text.secondary">
+									This is the backend record status, not a gateway payment receipt.
+								</Typography>
 							</Paper>
 						)}
+						{!currentPayment && attempts.length > 0 && (
+							<Typography color="text.secondary">
+								Last payment attempt: {attempts[0].paymentStatus}. A new pending attempt can be created.
+							</Typography>
+						)}
+
 						{booking.bookingStatus !== BookingStatus.PENDING && (
 							<Alert severity="info">
 								This booking is {booking.bookingStatus.toLowerCase()} and is not eligible for a new payment.
@@ -209,31 +282,31 @@ function PaymentPage() {
 								<Typography variant="h6">{money(booking.finalPrice)}</Typography>
 							</div>
 							<Button
+								className="payment-primary-action"
 								type="button"
 								variant="contained"
 								size="large"
-								disabled={booking.bookingStatus !== BookingStatus.PENDING}
-								onClick={() => showNotice('Card payment is not available yet.')}
+								disabled={
+									booking.bookingStatus !== BookingStatus.PENDING ||
+									Boolean(currentPayment) ||
+									payments.loading ||
+									Boolean(payments.error)
+								}
+								onClick={() => {
+									setPayUnavailable(true);
+								}}
 							>
 								Pay {money(booking.finalPrice)}
 							</Button>
+							{payUnavailable && (
+								<Typography variant="body2" color="text.secondary" role="status">
+									Card payment is not available yet.
+								</Typography>
+							)}
 						</Stack>
 					</Paper>
 				</div>
 			)}
-			<Snackbar
-				key={notice?.key}
-				open={Boolean(notice)}
-				autoHideDuration={4500}
-				onClose={(_, reason) => {
-					if (reason !== 'clickaway') setNotice(null);
-				}}
-				anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-			>
-				<Alert severity="info" variant="filled" onClose={() => setNotice(null)}>
-					{notice?.message}
-				</Alert>
-			</Snackbar>
 		</div>
 	);
 }
