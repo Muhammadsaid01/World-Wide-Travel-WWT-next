@@ -1,7 +1,7 @@
 import type { Payment } from '@/libs/types/booking/payment';
 import type { PaymentInput } from '@/libs/types/booking/payment.input';
-import type { BookingInput } from '@/libs/types/booking/booking.input';
-import type { BookingHandoff } from '@/libs/types/booking/booking';
+import type { BookingInput, CancelBookingInput } from '@/libs/types/booking/booking.input';
+import type { Booking, BookingHandoff } from '@/libs/types/booking/booking';
 import { gql, type TypedDocumentNode } from '@apollo/client';
 
 export const LOGIN = gql`
@@ -87,6 +87,21 @@ export const CREATE_PAYMENT: TypedDocumentNode<
 			paymentStatus
 			paymentAmount
 			currency
+		}
+	}
+`;
+
+export const CANCEL_BOOKING: TypedDocumentNode<
+	{
+		cancelBooking: Pick<Booking, '_id' | 'bookingStatus' | 'cancelledAt'>;
+	},
+	{ input: CancelBookingInput }
+> = gql`
+	mutation CancelBooking($input: CancelBookingInput!) {
+		cancelBooking(input: $input) {
+			_id
+			bookingStatus
+			cancelledAt
 		}
 	}
 `;

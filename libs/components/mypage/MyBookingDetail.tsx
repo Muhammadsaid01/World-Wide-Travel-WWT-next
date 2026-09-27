@@ -1,16 +1,27 @@
-import { useQuery, useReactiveVar } from '@apollo/client';
 import { currentUserVar } from '@/apollo/store';
+import { CANCEL_BOOKING } from '@/apollo/user/mutation';
 import { GET_MY_BOOKING, GET_MY_PAYMENTS, GET_MY_TRAVELERS_BY_BOOKING } from '@/apollo/user/query';
+import { BookingStatus } from '@/libs/enums/booking.enum';
 import { MemberType } from '@/libs/enums/member.enum';
-import ProfileSidebar from './ProfileSidebar';
-import PackageImage, { packageImageUrl } from '../package/PackageImage';
-import { formatScheduleDate } from '../package/PackageSchedules';
-import Link from 'next/link';
+import { useMutation, useQuery, useReactiveVar } from '@apollo/client';
+import ArrowBack from '@mui/icons-material/ArrowBack';
+import DownloadOutlined from '@mui/icons-material/DownloadOutlined';
+import EmailOutlined from '@mui/icons-material/EmailOutlined';
+import LocationOnOutlined from '@mui/icons-material/LocationOnOutlined';
+import PeopleAltOutlined from '@mui/icons-material/PeopleAltOutlined';
+import PersonOutlined from '@mui/icons-material/PersonOutlined';
+import PhoneOutlined from '@mui/icons-material/PhoneOutlined';
+import PrintOutlined from '@mui/icons-material/PrintOutlined';
 import {
 	Alert,
 	Avatar,
 	Breadcrumbs,
 	Button,
+	Dialog,
+	DialogActions,
+	DialogContent,
+	DialogContentText,
+	DialogTitle,
 	Divider,
 	IconButton,
 	Paper,
@@ -18,16 +29,20 @@ import {
 	Stack,
 	Typography,
 } from '@mui/material';
-import ArrowBack from '@mui/icons-material/ArrowBack';
-import PrintOutlined from '@mui/icons-material/PrintOutlined';
-import DownloadOutlined from '@mui/icons-material/DownloadOutlined';
-import PeopleAltOutlined from '@mui/icons-material/PeopleAltOutlined';
-import EmailOutlined from '@mui/icons-material/EmailOutlined';
-import PhoneOutlined from '@mui/icons-material/PhoneOutlined';
-import PersonOutlined from '@mui/icons-material/PersonOutlined';
-import LocationOnOutlined from '@mui/icons-material/LocationOnOutlined';
+import Link from 'next/link';
+import { useRef, useState } from 'react';
+import PackageImage, { packageImageUrl } from '../package/PackageImage';
+import { formatScheduleDate } from '../package/PackageSchedules';
+import ProfileSidebar from './ProfileSidebar';
 
 export default function MyBookingDetail({ id, ready }: { id: string; ready: boolean }) {
+	const [cancelOpen, setCancelOpen] = useState(false);
+	const [cancelBusy, setCancelBusy] = useState(false);
+	const [cancelError, setCancelError] = useState('');
+	const [cancelFeedback, setCancelFeedback] = useState('');
+	const cancelLock = useRef(false);
+	const [cancelBooking] = useMutation(CANCEL_BOOKING);
+
 	const user = useReactiveVar(currentUserVar);
 	const allowed = user?.memberType === MemberType.USER;
 	const validId = /^[a-f\d]{24}$/i.test(id);
@@ -48,8 +63,81 @@ export default function MyBookingDetail({ id, ready }: { id: string; ready: bool
 		`${booking?.currency} ${value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 	const packageHref = booking ? `/package/${booking.packageId}` : '/package';
 	const missing = !validId || query.error?.message.includes('No data found');
+	const canCancel = Boolean(
+		allowed &&
+		booking &&
+		booking.memberId === user?._id &&
+		[BookingStatus.PENDING, BookingStatus.CONFIRMED, BookingStatus.REJECTED].includes(booking.bookingStatus),
+	);
+	async function confirmCancellation() {
+		if (!canCancel || !booking || cancelLock.current) return;
+		cancelLock.current = true;
+		setCancelBusy(true);
+		setCancelError('');
+		setCancelFeedback('');
+		try {
+			const response = await cancelBooking({ variables: { input: { _id: booking._id } } });
+			const updated = response.data?.cancelBooking;
+			if (!updated || updated._id !== booking._id)
+				throw new Error('Cancellation response was unavailable. Please reload the booking.');
+			// Apply only the actual mutation response, including when a subsequent refresh fails.
+			query.updateQuery((previous) => ({ ...previous, getMyBooking: { ...previous.getMyBooking, ...updated } }));
+			setCancelOpen(false);
+			setCancelFeedback(
+				updated.bookingStatus === BookingStatus.CANCELLED
+					? 'Your booking has been cancelled.'
+					: `Booking status: ${updated.bookingStatus}.`,
+			);
+			// The list uses no-cache and fetches fresh data on return. No persistent local state is needed.
+			const refreshed = await Promise.allSettled([query.refetch(), payments.refetch()]);
+			if (refreshed.some((result) => result.status === 'rejected')) {
+				setCancelFeedback(
+					`Booking status: ${updated.bookingStatus}. Some details could not be refreshed; please reload the page.`,
+				);
+			}
+		} catch (error: unknown) {
+			setCancelError(error instanceof Error ? error.message : 'Cancellation could not be completed. Please try again.');
+		} finally {
+			cancelLock.current = false;
+			setCancelBusy(false);
+		}
+	}
+
 	return (
 		<div className="my-bookings-page booking-detail-page">
+			<Dialog
+				open={cancelOpen}
+				onClose={() => {
+					if (!cancelLock.current) setCancelOpen(false);
+				}}
+				aria-labelledby="cancel-booking-title"
+				aria-describedby="cancel-booking-description"
+				fullWidth
+				maxWidth="xs"
+			>
+				<DialogTitle id="cancel-booking-title">Cancel booking?</DialogTitle>
+				<DialogContent>
+					<DialogContentText id="cancel-booking-description">
+						Are you sure you want to cancel this booking? This action may not be reversible.
+					</DialogContentText>
+					{cancelError && <Alert severity="error">{cancelError}</Alert>}
+				</DialogContent>
+				<DialogActions>
+					<Button autoFocus disabled={cancelBusy} onClick={() => setCancelOpen(false)}>
+						Keep Booking
+					</Button>
+					<Button
+						color="error"
+						variant="contained"
+						disabled={!canCancel || cancelBusy}
+						onClick={() => {
+							void confirmCancellation();
+						}}
+					>
+						{cancelBusy ? 'Cancelling…' : 'Cancel Booking'}
+					</Button>
+				</DialogActions>
+			</Dialog>
 			<div className="my-bookings-layout">
 				<ProfileSidebar />
 				<div className="booking-detail-content">
@@ -62,6 +150,11 @@ export default function MyBookingDetail({ id, ready }: { id: string; ready: bool
 					<Button component={Link} href="/mypage/my-bookings" startIcon={<ArrowBack />} className="booking-detail-back">
 						Back to My Bookings
 					</Button>
+					{cancelFeedback && (
+						<Alert severity="info" role="status">
+							{cancelFeedback}
+						</Alert>
+					)}
 					{!ready ? (
 						<Skeleton height={160} />
 					) : !user ? (
@@ -335,8 +428,14 @@ export default function MyBookingDetail({ id, ready }: { id: string; ready: bool
 								<Button disabled variant="outlined">
 									Message Agent
 								</Button>
-								{/* Cancellation exists in the backend; deliberately not wired in this display-only task. */}
-								<Button disabled color="error">
+								<Button
+									disabled={!canCancel || cancelBusy}
+									color="error"
+									onClick={() => {
+										setCancelError('');
+										setCancelOpen(true);
+									}}
+								>
 									Cancel Booking
 								</Button>
 							</div>
