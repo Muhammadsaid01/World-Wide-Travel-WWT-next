@@ -14,15 +14,16 @@ export function createApolloClient() {
 	}
 
 	const authLink = setContext((_, { headers }: { headers?: Record<string, string> }) => {
-		const token = getJwtToken();
+  const token = getJwtToken();
 
-		return {
-			headers: {
-				...headers,
-				...(token ? { Authorization: `Bearer ${token}` } : {}),
-			},
-		};
-	});
+  return {
+    headers: {
+      ...headers,
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      'Apollo-Require-Preflight': 'true',
+    },
+  };
+});
 	const uploadLink = createUploadLink({ uri: GRAPHQL_URL });
 
 	return new ApolloClient({

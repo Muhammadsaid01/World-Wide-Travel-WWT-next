@@ -392,6 +392,10 @@ export type ProfileMember = Pick<
 	| '_id'
 	| 'memberNick'
 	| 'memberFullName'
+	| 'memberEmail'
+	| 'memberPhone'
+	| 'memberAddress'
+	| 'memberLanguage'
 	| 'memberType'
 	| 'memberImage'
 	| 'memberDesc'
@@ -406,6 +410,10 @@ export const GET_MY_PROFILE: TypedDocumentNode<{ getMyProfile: ProfileMember }, 
 			_id
 			memberNick
 			memberFullName
+			memberEmail
+			memberPhone
+			memberAddress
+			memberLanguage
 			memberType
 			memberImage
 			memberDesc

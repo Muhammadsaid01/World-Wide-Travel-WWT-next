@@ -1,0 +1,151 @@
+.edit-profile-page {
+	max-width: 900px;
+	margin: 0 auto;
+	padding: 72px 24px 96px;
+	.MuiBreadcrumbs-root {
+		font-size: 11px;
+		text-transform: uppercase;
+		letter-spacing: 1px;
+		a {
+			color: #6b7280;
+		}
+		[aria-current] {
+			font-weight: 700;
+			color: #0b2d4f;
+		}
+	}
+	.edit-profile-back {
+		margin: 20px 0 28px;
+		padding-left: 0;
+		text-transform: none;
+		font-size: 13px;
+	}
+	> header {
+		margin-bottom: 32px;
+		h1 {
+			font-size: 40px;
+			font-weight: 700;
+			color: #0b2d4f;
+			letter-spacing: -1px;
+			margin-bottom: 12px;
+		}
+	}
+	.edit-profile-card {
+		border-radius: 16px;
+		padding: 44px;
+		border: 1px solid #e5e7eb;
+		box-shadow: 0 8px 32px rgba(11, 45, 79, 0.05);
+	}
+	fieldset {
+		border: 0;
+		padding: 0;
+		margin: 0;
+		min-width: 0;
+	}
+	section h2 {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		font-size: 20px;
+		font-weight: 700;
+		color: #0b2d4f;
+		margin-bottom: 24px;
+		svg {
+			font-size: 22px;
+		}
+	}
+	.MuiDivider-root {
+		margin: 36px 0;
+	}
+	.edit-profile-photo {
+		display: flex;
+		align-items: center;
+		gap: 28px;
+		.MuiAvatar-root {
+			width: 116px;
+			height: 116px;
+			flex-shrink: 0;
+			background: #e7edf3;
+			color: #0b2d4f;
+			font-size: 36px;
+			box-shadow: 0 4px 14px rgba(11, 45, 79, 0.08);
+		}
+		h2 {
+			margin-bottom: 14px;
+		}
+	}
+	.edit-profile-photo-actions {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 12px;
+		margin-bottom: 10px;
+	}
+	.MuiButton-root {
+		border-radius: 50px;
+		min-height: 44px;
+		padding: 10px 24px;
+		font-size: 12px;
+	}
+	.edit-profile-fields {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 24px;
+		.full-width {
+			grid-column: 1 / -1;
+		}
+	}
+	.MuiTextField-root {
+		min-width: 0;
+		.MuiOutlinedInput-root {
+			background: #f3f4f5;
+			border-radius: 8px;
+			font-size: 15px;
+		}
+		input {
+			padding: 14px;
+		}
+		fieldset {
+			border: 1px solid #e1e5ea;
+		}
+		.Mui-focused fieldset {
+			border: 2px solid #0b2d4f;
+		}
+	}
+	.edit-profile-actions {
+		display: flex;
+		justify-content: flex-end;
+		gap: 16px;
+		margin-top: 36px;
+	}
+	.MuiAlert-root {
+		margin-top: 24px;
+	}
+	@media (max-width: 900px) {
+		padding-top: 48px;
+		.edit-profile-card {
+			padding: 32px;
+		}
+	}
+	@media (max-width: 600px) {
+		padding: 32px 16px 56px;
+		> header h1 {
+			font-size: 34px;
+		}
+		.edit-profile-card {
+			padding: 24px;
+		}
+		.edit-profile-photo {
+			flex-direction: column;
+			align-items: flex-start;
+		}
+		.edit-profile-fields {
+			grid-template-columns: minmax(0, 1fr);
+		}
+		.edit-profile-actions {
+			flex-direction: column-reverse;
+			.MuiButton-root {
+				width: 100%;
+			}
+		}
+	}
+}

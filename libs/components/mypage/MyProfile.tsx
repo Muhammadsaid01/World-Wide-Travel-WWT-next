@@ -293,7 +293,13 @@ function ProfileContent({ authenticated }: { authenticated: boolean }) {
 									))}
 								</div>
 							</div>
-							<Button disabled variant="outlined" startIcon={<EditOutlined />} className="profile-edit">
+							<Button
+								component={Link}
+								href="/mypage/edit-profile"
+								variant="outlined"
+								startIcon={<EditOutlined />}
+								className="profile-edit"
+							>
 								Edit Profile
 							</Button>
 						</>

@@ -1,3 +1,4 @@
+import { packageImageUrl } from '@/libs/components/package/PackageImage';
 import { useRef, useState } from 'react';
 import { useReactiveVar } from '@apollo/client';
 import Link from 'next/link';
@@ -58,7 +59,7 @@ export default function Navbar() {
 				aria-controls={open ? 'wwt-account-menu' : undefined}
 				aria-expanded={open}
 				onClick={(event) => setAccountAnchor(event.currentTarget)}
-				startIcon={<Avatar className="wwt-account-avatar" src={currentUser.memberImage || undefined} />}
+				startIcon={<Avatar className="wwt-account-avatar" src={packageImageUrl(currentUser.memberImage)} />}
 				endIcon={<ExpandMoreIcon />}
 			>
 				<span className="wwt-account-nick">{currentUser.memberNick}</span>

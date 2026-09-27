@@ -105,3 +105,20 @@ export const CANCEL_BOOKING: TypedDocumentNode<
 		}
 	}
 `;
+
+export const UPDATE_MEMBER: TypedDocumentNode<
+	{ updateMember: Pick<import('@/libs/types/member/member').Member, '_id' | 'accessToken'> },
+	{ input: import('@/libs/types/member/member.update').MemberUpdate }
+> = gql`
+	mutation UpdateMember($input: MemberUpdate!) {
+		updateMember(input: $input) {
+			_id
+			accessToken
+		}
+	}
+`;
+export const UPLOAD_PROFILE_IMAGE: TypedDocumentNode<{ imageUploader: string }, { file: File }> = gql`
+	mutation UploadProfileImage($file: Upload!) {
+		imageUploader(file: $file, target: "member")
+	}
+`;
