@@ -17,7 +17,7 @@ const navigation = [
 	{ label: 'Packages', href: '/package' },
 	{ label: 'Agents', href: null },
 	{ label: 'Community', href: '/community' },
-	{ label: 'My Profile', href: null },
+	{ label: 'My Profile', href: '/mypage' },
 	{ label: 'CS Center', href: null },
 ] as const;
 
@@ -159,8 +159,7 @@ export default function Navbar() {
 				transformOrigin={{ vertical: 'top', horizontal: 'right' }}
 				slotProps={{ list: { 'aria-labelledby': accountAnchor?.id } }}
 			>
-				{/* Profile components are placeholders; no profile page route exists yet. */}
-				<MenuItem disabled aria-label="My Profile (coming soon)">My Profile (coming soon)</MenuItem>
+				<MenuItem component={Link} href="/mypage" selected={router.pathname === '/mypage'} onClick={() => { setAccountAnchor(null); setMenuOpen(false); }}>My Profile</MenuItem>
 				<MenuItem onClick={handleLogout}>Logout</MenuItem>
 			</Menu>
 		</header>

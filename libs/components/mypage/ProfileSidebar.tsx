@@ -9,17 +9,23 @@ const groups = [
 	{ title: 'Account', items: ['Edit Profile', 'Settings'] },
 ];
 
-export default function ProfileSidebar() {
+export default function ProfileSidebar({ active = 'My Bookings' }: { active?: 'Overview' | 'My Bookings' }) {
 	return (
 		<aside className="my-bookings-sidebar" aria-label="Profile navigation">
 			{groups.map((group) => (
 				<section key={group.title}>
 					<Typography component="h2">{group.title}</Typography>
 					{group.items.map((item) =>
-						item === 'My Bookings' ? (
-							<Button key={item} component={Link} href="/mypage/my-bookings" className="is-active" aria-current="page">
+						item === 'My Bookings' || item === 'Overview' ? (
+							<Button
+								key={item}
+								component={Link}
+								href={item === 'Overview' ? '/mypage' : '/mypage/my-bookings'}
+								className={item === active ? 'is-active' : undefined}
+								aria-current={item === active ? 'page' : undefined}
+							>
 								{item}
-								<span className="my-bookings-active-dot" aria-hidden="true" />
+								{item === active && <span className="my-bookings-active-dot" aria-hidden="true" />}
 							</Button>
 						) : (
 							<Button key={item} disabled>

@@ -386,3 +386,85 @@ export const GET_MY_TRAVELERS_BY_BOOKING: TypedDocumentNode<
 		}
 	}
 `;
+
+export type ProfileMember = Pick<
+	Member,
+	| '_id'
+	| 'memberNick'
+	| 'memberFullName'
+	| 'memberType'
+	| 'memberImage'
+	| 'memberDesc'
+	| 'memberCity'
+	| 'memberCountry'
+	| 'memberFollowerCount'
+	| 'memberFollowingCount'
+>;
+export const GET_MY_PROFILE: TypedDocumentNode<{ getMyProfile: ProfileMember }, Record<string, never>> = gql`
+	query GetMyProfile {
+		getMyProfile {
+			_id
+			memberNick
+			memberFullName
+			memberType
+			memberImage
+			memberDesc
+			memberCity
+			memberCountry
+			memberFollowerCount
+			memberFollowingCount
+		}
+	}
+`;
+export const GET_PROFILE_ARTICLES: TypedDocumentNode<
+	{
+		getMyBoardArticles: {
+			list: Pick<
+				import('@/libs/types/article/board-article').BoardArticle,
+				'_id' | 'articleTitle' | 'articleLikeCount' | 'articleViewCount' | 'articleCommentCount'
+			>[];
+			metaCounter?: { total: number }[] | null;
+		};
+	},
+	Record<string, never>
+> = gql`
+	query GetProfileArticles {
+		getMyBoardArticles(input: { page: 1, limit: 1, sort: "createdAt", direction: DESC }) {
+			list {
+				_id
+				articleTitle
+				articleLikeCount
+				articleViewCount
+				articleCommentCount
+			}
+			metaCounter {
+				total
+			}
+		}
+	}
+`;
+export const GET_PROFILE_TRAVEL_MATES: TypedDocumentNode<
+	{
+		getMyTravelMatePosts: {
+			list: Pick<
+				import('@/libs/types/travel-mate/travel-mate-post').TravelMatePost,
+				'_id' | 'matePostTitle' | 'matePostStatus'
+			>[];
+			metaCounter?: { total: number }[] | null;
+		};
+	},
+	Record<string, never>
+> = gql`
+	query GetProfileTravelMates {
+		getMyTravelMatePosts(input: { page: 1, limit: 1, sort: "createdAt", direction: DESC }) {
+			list {
+				_id
+				matePostTitle
+				matePostStatus
+			}
+			metaCounter {
+				total
+			}
+		}
+	}
+`;
