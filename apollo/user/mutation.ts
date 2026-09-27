@@ -171,3 +171,12 @@ export const REJECT_TRAVEL_MATE_JOIN: TypedDocumentNode<
 		}
 	}
 `;
+
+export const TOGGLE_SAVED_PACKAGE: TypedDocumentNode<{ likeTargetPackage: { _id: string } }, { packageId: string }> =
+	gql`
+		mutation ToggleSavedPackage($packageId: String!) {
+			likeTargetPackage(packageId: $packageId) {
+				_id
+			}
+		}
+	`;

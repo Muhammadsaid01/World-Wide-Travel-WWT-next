@@ -1,10 +1,19 @@
-import { useState, type FormEvent } from 'react';
-import { useQuery } from '@apollo/client';
-import { Alert, Button, Chip, MenuItem, Pagination, Skeleton, TextField } from '@mui/material';
+
+import { currentUserVar } from '@/apollo/store';
+import {
+	GET_SAVED_PACKAGES,
+	GET_TRAVEL_PACKAGES,
+	type PackageListInput,
+} from '@/apollo/user/query';
+import { PackageCategory } from '@/libs/enums/package.enum';
+import { useMutation, useQuery, useReactiveVar } from '@apollo/client';
 import SearchIcon from '@mui/icons-material/Search';
 import TuneIcon from '@mui/icons-material/Tune';
-import { GET_TRAVEL_PACKAGES, type PackageListInput } from '@/apollo/user/query';
-import { PackageCategory } from '@/libs/enums/package.enum';
+import { Alert, Button, Chip, MenuItem, Pagination, Skeleton, TextField } from '@mui/material';
+import { useRouter } from 'next/router';
+import { useEffect, useState, type FormEvent } from 'react';
+
+import { TOGGLE_SAVED_PACKAGE } from '@/apollo/user/mutation';
 import PackageCard from './PackageCard';
 
 // Confirmed against availablePackageSorts in the backend config.
@@ -19,6 +28,8 @@ type FilterKey = 'text' | 'destinationCountry' | 'destinationCity' | 'packageCat
 const filterKeys: FilterKey[] = ['text', 'destinationCountry', 'destinationCity', 'packageCategory'];
 const categoryLabel = (value: string) => value.charAt(0) + value.slice(1).toLowerCase();
 
+
+
 export default function PackageList() {
 	const [input, setInput] = useState(initialInput);
 	const [text, setText] = useState('');
@@ -26,10 +37,92 @@ export default function PackageList() {
 	const [city, setCity] = useState('');
 	const [category, setCategory] = useState<PackageCategory | ''>('');
 	const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+	const user = useReactiveVar(currentUserVar);
+	const router = useRouter();
+
+	const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
+	const [favoriteBusyId, setFavoriteBusyId] = useState<string | null>(null);
+	const [toggleSavedPackage] = useMutation(TOGGLE_SAVED_PACKAGE);
 	const { data, loading, error, refetch } = useQuery(GET_TRAVEL_PACKAGES, {
 		variables: { input },
 		notifyOnNetworkStatusChange: true,
 	});
+	const savedPackagesQuery = useQuery(GET_SAVED_PACKAGES, {
+		variables: {
+			input: {
+				page: 1,
+				limit: 100,
+			},
+		},
+		skip: !user,
+		fetchPolicy: 'no-cache',
+	});
+		useEffect(() => {
+  if (!user) {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setSavedIds(new Set());
+    return;
+  }
+
+  const savedPackages = savedPackagesQuery.data?.getFavorities?.list;
+
+  if (!savedPackages) return;
+
+  setSavedIds(
+    new Set(savedPackages.map((savedPackage) => savedPackage._id)),
+  );
+}, [user, savedPackagesQuery.data]);
+
+async function handleFavoriteToggle(packageId: string) {
+  if (!user) {
+  await router.push('/account/login');
+  return;
+}
+
+  if (favoriteBusyId) return;
+
+  const wasSaved = savedIds.has(packageId);
+
+  setFavoriteBusyId(packageId);
+
+  setSavedIds((previous) => {
+    const next = new Set(previous);
+
+    if (wasSaved) {
+      next.delete(packageId);
+    } else {
+      next.add(packageId);
+    }
+
+    return next;
+  });
+
+  try {
+    await toggleSavedPackage({
+      variables: {
+        packageId,
+      },
+    });
+
+    await savedPackagesQuery.refetch();
+  } catch (error) {
+    setSavedIds((previous) => {
+      const next = new Set(previous);
+
+      if (wasSaved) {
+        next.add(packageId);
+      } else {
+        next.delete(packageId);
+      }
+
+      return next;
+    });
+
+    console.error('Favorite toggle failed:', error);
+  } finally {
+    setFavoriteBusyId(null);
+  }
+}
 	const list = data?.getTravelPackages.list ?? [];
 	const counters = data?.getTravelPackages.metaCounter;
 	const total = counters?.length === 0 ? 0 : counters?.[0]?.total;
@@ -250,7 +343,17 @@ export default function PackageList() {
 					) : (
 						<div className="packages-grid">
 							{list.map((item) => (
-								<PackageCard key={item._id} item={item} />
+								<PackageCard
+									key={item._id}
+									item={item}
+									favoriteAction={{
+										active: savedIds.has(item._id),
+										disabled: favoriteBusyId === item._id,
+										onToggle: () => {
+											void handleFavoriteToggle(item._id);
+										},
+									}}
+								/>
 							))}
 						</div>
 					)}

@@ -1,23 +1,23 @@
-import type { Traveler } from '@/libs/types/booking/traveler';
-import type { BookingsInquiry } from '@/libs/types/booking/booking.input';
-import type { Payment } from '@/libs/types/booking/payment';
-import type { Booking, BookingHandoff } from '@/libs/types/booking/booking';
-import { gql, type TypedDocumentNode } from '@apollo/client';
 import type { Direction } from '@/libs/enums/common.enum';
-import type { TravelPackage } from '@/libs/types/package/travel-package';
-import type { TravelPackagesInquiry } from '@/libs/types/package/travel-package.input';
 import type { Agent } from '@/libs/types/agent/agent';
-import type { Member } from '@/libs/types/member/member';
-import type { Itinerary } from '@/libs/types/package/itinerary';
-import type { PackageInclude } from '@/libs/types/package/package-include';
-import type { PackageExclude } from '@/libs/types/package/package-exclude';
-import type { PackageTag } from '@/libs/types/package/package-tag';
-import type { PackagePolicy } from '@/libs/types/package/package-policy';
-import type { Review } from '@/libs/types/community/review';
-import type { ReviewsInquiry } from '@/libs/types/community/review.input';
-import type { PackageSchedule } from '@/libs/types/package/package-schedule';
+import type { Booking, BookingHandoff } from '@/libs/types/booking/booking';
+import type { BookingsInquiry } from '@/libs/types/booking/booking.input';
 import type { CouponValidation } from '@/libs/types/booking/coupon';
 import type { ValidateCouponInput } from '@/libs/types/booking/coupon.input';
+import type { Payment } from '@/libs/types/booking/payment';
+import type { Traveler } from '@/libs/types/booking/traveler';
+import type { Review } from '@/libs/types/community/review';
+import type { ReviewsInquiry } from '@/libs/types/community/review.input';
+import type { Member } from '@/libs/types/member/member';
+import type { Itinerary } from '@/libs/types/package/itinerary';
+import type { PackageExclude } from '@/libs/types/package/package-exclude';
+import type { PackageInclude } from '@/libs/types/package/package-include';
+import type { PackagePolicy } from '@/libs/types/package/package-policy';
+import type { PackageSchedule } from '@/libs/types/package/package-schedule';
+import type { PackageTag } from '@/libs/types/package/package-tag';
+import type { TravelPackage } from '@/libs/types/package/travel-package';
+import type { TravelPackagesInquiry } from '@/libs/types/package/travel-package.input';
+import { gql, type TypedDocumentNode } from '@apollo/client';
 
 export type PackageListItem = Pick<
 	TravelPackage,
@@ -46,6 +46,10 @@ export const GET_TRAVEL_PACKAGES: TypedDocumentNode<
 			metaCounter?: { total?: number | null }[] | null;
 		};
 	},
+
+	
+
+
 	{ input: PackageListInput }
 > = gql`
 	query GetTravelPackages($input: TravelPackagesInquiry!) {
@@ -704,6 +708,35 @@ export const GET_MY_INCOMING_TRAVEL_MATE_JOIN_REQUESTS: TypedDocumentNode<
 					currentMembers
 					maxMembers
 				}
+			}
+			metaCounter {
+				total
+			}
+		}
+	}
+`;
+
+export type SavedPackageItem = PackageListItem & Pick<TravelPackage, 'packageStatus' | 'deletedAt'>;
+export const GET_SAVED_PACKAGES: TypedDocumentNode<
+	{ getFavorities: { list: SavedPackageItem[]; metaCounter?: { total: number }[] | null } },
+	{ input: import('@/libs/types/package/travel-package.input').OrdinaryInquiry }
+> = gql`
+	query GetSavedPackages($input: OrdinaryInquiry!) {
+		getFavorities(input: $input) {
+			list {
+				_id
+				packageTitle
+				packageStatus
+				deletedAt
+				destinationCountry
+				destinationCity
+				packageImages
+				packageDays
+				packageNights
+				packagePrice
+				currency
+				packageRating
+				packageReviewCount
 			}
 			metaCounter {
 				total

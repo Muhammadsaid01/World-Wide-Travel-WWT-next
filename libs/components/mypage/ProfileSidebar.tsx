@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import Link from 'next/link';
 import { Button, Typography } from '@mui/material';
 const groups = [
@@ -11,11 +12,14 @@ const groups = [
 
 export default function ProfileSidebar({
 	active = 'My Bookings',
+	profileCard,
 }: {
-	active?: 'Overview' | 'My Bookings' | 'Edit Profile' | 'My Articles' | 'My Travel Mates' | 'Join Requests';
+	active?: 'Overview' | 'My Bookings' | 'Edit Profile' | 'My Articles' | 'My Travel Mates' | 'Join Requests' | 'Saved';
+	profileCard?: ReactNode;
 }) {
 	return (
 		<aside className="my-bookings-sidebar" aria-label="Profile navigation">
+			{profileCard}
 			{groups.map((group) => (
 				<section key={group.title}>
 					<Typography component="h2">{group.title}</Typography>
@@ -25,7 +29,8 @@ export default function ProfileSidebar({
 						item === 'Edit Profile' ||
 						item === 'My Articles' ||
 						item === 'My Travel Mates' ||
-						item === 'Join Requests' ? (
+						item === 'Join Requests' ||
+						item === 'Saved' ? (
 							<Button
 								key={item}
 								component={Link}
@@ -40,7 +45,9 @@ export default function ProfileSidebar({
 													? '/mypage/travel-mates'
 													: item === 'Join Requests'
 														? '/mypage/join-requests'
-														: '/mypage/my-bookings'
+														: item === 'Saved'
+															? '/mypage/saved'
+															: '/mypage/my-bookings'
 								}
 								className={item === active ? 'is-active' : undefined}
 								aria-current={item === active ? 'page' : undefined}

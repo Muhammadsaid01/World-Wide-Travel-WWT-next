@@ -1,25 +1,41 @@
-import Head from 'next/head';
-import { useState } from 'react';
-import Link from 'next/link';
-import { useQuery } from '@apollo/client';
-import { Alert, Breadcrumbs, Button, Chip, Skeleton } from '@mui/material';
+import { currentUserVar } from '@/apollo/store';
+import { TOGGLE_SAVED_PACKAGE } from '@/apollo/user/mutation';
+import {
+	GET_PACKAGE_SCHEDULES,
+	GET_SAVED_PACKAGES,
+	GET_TRAVEL_PACKAGE,
+	GET_TRAVEL_PACKAGES,
+} from '@/apollo/user/query';
+import { useMutation, useQuery, useReactiveVar } from '@apollo/client';
+import Favorite from '@mui/icons-material/Favorite';
 import FavoriteBorder from '@mui/icons-material/FavoriteBorder';
 import ShareOutlined from '@mui/icons-material/ShareOutlined';
-import { GET_TRAVEL_PACKAGE, GET_PACKAGE_SCHEDULES, GET_TRAVEL_PACKAGES } from '@/apollo/user/query';
+import { Alert, Breadcrumbs, Button, Chip, Skeleton } from '@mui/material';
+import Head from 'next/head';
+import Link from 'next/link';
+import { useRouter } from 'next/router';
+import { useEffect, useState } from 'react';
+import PackageAgentCard from './PackageAgentCard';
+import PackageBookingCard from './PackageBookingCard';
 import PackageCard from './PackageCard';
 import PackageImage from './PackageImage';
-import PackageAgentCard from './PackageAgentCard';
-import PackageReviews from './PackageReviews';
-import PackageItinerary from './PackageItinerary';
-import PackageSchedules from './PackageSchedules';
-import PackageBookingCard from './PackageBookingCard';
 import PackageInclusions from './PackageInclusions';
-import PackageTags from './PackageTags';
+import PackageItinerary from './PackageItinerary';
 import PackagePolicy from './PackagePolicy';
+import PackageReviews from './PackageReviews';
+import PackageSchedules from './PackageSchedules';
+import PackageTags from './PackageTags';
 
 export default function PackageDetail({ id, ready }: { id: string; ready: boolean }) {
 	// The route keys this component by package ID, resetting selection on navigation.
 	const [selectedScheduleId, setSelectedScheduleId] = useState<string | null>(null);
+	const user = useReactiveVar(currentUserVar);
+const router = useRouter();
+
+const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
+const [favoriteBusyId, setFavoriteBusyId] = useState<string | null>(null);
+
+const [toggleSavedPackage] = useMutation(TOGGLE_SAVED_PACKAGE);
 	const valid = /^[a-f\d]{24}$/i.test(id);
 	const { data, loading, error, refetch } = useQuery(GET_TRAVEL_PACKAGE, {
 		variables: { input: id },
@@ -35,6 +51,82 @@ export default function PackageDetail({ id, ready }: { id: string; ready: boolea
 		variables: { input: { page: 1, limit: 5, search: { packageCategory: item?.packageCategory } } },
 		skip: !item,
 	});
+	const savedPackagesQuery = useQuery(GET_SAVED_PACKAGES, {
+		variables: {
+			input: {
+				page: 1,
+				limit: 100,
+			},
+		},
+		skip: !user,
+		fetchPolicy: 'no-cache',
+	});
+
+	useEffect(() => {
+  if (!user) {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setSavedIds(new Set());
+    return;
+  }
+
+  const savedPackages = savedPackagesQuery.data?.getFavorities?.list;
+
+  if (!savedPackages) return;
+  setSavedIds(
+    new Set(savedPackages.map((savedPackage) => savedPackage._id)),
+  );
+}, [user, savedPackagesQuery.data]);
+
+async function handleFavoriteToggle(packageId: string) {
+  if (!user) {
+    await router.push('/account/login');
+    return;
+  }
+
+  if (favoriteBusyId) return;
+
+  const wasSaved = savedIds.has(packageId);
+
+  setFavoriteBusyId(packageId);
+
+  setSavedIds((previous) => {
+    const next = new Set(previous);
+
+    if (wasSaved) {
+      next.delete(packageId);
+    } else {
+      next.add(packageId);
+    }
+
+    return next;
+  });
+
+  try {
+    await toggleSavedPackage({
+      variables: {
+        packageId,
+      },
+    });
+
+    await savedPackagesQuery.refetch();
+  } catch (error) {
+    setSavedIds((previous) => {
+      const next = new Set(previous);
+
+      if (wasSaved) {
+        next.add(packageId);
+      } else {
+        next.delete(packageId);
+      }
+
+      return next;
+    });
+
+    console.error('Favorite toggle failed:', error);
+  } finally {
+    setFavoriteBusyId(null);
+  }
+}
 	const relatedItems = related.data?.getTravelPackages.list.filter((entry) => entry._id !== id).slice(0, 4) ?? [];
 	const notFound =
 		!valid ||
@@ -113,8 +205,20 @@ export default function PackageDetail({ id, ready }: { id: string; ready: boolea
 						<Button disabled startIcon={<ShareOutlined />}>
 							Share
 						</Button>
-						<Button disabled startIcon={<FavoriteBorder />}>
-							Save
+						<Button
+							disabled={favoriteBusyId === item._id}
+							startIcon={
+								savedIds.has(item._id) ? (
+									<Favorite color="error" />
+								) : (
+									<FavoriteBorder />
+								)
+							}
+							onClick={() => {
+								void handleFavoriteToggle(item._id);
+							}}
+						>
+							{savedIds.has(item._id) ? 'Saved' : 'Save'}
 						</Button>
 					</div>
 				</header>
@@ -161,7 +265,17 @@ export default function PackageDetail({ id, ready }: { id: string; ready: boolea
 						<p>More journeys in the same category.</p>
 						<div className="detail-related-grid">
 							{relatedItems.map((entry) => (
-								<PackageCard key={entry._id} item={entry} />
+								<PackageCard
+									key={entry._id}
+									item={entry}
+									favoriteAction={{
+										active: savedIds.has(entry._id),
+										disabled: favoriteBusyId === entry._id,
+										onToggle: () => {
+											void handleFavoriteToggle(entry._id);
+										},
+									}}
+								/>
 							))}
 						</div>
 					</section>
