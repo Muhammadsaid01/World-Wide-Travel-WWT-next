@@ -666,3 +666,48 @@ export const GET_MORE_TRAVEL_MATES: TypedDocumentNode<
 		}
 	}
 `;
+
+export type IncomingTravelMateJoin = TravelMateJoinItem & {
+	message?: string | null;
+	createdAt: import('@/libs/types/travel-mate/travel-mate-join').TravelMateJoin['createdAt'];
+	memberData?: Pick<Member, '_id' | 'memberNick' | 'memberFullName' | 'memberImage'> | null;
+	travelMatePostData?: Pick<
+		import('@/libs/types/travel-mate/travel-mate-post').TravelMatePost,
+		'_id' | 'memberId' | 'matePostTitle' | 'matePostStatus' | 'travelDate' | 'currentMembers' | 'maxMembers'
+	> | null;
+};
+export const GET_MY_INCOMING_TRAVEL_MATE_JOIN_REQUESTS: TypedDocumentNode<
+	{ getMyIncomingTravelMateJoinRequests: { list: IncomingTravelMateJoin[]; metaCounter?: { total: number }[] | null } },
+	{ input: TravelMateJoinsInput }
+> = gql`
+	query GetMyIncomingTravelMateJoinRequests($input: TravelMateJoinsInquiry!) {
+		getMyIncomingTravelMateJoinRequests(input: $input) {
+			list {
+				_id
+				memberId
+				travelMatePostId
+				joinStatus
+				message
+				createdAt
+				memberData {
+					_id
+					memberNick
+					memberFullName
+					memberImage
+				}
+				travelMatePostData {
+					_id
+					memberId
+					matePostTitle
+					matePostStatus
+					travelDate
+					currentMembers
+					maxMembers
+				}
+			}
+			metaCounter {
+				total
+			}
+		}
+	}
+`;

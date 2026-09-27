@@ -12,7 +12,7 @@ const groups = [
 export default function ProfileSidebar({
 	active = 'My Bookings',
 }: {
-	active?: 'Overview' | 'My Bookings' | 'Edit Profile' | 'My Articles' | 'My Travel Mates';
+	active?: 'Overview' | 'My Bookings' | 'Edit Profile' | 'My Articles' | 'My Travel Mates' | 'Join Requests';
 }) {
 	return (
 		<aside className="my-bookings-sidebar" aria-label="Profile navigation">
@@ -24,7 +24,8 @@ export default function ProfileSidebar({
 						item === 'Overview' ||
 						item === 'Edit Profile' ||
 						item === 'My Articles' ||
-						item === 'My Travel Mates' ? (
+						item === 'My Travel Mates' ||
+						item === 'Join Requests' ? (
 							<Button
 								key={item}
 								component={Link}
@@ -37,7 +38,9 @@ export default function ProfileSidebar({
 												? '/mypage/articles'
 												: item === 'My Travel Mates'
 													? '/mypage/travel-mates'
-													: '/mypage/my-bookings'
+													: item === 'Join Requests'
+														? '/mypage/join-requests'
+														: '/mypage/my-bookings'
 								}
 								className={item === active ? 'is-active' : undefined}
 								aria-current={item === active ? 'page' : undefined}

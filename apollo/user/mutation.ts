@@ -144,3 +144,30 @@ export const JOIN_TRAVEL_MATE: TypedDocumentNode<
 		}
 	}
 `;
+
+export const APPROVE_TRAVEL_MATE_JOIN: TypedDocumentNode<
+	{ approveTravelMateJoin: import('./query').TravelMateJoinItem },
+	{ joinId: string }
+> = gql`
+	mutation ApproveTravelMateJoin($joinId: String!) {
+		approveTravelMateJoin(joinId: $joinId) {
+			_id
+			memberId
+			travelMatePostId
+			joinStatus
+		}
+	}
+`;
+export const REJECT_TRAVEL_MATE_JOIN: TypedDocumentNode<
+	{ rejectTravelMateJoin: import('./query').TravelMateJoinItem },
+	{ joinId: string }
+> = gql`
+	mutation RejectTravelMateJoin($joinId: String!) {
+		rejectTravelMateJoin(joinId: $joinId) {
+			_id
+			memberId
+			travelMatePostId
+			joinStatus
+		}
+	}
+`;
