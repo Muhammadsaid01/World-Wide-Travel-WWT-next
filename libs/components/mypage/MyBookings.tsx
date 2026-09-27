@@ -1,3 +1,4 @@
+import ProfileSidebar from './ProfileSidebar';
 import { currentUserVar } from '@/apollo/store';
 import { GET_MY_BOOKINGS, type MyBookingsInput, type PaymentBooking } from '@/apollo/user/query';
 import PackageImage from '@/libs/components/package/PackageImage';
@@ -25,14 +26,6 @@ import Link from 'next/link';
 import { useState } from 'react';
 
 const PAGE_SIZE = 6;
-const groups = [
-	{
-		title: 'My Profile',
-		items: ['Overview', 'My Bookings', 'My Articles', 'My Travel Mates', 'Join Requests', 'Saved'],
-	},
-	{ title: 'Connections', items: ['Followers', 'Following'] },
-	{ title: 'Account', items: ['Edit Profile', 'Settings'] },
-];
 function BookingCard({ booking }: { booking: PaymentBooking }) {
 	const destination = [booking.packageData?.destinationCity, booking.packageData?.destinationCountry]
 		.filter(Boolean)
@@ -79,8 +72,13 @@ function BookingCard({ booking }: { booking: PaymentBooking }) {
 							{booking.finalPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
 						</Typography>
 					</div>
-					{/* Connect View Booking when a real booking-detail route is implemented. */}
-					<Button disabled variant="outlined" endIcon={<ArrowForward />}>
+
+					<Button
+						component={Link}
+						href={`/mypage/my-bookings/${booking._id}`}
+						variant="outlined"
+						endIcon={<ArrowForward />}
+					>
 						View Booking
 					</Button>
 				</div>
@@ -146,31 +144,7 @@ function MyBookingsContent({ authenticated, allowed }: { authenticated: boolean;
 				<span aria-current="page">My Bookings</span>
 			</Breadcrumbs>
 			<div className="my-bookings-layout">
-				<aside className="my-bookings-sidebar" aria-label="Profile navigation">
-					{groups.map((group) => (
-						<section key={group.title}>
-							<Typography component="h2">{group.title}</Typography>
-							{group.items.map((item) =>
-								item === 'My Bookings' ? (
-									<Button
-										key={item}
-										component={Link}
-										href="/mypage/my-bookings"
-										className="is-active"
-										aria-current="page"
-									>
-										{item}
-										<span className="my-bookings-active-dot" aria-hidden="true" />
-									</Button>
-								) : (
-									<Button key={item} disabled>
-										{item}
-									</Button>
-								),
-							)}
-						</section>
-					))}
-				</aside>
+				<ProfileSidebar />
 				<main className="my-bookings-main">
 					<header className="my-bookings-header">
 						<div>

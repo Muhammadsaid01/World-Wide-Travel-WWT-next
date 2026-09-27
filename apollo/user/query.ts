@@ -1,6 +1,7 @@
+import type { Traveler } from '@/libs/types/booking/traveler';
 import type { BookingsInquiry } from '@/libs/types/booking/booking.input';
 import type { Payment } from '@/libs/types/booking/payment';
-import type { BookingHandoff } from '@/libs/types/booking/booking';
+import type { Booking, BookingHandoff } from '@/libs/types/booking/booking';
 import { gql, type TypedDocumentNode } from '@apollo/client';
 import type { Direction } from '@/libs/enums/common.enum';
 import type { TravelPackage } from '@/libs/types/package/travel-package';
@@ -255,11 +256,35 @@ export type PaymentBooking = BookingHandoff & {
 	> | null;
 	scheduleData?: Pick<PackageSchedule, 'startDate' | 'endDate'> | null;
 };
-export const GET_MY_BOOKING: TypedDocumentNode<{ getMyBooking: PaymentBooking }, { bookingId: string }> = gql`
+export type BookingDetail = Omit<PaymentBooking, 'packageData'> &
+	Pick<
+		Booking,
+		'packageId' | 'createdAt' | 'contactName' | 'contactPhone' | 'contactEmail' | 'specialRequest' | 'cancelledAt'
+	> & {
+		agentData?: Pick<Agent, 'companyName'> | null;
+		memberData?: Pick<Member, 'memberNick' | 'memberImage'> | null;
+		packageData?:
+			(NonNullable<PaymentBooking['packageData']> & Pick<TravelPackage, 'packageDays' | 'packageNights'>) | null;
+	};
+export const GET_MY_BOOKING: TypedDocumentNode<{ getMyBooking: BookingDetail }, { bookingId: string }> = gql`
 	query GetMyBooking($bookingId: String!) {
 		getMyBooking(bookingId: $bookingId) {
 			_id
 			bookingCode
+			packageId
+			createdAt
+			contactName
+			contactPhone
+			contactEmail
+			specialRequest
+			cancelledAt
+			agentData {
+				companyName
+			}
+			memberData {
+				memberNick
+				memberImage
+			}
 			memberId
 			bookingStatus
 			peopleCount
@@ -269,6 +294,8 @@ export const GET_MY_BOOKING: TypedDocumentNode<{ getMyBooking: PaymentBooking },
 			packageData {
 				_id
 				packageTitle
+				packageDays
+				packageNights
 				packageImages
 				destinationCity
 				destinationCountry
@@ -341,6 +368,21 @@ export const GET_MY_BOOKINGS: TypedDocumentNode<
 			metaCounter {
 				total
 			}
+		}
+	}
+`;
+
+export const GET_MY_TRAVELERS_BY_BOOKING: TypedDocumentNode<
+	{
+		getMyTravelersByBooking: Pick<Traveler, '_id' | 'firstName' | 'lastName'>[];
+	},
+	{ bookingId: string }
+> = gql`
+	query GetMyTravelersByBooking($bookingId: String!) {
+		getMyTravelersByBooking(bookingId: $bookingId) {
+			_id
+			firstName
+			lastName
 		}
 	}
 `;
