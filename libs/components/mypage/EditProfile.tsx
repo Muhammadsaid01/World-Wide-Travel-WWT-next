@@ -137,6 +137,7 @@ function ProfileForm({ member }: { member: ProfileMember }) {
 			<TextField
 				fullWidth
 				label={label}
+				slotProps={{ inputLabel: { shrink: true } }}
 				value={values[key]}
 				onChange={(event) => setValues((previous) => ({ ...previous, [key]: event.target.value }))}
 				error={Boolean(errors[key])}
@@ -181,6 +182,7 @@ function ProfileForm({ member }: { member: ProfileMember }) {
 							<Button
 								type="button"
 								color="error"
+								variant="outlined"
 								disabled={!image && !file}
 								onClick={() => {
 									setFile(null);
@@ -209,11 +211,11 @@ function ProfileForm({ member }: { member: ProfileMember }) {
 						Personal Information
 					</Typography>
 					<div className="edit-profile-fields">
-						<div className="full-width">{field('memberFullName', 'Full Name')}</div>
+						{field('memberFullName', 'Full Name')}
 						<TextField
 							label="Nickname"
 							value={member.memberNick}
-							slotProps={{ input: { readOnly: true } }}
+							slotProps={{ input: { readOnly: true }, inputLabel: { shrink: true } }}
 							helperText="Nickname cannot be changed."
 						/>
 						<div className="full-width">{field('memberDesc', 'Bio / Description', true)}</div>
@@ -243,6 +245,8 @@ function ProfileForm({ member }: { member: ProfileMember }) {
 						select
 						fullWidth
 						label="Preferred Language"
+						className="edit-profile-language"
+						slotProps={{ inputLabel: { shrink: true } }}
 						value={language}
 						onChange={(event) => {
 							const value = Object.values(MemberLanguage).find((entry) => entry === event.target.value);
