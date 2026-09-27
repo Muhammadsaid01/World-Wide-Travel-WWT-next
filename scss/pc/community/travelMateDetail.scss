@@ -1,0 +1,166 @@
+.travel-mate-detail {
+	max-width: 1280px;
+	width: 100%;
+	margin: 0 auto;
+	padding: 48px 24px 64px;
+	color: var(--wwt-text);
+	.travel-mate-breadcrumb {
+		font-size: 12px;
+		overflow-wrap: anywhere;
+		color: var(--wwt-muted);
+		[aria-current] {
+			color: var(--wwt-primary);
+		}
+	}
+	.travel-mate-back {
+		margin: 16px 0 24px;
+	}
+	.travel-mate-columns {
+		display: grid;
+		grid-template-columns: minmax(0, 72fr) minmax(280px, 28fr);
+		gap: 24px;
+		align-items: start;
+	}
+	.travel-mate-content {
+		min-width: 0;
+		> header h1 {
+			font-size: clamp(32px, 3.4vw, 48px);
+			line-height: 1.15;
+			font-weight: 700;
+			margin: 24px 0;
+			overflow-wrap: anywhere;
+		}
+		> section {
+			margin-top: 48px;
+		}
+	}
+	section > h2,
+	.travel-mate-join > h2 {
+		font-size: 24px;
+		font-weight: 700;
+		margin-bottom: 20px;
+	}
+	.travel-mate-facts {
+		display: grid;
+		grid-template-columns: repeat(4, minmax(0, 1fr));
+		gap: 12px;
+		margin: 32px 0 48px;
+		> .MuiPaper-root {
+			padding: 20px;
+			border-radius: 16px;
+			background: #edeeef;
+			overflow-wrap: anywhere;
+		}
+		h2 {
+			font-size: 10px;
+			text-transform: uppercase;
+			letter-spacing: 1px;
+			margin: 12px 0 8px;
+			color: var(--wwt-muted);
+		}
+	}
+	.travel-mate-description {
+		white-space: pre-wrap;
+		overflow-wrap: anywhere;
+		line-height: 1.8;
+	}
+	.travel-mate-travelers {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 12px;
+		margin: 20px 0;
+		> .MuiPaper-root {
+			padding: 16px;
+			border-radius: 12px;
+			overflow-wrap: anywhere;
+		}
+	}
+	.travel-mate-creator {
+		display: grid;
+		gap: 20px;
+		border-radius: 16px;
+		padding: 24px;
+		overflow-wrap: anywhere;
+	}
+	.travel-mate-join {
+		position: sticky;
+		top: 100px;
+		padding: 24px;
+		border-radius: 16px;
+		display: flex;
+		flex-direction: column;
+		gap: 16px;
+		min-width: 0;
+		h2 {
+			margin-bottom: 4px;
+		}
+		.MuiLinearProgress-root {
+			height: 6px;
+			border-radius: 6px;
+		}
+	}
+	.travel-mate-more {
+		margin-top: 80px;
+		> div {
+			display: grid;
+			grid-template-columns: repeat(3, minmax(0, 1fr));
+			gap: 20px;
+		}
+		.MuiPaper-root {
+			display: flex;
+			flex-direction: column;
+			align-items: flex-start;
+			gap: 14px;
+			padding: 24px;
+			border-radius: 16px;
+			overflow-wrap: anywhere;
+		}
+		h3 {
+			font-size: 22px;
+			font-weight: 700;
+		}
+		.MuiButton-root {
+			margin-top: auto;
+		}
+	}
+	.travel-mate-state {
+		padding: 40px 24px;
+		display: grid;
+		gap: 24px;
+		border-radius: 16px;
+	}
+	@media (max-width: 1100px) {
+		.travel-mate-join {
+			top: 84px;
+		}
+		.travel-mate-facts {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+	}
+	@media (max-width: 900px) {
+		.travel-mate-columns {
+			grid-template-columns: minmax(0, 1fr);
+		}
+		.travel-mate-join {
+			position: static;
+		}
+		.travel-mate-more > div {
+			grid-template-columns: minmax(0, 1fr);
+		}
+	}
+	@media (max-width: 600px) {
+		padding: 32px 16px 64px;
+		.travel-mate-facts {
+			gap: 10px;
+			> .MuiPaper-root {
+				padding: 16px;
+			}
+		}
+		.travel-mate-travelers {
+			grid-template-columns: minmax(0, 1fr);
+		}
+		.travel-mate-more {
+			margin-top: 48px;
+		}
+	}
+}

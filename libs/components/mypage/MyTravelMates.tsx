@@ -284,6 +284,11 @@ function TravelMateList({ userId }: { userId?: string }) {
 												</div>
 												{post.memberId === userId && (
 													<div className="my-travel-mate-actions">
+														{post.matePostStatus === TravelMatePostStatus.ACTIVE && (
+															<Button component={Link} href={`/community/travel-mate/${post._id}`} variant="outlined">
+																View Details
+															</Button>
+														)}
 														<IconButton
 															aria-label={`More actions for ${post.matePostTitle}`}
 															aria-haspopup="menu"

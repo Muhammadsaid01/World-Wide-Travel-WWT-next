@@ -541,3 +541,128 @@ export const GET_MY_TRAVEL_MATES: TypedDocumentNode<
   }
  }
 `;
+
+export type TravelMateMember = Pick<
+	Member,
+	| '_id'
+	| 'memberNick'
+	| 'memberFullName'
+	| 'memberImage'
+	| 'memberCity'
+	| 'memberCountry'
+	| 'memberDesc'
+	| 'memberFollowerCount'
+	| 'memberFollowingCount'
+>;
+export type TravelMateDetail = Omit<
+	import('@/libs/types/travel-mate/travel-mate-post').TravelMatePost,
+	'memberData'
+> & { memberData?: TravelMateMember | null };
+export type TravelMateJoinItem = Pick<
+	import('@/libs/types/travel-mate/travel-mate-join').TravelMateJoin,
+	'_id' | 'memberId' | 'travelMatePostId' | 'joinStatus'
+>;
+export type TravelMateJoinsInput = Omit<
+	import('@/libs/types/travel-mate/travel-mate-join.input').TravelMateJoinsInquiry,
+	'direction'
+> & { direction?: keyof typeof Direction };
+export const GET_TRAVEL_MATE_DETAIL: TypedDocumentNode<{ getTravelMatePost: TravelMateDetail }, { postId: string }> =
+	gql`
+		query GetTravelMateDetail($postId: String!) {
+			getTravelMatePost(postId: $postId) {
+				_id
+				memberId
+				departureCountry
+				departureCity
+				destinationCountry
+				destinationCity
+				travelDate
+				maxMembers
+				currentMembers
+				matePostTitle
+				matePostContent
+				matePostStatus
+				matePostDeletedAt
+				createdAt
+				updatedAt
+				matePostViewCount
+				memberData {
+					_id
+					memberNick
+					memberFullName
+					memberImage
+					memberCity
+					memberCountry
+					memberDesc
+					memberFollowerCount
+					memberFollowingCount
+				}
+			}
+		}
+	`;
+export const GET_TRAVEL_MATE_PARTICIPANTS: TypedDocumentNode<
+	{
+		getTravelMateParticipants: {
+			list: (TravelMateJoinItem & {
+				memberData?: Pick<TravelMateMember, '_id' | 'memberNick' | 'memberFullName' | 'memberImage'> | null;
+			})[];
+			metaCounter?: { total: number }[] | null;
+		};
+	},
+	{ input: TravelMateJoinsInput }
+> = gql`
+	query GetTravelMateParticipants($input: TravelMateJoinsInquiry!) {
+		getTravelMateParticipants(input: $input) {
+			list {
+				_id
+				memberId
+				travelMatePostId
+				joinStatus
+				memberData {
+					_id
+					memberNick
+					memberFullName
+					memberImage
+				}
+			}
+			metaCounter {
+				total
+			}
+		}
+	}
+`;
+export const GET_MY_TRAVEL_MATE_JOIN: TypedDocumentNode<
+	{ getMyJoinedTravelMates: { list: TravelMateJoinItem[] } },
+	{ input: TravelMateJoinsInput }
+> = gql`
+	query GetMyTravelMateJoin($input: TravelMateJoinsInquiry!) {
+		getMyJoinedTravelMates(input: $input) {
+			list {
+				_id
+				memberId
+				travelMatePostId
+				joinStatus
+			}
+		}
+	}
+`;
+export const GET_MORE_TRAVEL_MATES: TypedDocumentNode<
+	{ getTravelMatePosts: { list: MyTravelMateItem[] } },
+	{ input: MyTravelMatesInput }
+> = gql`
+	query GetMoreTravelMates($input: TravelMatePostsInquiry!) {
+		getTravelMatePosts(input: $input) {
+			list {
+				_id
+				memberId
+				matePostTitle
+				matePostStatus
+				destinationCity
+				destinationCountry
+				travelDate
+				currentMembers
+				maxMembers
+			}
+		}
+	}
+`;

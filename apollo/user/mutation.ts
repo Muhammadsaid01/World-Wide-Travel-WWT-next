@@ -130,3 +130,17 @@ export const DELETE_TRAVEL_MATE_POST: TypedDocumentNode<
   deleteTravelMatePost(postId: $postId) { _id }
  }
 `;
+
+export const JOIN_TRAVEL_MATE: TypedDocumentNode<
+	{ joinTravelMate: import('./query').TravelMateJoinItem },
+	{ input: import('@/libs/types/travel-mate/travel-mate-join.input').TravelMateJoinInput }
+> = gql`
+	mutation JoinTravelMate($input: TravelMateJoinInput!) {
+		joinTravelMate(input: $input) {
+			_id
+			memberId
+			travelMatePostId
+			joinStatus
+		}
+	}
+`;
