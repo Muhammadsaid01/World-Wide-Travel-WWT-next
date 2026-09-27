@@ -124,27 +124,38 @@ function BookingForm({ draft, user }: { draft: BookingDraft; user: CustomJwtPayl
 	const [coupon, setCoupon] = useState<{ result: CouponValidation; amount: number; code: string } | null>(null);
 	const [couponError, setCouponError] = useState('');
 	const [applying, setApplying] = useState(false);
+	const couponLock = useRef(false);
 	const item = packageQuery.data?.getTravelPackage;
 	const schedule = schedulesQuery.data?.getPackageSchedules.find((entry) => entry._id === draft.scheduleId);
 	const peopleCount = draft.adultCount + draft.childCount + draft.infantCount;
 	const subtotal = item ? peopleCount * item.packagePrice : 0;
-	const activeCoupon =
-		coupon?.amount === subtotal && coupon.code === couponCode && coupon.result.valid ? coupon.result : null;
+	const activeCoupon = coupon?.amount === subtotal && coupon.result.valid ? coupon.result : null;
 	async function applyCoupon() {
+		if (couponLock.current || submitLock.current || !couponCode.trim() || !item) return;
+		couponLock.current = true;
+		const requestedCode = couponCode.trim();
+		setCouponCode(requestedCode);
 		setApplying(true);
-		setCoupon(null);
 		setCouponError('');
 		try {
 			const result = await client.query({
 				query: VALIDATE_COUPON,
-				variables: { input: { couponCode: couponCode.trim(), bookingAmount: subtotal } },
+				variables: { input: { couponCode: requestedCode, bookingAmount: subtotal } },
 				fetchPolicy: 'no-cache',
 			});
 			if (!result.data.validateCoupon.valid) setCouponError(result.data.validateCoupon.message);
-			else setCoupon({ result: result.data.validateCoupon, amount: subtotal, code: couponCode });
+			else {
+				setCoupon({
+					result: result.data.validateCoupon,
+					amount: subtotal,
+					code: result.data.validateCoupon.couponCode,
+				});
+				setCouponCode(result.data.validateCoupon.couponCode);
+			}
 		} catch (error) {
 			setCouponError(error instanceof Error ? error.message : 'Coupon validation failed. Please try again.');
 		} finally {
+			couponLock.current = false;
 			setApplying(false);
 		}
 	}
@@ -191,7 +202,11 @@ function BookingForm({ draft, user }: { draft: BookingDraft; user: CustomJwtPayl
 	const money = (value: number) => `${item.currency} ${value.toLocaleString('en-US', { maximumFractionDigits: 2 })}`;
 
 	async function submit() {
-		if (submitLock.current || applying || !item || !valid) return;
+		if (submitLock.current || couponLock.current || applying || !item || !valid) return;
+		if ((couponCode.trim() || activeCoupon) && (!activeCoupon || couponCode.trim() !== activeCoupon.couponCode)) {
+			setCouponError('Apply this code before continuing, or remove it to continue without a coupon.');
+			return;
+		}
 		const nextErrors: Record<string, string> = {};
 		for (const field of ['contactName', 'contactPhone'] as const)
 			if (!contact[field].trim()) nextErrors[field] = 'Required.';
@@ -251,7 +266,7 @@ function BookingForm({ draft, user }: { draft: BookingDraft; user: CustomJwtPayl
 						contactPhone: contact.contactPhone.trim(),
 						...(contact.contactEmail.trim() ? { contactEmail: contact.contactEmail.trim() } : {}),
 						...(contact.specialRequest.trim() ? { specialRequest: contact.specialRequest.trim() } : {}),
-						...(couponCode.trim() ? { couponCode: couponCode.trim() } : {}),
+						...(activeCoupon ? { couponCode: activeCoupon.couponCode } : {}),
 						travelers: inputs,
 					},
 				},
@@ -441,30 +456,54 @@ function BookingForm({ draft, user }: { draft: BookingDraft; user: CustomJwtPayl
 						</Paper>
 						<Paper className="booking-panel" variant="outlined">
 							<Typography component="h2" variant="h6">
-								Coupon
+								Promo Code
 							</Typography>
 							{user.memberType === MemberType.USER ? (
-								<Stack spacing={2}>
-									<TextField
-										label="Coupon code"
-										value={couponCode}
-										disabled={applying || submitting}
-										onChange={(event) => {
-											setCouponCode(event.target.value);
-											setCoupon(null);
-											setCouponError('');
-										}}
-									/>
-									<Button
-										disabled={!couponCode.trim() || applying || submitting}
-										onClick={() => {
-											void applyCoupon();
-										}}
-									>
-										{applying ? 'Checking…' : 'Apply'}
-									</Button>
-									{couponError && <Alert severity="error">{couponError}</Alert>}
-									{activeCoupon && <Alert severity="success">{activeCoupon.message}</Alert>}
+								<Stack spacing={1} className="booking-coupon">
+									<div className="booking-coupon-controls">
+										<TextField
+											label="Coupon code"
+											size="small"
+											placeholder="Enter coupon code"
+											value={couponCode}
+											disabled={applying || submitting}
+											onChange={(event) => {
+												setCouponCode(event.target.value);
+												setCouponError('');
+											}}
+										/>
+										<Button
+											disabled={!couponCode.trim() || applying || submitting}
+											onClick={() => {
+												void applyCoupon();
+											}}
+										>
+											{applying ? 'Checking…' : 'Apply'}
+										</Button>
+									</div>
+									{couponError && (
+										<Typography variant="caption" color="error" role="alert">
+											{couponError}
+										</Typography>
+									)}
+									{activeCoupon && (
+										<Typography variant="body2" color="success.main" role="status">
+											✓ {activeCoupon.couponCode} applied to estimate
+										</Typography>
+									)}
+									{(coupon || couponCode) && (
+										<Button
+											size="small"
+											disabled={applying || submitting}
+											onClick={() => {
+												setCoupon(null);
+												setCouponCode('');
+												setCouponError('');
+											}}
+										>
+											Remove code
+										</Button>
+									)}
 								</Stack>
 							) : (
 								<Typography variant="body2">Coupon validation is available to customer accounts only.</Typography>
@@ -474,7 +513,7 @@ function BookingForm({ draft, user }: { draft: BookingDraft; user: CustomJwtPayl
 							{draft.adultCount} adults · {draft.childCount} children · {draft.infantCount} infants
 						</Typography>
 						<p>Subtotal: {money(subtotal)}</p>
-						<p>Discount: {money(activeCoupon?.discountAmount ?? 0)}</p>
+						{activeCoupon && activeCoupon.discountAmount > 0 && <p>Discount: −{money(activeCoupon.discountAmount)}</p>}
 						<Divider />
 						<Typography variant="h6">Final Total: {money(activeCoupon?.finalPrice ?? subtotal)}</Typography>
 						<Typography variant="caption">

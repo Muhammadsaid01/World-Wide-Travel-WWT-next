@@ -575,3 +575,45 @@
 		}
 	}
 }
+
+.booking-coupon {
+	.booking-coupon-controls {
+		display: flex;
+		gap: 12px;
+		align-items: flex-start;
+		.MuiTextField-root {
+			flex: 1;
+			min-width: 0;
+		}
+		.MuiButton-root {
+			min-height: 44px;
+			flex-shrink: 0;
+		}
+		.MuiInputBase-root {
+			min-height: 44px;
+		}
+	}
+	> .MuiButton-root {
+		align-self: flex-start;
+	}
+	@media (max-width: 400px) {
+		.booking-coupon-controls {
+			flex-direction: column;
+			.MuiTextField-root,
+			.MuiButton-root {
+				width: 100%;
+			}
+		}
+	}
+}
+.booking-confirmation .confirmation-price-breakdown {
+	padding-top: 20px;
+	p {
+		display: flex;
+		justify-content: space-between;
+		flex-wrap: wrap;
+		gap: 12px;
+		margin-bottom: 10px;
+		font-size: 14px;
+	}
+}

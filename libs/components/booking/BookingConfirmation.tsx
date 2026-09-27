@@ -106,6 +106,27 @@ export default function BookingConfirmation({
 						</div>
 					</div>
 					<Divider />
+					<div className="confirmation-price-breakdown">
+						<Typography>
+							Subtotal{' '}
+							<span>
+								{booking.currency}{' '}
+								{booking.totalPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+							</span>
+						</Typography>
+						{booking.discountAmount > 0 && (
+							<Typography>
+								Discount{' '}
+								<span>
+									−{booking.currency}{' '}
+									{booking.discountAmount.toLocaleString('en-US', {
+										minimumFractionDigits: 2,
+										maximumFractionDigits: 2,
+									})}
+								</span>
+							</Typography>
+						)}
+					</div>
 					<div className="confirmation-total">
 						<Typography>Booking Total</Typography>
 						<Typography component="strong">
