@@ -13,7 +13,7 @@
 }
 
 .wwt-page-content {
-	flex: 1;
+	flex: 1 0 auto;
 	min-width: 0;
 	padding-top: 76px;
 }
@@ -133,6 +133,7 @@
 	padding-top: 64px;
 	background: #f1f3f5;
 	border-top: 1px solid var(--wwt-divider);
+	flex-shrink: 0;
 }
 .wwt-footer-grid {
 	display: grid;

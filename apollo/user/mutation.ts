@@ -122,3 +122,11 @@ export const UPLOAD_PROFILE_IMAGE: TypedDocumentNode<{ imageUploader: string }, 
 		imageUploader(file: $file, target: "member")
 	}
 `;
+
+export const DELETE_TRAVEL_MATE_POST: TypedDocumentNode<
+ { deleteTravelMatePost: { _id: string } }, { postId: string }
+> = gql`
+ mutation DeleteTravelMatePost($postId: String!) {
+  deleteTravelMatePost(postId: $postId) { _id }
+ }
+`;

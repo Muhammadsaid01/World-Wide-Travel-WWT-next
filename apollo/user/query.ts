@@ -476,3 +476,68 @@ export const GET_PROFILE_TRAVEL_MATES: TypedDocumentNode<
 		}
 	}
 `;
+
+export type MyArticleItem = Pick<
+	import('@/libs/types/article/board-article').BoardArticle,
+	| '_id'
+	| 'articleTitle'
+	| 'articleImages'
+	| 'articleCategory'
+	| 'articleStatus'
+	| 'articleLikeCount'
+	| 'articleCommentCount'
+	| 'articleViewCount'
+	| 'createdAt'
+	| 'updatedAt'
+>;
+export type MyArticlesInput = Omit<
+	import('@/libs/types/article/board-article.input').BoardArticlesInquiry,
+	'direction' | 'search'
+> & {
+	direction?: keyof typeof Direction;
+	search?: Pick<
+		NonNullable<import('@/libs/types/article/board-article.input').BoardArticlesInquiry['search']>,
+		'text' | 'articleStatus' | 'articleCategory'
+	>;
+};
+export const GET_MY_ARTICLES: TypedDocumentNode<
+	{ getMyBoardArticles: { list: MyArticleItem[]; metaCounter?: { total: number }[] | null } },
+	{ input: MyArticlesInput }
+> = gql`
+	query GetMyArticles($input: BoardArticlesInquiry!) {
+		getMyBoardArticles(input: $input) {
+			list {
+				_id
+				articleTitle
+				articleImages
+				articleCategory
+				articleStatus
+				articleLikeCount
+				articleCommentCount
+				articleViewCount
+				createdAt
+				updatedAt
+			}
+			metaCounter {
+				total
+			}
+		}
+	}
+`;
+
+export type MyTravelMateItem = Pick<
+ import('@/libs/types/travel-mate/travel-mate-post').TravelMatePost,
+ '_id' | 'memberId' | 'matePostTitle' | 'matePostStatus' | 'destinationCity' | 'destinationCountry' | 'travelDate' | 'currentMembers' | 'maxMembers'
+>;
+export type MyTravelMatesInput = Omit<import('@/libs/types/travel-mate/travel-mate-post.input').TravelMatePostsInquiry, 'direction'> & { direction?: keyof typeof Direction };
+export const GET_MY_TRAVEL_MATES: TypedDocumentNode<
+ { getMyTravelMatePosts: { list: MyTravelMateItem[]; metaCounter?: { total: number }[] | null } },
+ { input: MyTravelMatesInput }
+> = gql`
+ query GetMyTravelMates($input: TravelMatePostsInquiry!) {
+  getMyTravelMatePosts(input: $input) {
+   list { _id memberId matePostTitle matePostStatus destinationCity destinationCountry travelDate currentMembers maxMembers }
+   metaCounter { total }
+  }
+ }
+`;

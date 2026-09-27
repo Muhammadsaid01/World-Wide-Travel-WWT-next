@@ -1,0 +1,246 @@
+// Keep viewport height; let the footer surface fill spare space, not the content gap.
+.wwt-public-layout:has(.my-travel-mates-page) {
+	min-height: 100vh;
+	> .wwt-footer {
+		flex-grow: 1;
+	}
+	> .wwt-page-content {
+		flex: 0 0 auto;
+	}
+}
+.my-bookings-page.my-travel-mates-page {
+	width: 100%;
+	max-width: 1280px;
+	padding: 0 24px 64px;
+	.my-bookings-breadcrumb {
+		padding: 16px 0;
+	}
+	.my-bookings-layout {
+		grid-template-columns: 220px minmax(0, 1fr);
+		gap: 40px;
+		padding-top: 32px;
+		align-items: start;
+	}
+	.my-bookings-sidebar {
+		position: sticky;
+		top: 100px;
+		align-self: flex-start;
+		height: fit-content;
+		section:last-child {
+			margin-bottom: 0;
+		}
+	}
+	.my-travel-mates-main {
+		min-width: 0;
+	}
+	.my-travel-mates-header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 24px;
+		padding-bottom: 24px;
+		margin-bottom: 24px;
+		h1 {
+			font-size: clamp(40px, 4vw, 56px);
+			font-weight: 700;
+			line-height: 1.1;
+			letter-spacing: -1.5px;
+			margin-bottom: 16px;
+		}
+		p {
+			font-size: 16px;
+			line-height: 1.7;
+		}
+		> div:last-child {
+			display: grid;
+			gap: 8px;
+			flex-shrink: 0;
+		}
+	}
+	.my-travel-mates-toolbar {
+		display: flex;
+		align-items: center;
+		flex-wrap: wrap;
+		gap: 12px;
+		padding: 10px;
+		margin-bottom: 24px;
+		background: var(--wwt-paper);
+		border: 1px solid var(--wwt-divider);
+		border-radius: 12px;
+		.my-bookings-tabs {
+			flex-wrap: wrap;
+			overflow: visible;
+		}
+		form {
+			flex: 1 1 180px;
+			margin-left: auto;
+			min-width: 0;
+		}
+		> .MuiTextField-root {
+			width: 120px;
+		}
+		.MuiOutlinedInput-root {
+			font-size: 14px;
+			background: var(--wwt-paper);
+			border-radius: 8px;
+		}
+	}
+	.my-travel-mates-count {
+		font-size: 12px;
+		color: var(--wwt-muted);
+		margin-bottom: 16px;
+	}
+	.my-travel-mates-list {
+		display: grid;
+		gap: 16px;
+	}
+	.my-travel-mate-card {
+		display: flex;
+		align-items: center;
+		gap: 24px;
+		padding: 24px;
+		min-height: 192px;
+		border-radius: 16px;
+		border-color: var(--wwt-divider);
+		border-left: 5px solid #a5b5c8;
+		box-shadow: 0 3px 12px rgba(11, 45, 79, 0.04);
+		&.is-active {
+			border-left-color: #68cbdc;
+			.my-travel-mate-status {
+				background: #e4f7fb;
+				color: #17687b;
+			}
+		}
+		&.is-closed,
+		&.is-deleted {
+			border-left-color: #c3c6d1;
+			.my-travel-mate-status {
+				background: #f0f1f3;
+				color: var(--wwt-muted);
+			}
+		}
+	}
+	.my-travel-mate-info {
+		min-width: 0;
+		flex: 1;
+		h2 {
+			font-size: 24px;
+			font-weight: 700;
+			margin: 20px 0;
+			overflow-wrap: anywhere;
+		}
+	}
+	.my-travel-mate-meta {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 12px;
+		font-size: 11px;
+		text-transform: uppercase;
+		letter-spacing: 0.6px;
+		color: var(--wwt-muted);
+		overflow-wrap: anywhere;
+	}
+	.my-travel-mate-status {
+		padding: 5px 10px;
+		border-radius: 50px;
+		background: #e9eef4;
+		font-weight: 700;
+		&::before {
+			content: '';
+			display: inline-block;
+			width: 5px;
+			height: 5px;
+			border-radius: 50%;
+			background: currentColor;
+			margin-right: 6px;
+		}
+	}
+	.my-travel-mate-details {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 12px 24px;
+		font-size: 14px;
+		color: var(--wwt-muted);
+		> span,
+		> div {
+			display: flex;
+			flex-wrap: wrap;
+			align-items: center;
+			gap: 8px;
+		}
+		svg {
+			font-size: 18px;
+		}
+	}
+	.MuiLinearProgress-root {
+		width: 88px;
+		flex: 0 0 88px;
+		height: 5px;
+		border-radius: 5px;
+	}
+	.my-travel-mate-actions {
+		align-self: stretch;
+		display: flex;
+		align-items: flex-start;
+		border-left: 1px solid var(--wwt-divider);
+		padding-left: 24px;
+	}
+	.my-travel-mates-empty {
+		padding: 40px 24px;
+		text-align: center;
+		border-radius: 16px;
+		h2 {
+			font-size: 24px;
+			margin-bottom: 16px;
+		}
+	}
+	.my-bookings-pagination {
+		margin-top: 32px;
+	}
+	@media (max-width: 1100px) {
+		.my-bookings-sidebar {
+			top: 84px;
+		}
+		.my-bookings-layout {
+			gap: 24px;
+		}
+		.my-travel-mates-header {
+			flex-wrap: wrap;
+		}
+	}
+	@media (max-width: 1023px) {
+		.my-bookings-layout {
+			grid-template-columns: minmax(0, 1fr);
+		}
+	}
+	@media (max-width: 600px) {
+		padding-inline: 16px;
+		.my-travel-mates-toolbar {
+			align-items: stretch;
+			form {
+				flex-basis: 100%;
+				margin: 0;
+			}
+			> .MuiTextField-root {
+				width: 100%;
+			}
+		}
+		.my-travel-mate-card {
+			flex-direction: column;
+			align-items: stretch;
+			padding: 20px;
+		}
+		.my-travel-mate-actions {
+			border-left: 0;
+			border-top: 1px solid var(--wwt-divider);
+			padding: 16px 0 0;
+			.MuiButton-root {
+				width: 100%;
+			}
+		}
+		.my-travel-mate-info h2 {
+			font-size: 22px;
+		}
+	}
+}

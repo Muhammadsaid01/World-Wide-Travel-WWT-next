@@ -12,7 +12,7 @@ const groups = [
 export default function ProfileSidebar({
 	active = 'My Bookings',
 }: {
-	active?: 'Overview' | 'My Bookings' | 'Edit Profile';
+	active?: 'Overview' | 'My Bookings' | 'Edit Profile' | 'My Articles' | 'My Travel Mates';
 }) {
 	return (
 		<aside className="my-bookings-sidebar" aria-label="Profile navigation">
@@ -20,7 +20,11 @@ export default function ProfileSidebar({
 				<section key={group.title}>
 					<Typography component="h2">{group.title}</Typography>
 					{group.items.map((item) =>
-						item === 'My Bookings' || item === 'Overview' || item === 'Edit Profile' ? (
+						item === 'My Bookings' ||
+						item === 'Overview' ||
+						item === 'Edit Profile' ||
+						item === 'My Articles' ||
+						item === 'My Travel Mates' ? (
 							<Button
 								key={item}
 								component={Link}
@@ -29,7 +33,11 @@ export default function ProfileSidebar({
 										? '/mypage'
 										: item === 'Edit Profile'
 											? '/mypage/edit-profile'
-											: '/mypage/my-bookings'
+											: item === 'My Articles'
+												? '/mypage/articles'
+												: item === 'My Travel Mates'
+													? '/mypage/travel-mates'
+													: '/mypage/my-bookings'
 								}
 								className={item === active ? 'is-active' : undefined}
 								aria-current={item === active ? 'page' : undefined}

@@ -1,0 +1,269 @@
+// Only My Articles opts out of the shared viewport-filling footer layout.
+.wwt-public-layout:has(.my-articles-page) {
+	min-height: 0;
+	> .wwt-page-content {
+		flex: 0 0 auto;
+	}
+}
+
+.my-bookings-page.my-articles-page {
+	padding-bottom: 64px;
+	.my-bookings-breadcrumb {
+		padding: 12px 16px;
+		background: #f0f2f4;
+		font-size: 11px;
+		border: 0;
+	}
+	.my-bookings-layout {
+		grid-template-columns: 200px minmax(0, 1fr);
+		gap: 24px;
+		padding-top: 32px;
+		align-items: start;
+	}
+	.my-bookings-sidebar {
+		position: sticky;
+		// Desktop navbar is 76px high; leave 24px breathing room.
+		top: 100px;
+		align-self: flex-start;
+		height: fit-content;
+		section:last-child {
+			margin-bottom: 0;
+		}
+	}
+	.my-bookings-sidebar .is-active {
+		background: var(--wwt-primary);
+		color: #fff;
+		.my-bookings-active-dot {
+			background: #fff;
+		}
+	}
+	.my-articles-main {
+		min-width: 0;
+	}
+	.my-articles-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		gap: 24px;
+		margin-bottom: 24px;
+		h1 {
+			font-size: 60px;
+			font-weight: 700;
+			line-height: 1.1;
+			letter-spacing: -1.5px;
+			margin-bottom: 16px;
+		}
+		p {
+			font-size: 18px;
+		}
+		> div:last-child {
+			display: grid;
+			gap: 8px;
+			flex-shrink: 0;
+		}
+	}
+	.my-articles-toolbar {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 16px;
+		padding: 8px;
+		border-radius: 12px;
+		background: #edeeef;
+		margin-bottom: 20px;
+		form {
+			margin-left: auto;
+			flex: 1 1 210px;
+			max-width: 290px;
+			.MuiTextField-root {
+				width: 100%;
+			}
+		}
+		> .MuiTextField-root {
+			width: 155px;
+		}
+		.MuiOutlinedInput-root {
+			background: #fff;
+			font-size: 14px;
+			border-radius: 8px;
+			min-height: 42px;
+		}
+		fieldset {
+			border-color: transparent;
+		}
+	}
+	// Button appearance comes from the existing My Bookings tabs class.
+	.my-articles-tabs {
+		padding: 4px;
+	}
+	.my-articles-count {
+		font-size: 12px;
+		color: #6b7280;
+		margin-bottom: 16px;
+	}
+	.my-articles-list {
+		display: grid;
+		gap: 16px;
+	}
+	.my-article-card {
+		display: flex;
+		gap: 24px;
+		padding: 12px;
+		border-radius: 12px;
+		min-height: 132px;
+		border: 1px solid #e1e3e4;
+		box-shadow: 0 3px 12px rgba(11, 45, 79, 0.04);
+		align-items: center;
+	}
+	.my-article-image {
+		position: relative;
+		width: 192px;
+		height: 112px;
+		flex-shrink: 0;
+		border-radius: 8px;
+		overflow: hidden;
+		background: #edeeef;
+		img {
+			object-fit: cover;
+		}
+		.detail-image-fallback {
+			display: grid;
+			place-items: center;
+			height: 100%;
+			font-size: 12px;
+			color: #6b7280;
+			text-align: center;
+		}
+	}
+	.my-article-info {
+		flex: 1;
+		min-width: 0;
+		h2 {
+			font-size: 21px;
+			font-weight: 700;
+			margin: 12px 0;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+		}
+	}
+	.my-article-meta {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 8px 12px;
+		font-size: 12px;
+		color: #6b7280;
+	}
+	.my-article-category {
+		background: #f3f4f5;
+		padding: 3px 6px;
+		border-radius: 4px;
+		font-size: 10px;
+		letter-spacing: 0.6px;
+	}
+	.my-article-status {
+		align-self: flex-start;
+		font-size: 10px;
+		font-weight: 700;
+		border-radius: 50px;
+		background: #f3f4f5;
+		padding: 6px 10px;
+		white-space: nowrap;
+		&::before {
+			content: '';
+			display: inline-block;
+			width: 5px;
+			height: 5px;
+			background: currentColor;
+			border-radius: 50%;
+			margin-right: 6px;
+		}
+	}
+	.my-article-metrics {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 14px;
+		color: #6b7280;
+		font-size: 12px;
+		span {
+			display: flex;
+			align-items: center;
+			gap: 5px;
+		}
+		svg {
+			font-size: 15px;
+		}
+	}
+	.my-articles-empty {
+		padding: 28px 24px;
+		min-height: 160px;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		text-align: center;
+		border-radius: 12px;
+		h2 {
+			font-size: 24px;
+			margin-bottom: 14px;
+		}
+	}
+	// Keep this page's spacing; pagination controls reuse My Bookings styling.
+	.my-articles-pagination {
+		margin-top: 32px;
+	}
+	@media (max-width: 1100px) {
+		.my-bookings-sidebar {
+			// The shared navbar switches to 60px at this breakpoint.
+			top: 84px;
+		}
+	}
+	@media (max-width: 1023px) {
+		.my-bookings-layout {
+			grid-template-columns: minmax(0, 1fr);
+		}
+	}
+	@media (max-width: 768px) {
+		.my-articles-header {
+			flex-direction: column;
+			align-items: flex-start;
+			h1 {
+				font-size: 44px;
+			}
+		}
+		.my-article-card {
+			gap: 16px;
+			flex-wrap: wrap;
+		}
+		.my-article-status {
+			margin-left: auto;
+		}
+	}
+	@media (max-width: 600px) {
+		.my-articles-toolbar {
+			flex-direction: column;
+			align-items: stretch;
+			form {
+				margin: 0;
+				flex: auto;
+				max-width: none;
+			}
+			> .MuiTextField-root {
+				width: 100%;
+			}
+		}
+		.my-article-card {
+			flex-direction: column;
+			align-items: stretch;
+		}
+		.my-article-image {
+			width: 100%;
+			height: 180px;
+		}
+		.my-article-info h2 {
+			white-space: normal;
+			overflow-wrap: anywhere;
+		}
+	}
+}
