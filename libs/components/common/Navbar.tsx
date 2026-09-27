@@ -1,17 +1,18 @@
-import { packageImageUrl } from '@/libs/components/package/PackageImage';
-import { useRef, useState } from 'react';
-import { useReactiveVar } from '@apollo/client';
-import Link from 'next/link';
-import { useRouter } from 'next/router';
-import { Avatar, Button, Collapse, Container, IconButton, Menu, MenuItem } from '@mui/material';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { currentUserVar } from '@/apollo/store';
 import { logout } from '@/libs/auth';
-import MenuIcon from '@mui/icons-material/Menu';
+import { packageImageUrl } from '@/libs/components/package/PackageImage';
+import { useReactiveVar } from '@apollo/client';
 import CloseIcon from '@mui/icons-material/Close';
-import LanguageIcon from '@mui/icons-material/Language';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import FavoriteIcon from '@mui/icons-material/Favorite';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
+import LanguageIcon from '@mui/icons-material/Language';
+import MenuIcon from '@mui/icons-material/Menu';
 import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone';
+import { Avatar, Button, Collapse, Container, IconButton, Menu, MenuItem } from '@mui/material';
+import Link from 'next/link';
+import { useRouter } from 'next/router';
+import { useRef, useState } from 'react';
 
 const navigation = [
 	{ label: 'Home', href: '/' },
@@ -111,8 +112,17 @@ export default function Navbar() {
 					<Button className="wwt-language" startIcon={<LanguageIcon />} disabled>
 						Language
 					</Button>
-					<IconButton disabled aria-label="Saved packages (coming soon)">
-						<FavoriteBorderIcon />
+					<IconButton
+						component={Link}
+						href="/mypage/saved"
+						aria-label="Saved packages"
+						color={router.pathname === '/mypage/saved' ? 'primary' : 'default'}
+					>
+						{router.pathname === '/mypage/saved' ? (
+							<FavoriteIcon />
+						) : (
+							<FavoriteBorderIcon />
+						)}
 					</IconButton>
 					<IconButton disabled aria-label="Notifications (coming soon)">
 						<NotificationsNoneIcon />
@@ -140,8 +150,18 @@ export default function Navbar() {
 						<Button startIcon={<LanguageIcon />} disabled>
 							Language
 						</Button>
-						<IconButton disabled aria-label="Saved packages (coming soon)">
-							<FavoriteBorderIcon />
+						<IconButton
+							component={Link}
+							href="/mypage/saved"
+							aria-label="Saved packages"
+							color={router.pathname === '/mypage/saved' ? 'primary' : 'default'}
+							onClick={() => setMenuOpen(false)}
+						>
+							{router.pathname === '/mypage/saved' ? (
+								<FavoriteIcon />
+							) : (
+								<FavoriteBorderIcon />
+							)}
 						</IconButton>
 						<IconButton disabled aria-label="Notifications (coming soon)">
 							<NotificationsNoneIcon />
