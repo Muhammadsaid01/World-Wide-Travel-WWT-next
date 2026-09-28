@@ -1,21 +1,22 @@
-import { useEffect, useState } from 'react';
-import { useApolloClient, useQuery, useReactiveVar } from '@apollo/client';
 import { currentUserVar } from '@/apollo/store';
 import {
-	GET_MY_PROFILE,
+	GET_CONNECTION_COUNTS,
 	GET_MY_BOOKINGS,
+	GET_MY_PROFILE,
 	GET_PROFILE_ARTICLES,
 	GET_PROFILE_TRAVEL_MATES,
 	type PaymentBooking,
 } from '@/apollo/user/query';
 import { BookingStatus } from '@/libs/enums/booking.enum';
 import { MemberType } from '@/libs/enums/member.enum';
-import { Alert, Avatar, Button, Chip, Paper, Skeleton, Stack, Typography } from '@mui/material';
+import { useApolloClient, useQuery, useReactiveVar } from '@apollo/client';
 import EditOutlined from '@mui/icons-material/EditOutlined';
+import { Alert, Avatar, Button, Chip, Paper, Skeleton, Stack, Typography } from '@mui/material';
 import Link from 'next/link';
-import ProfileSidebar from './ProfileSidebar';
+import { useEffect, useState } from 'react';
 import PackageImage, { packageImageUrl } from '../package/PackageImage';
 import { formatScheduleDate } from '../package/PackageSchedules';
+import ProfileSidebar from './ProfileSidebar';
 
 function UpcomingTrip() {
 	const client = useApolloClient();
@@ -213,6 +214,32 @@ export default function MyProfile() {
 function ProfileContent({ authenticated }: { authenticated: boolean }) {
 	const { data, loading, error, refetch } = useQuery(GET_MY_PROFILE, { skip: !authenticated, fetchPolicy: 'no-cache' });
 	const member = data?.getMyProfile;
+	const connectionCounts = useQuery(GET_CONNECTION_COUNTS, {
+  variables: {
+    followers: {
+      page: 1,
+      limit: 1,
+      search: {
+        followingId: member?._id,
+      },
+    },
+    following: {
+      page: 1,
+      limit: 1,
+      search: {
+        followerId: member?._id,
+      },
+    },
+  },
+  skip: !authenticated || !member?._id,
+  fetchPolicy: 'no-cache',
+});
+
+const followerCount =
+  connectionCounts.data?.getMemberFollowers.metaCounter?.[0]?.total ?? 0;
+
+const followingCount =
+  connectionCounts.data?.getMemberFollowings.metaCounter?.[0]?.total ?? 0;
 	const articles = useProfileArticles(!authenticated || !member);
 	const name = member?.memberFullName || member?.memberNick;
 	return (
@@ -282,15 +309,19 @@ function ProfileContent({ authenticated }: { authenticated: boolean }) {
 										)}
 										<span>Articles</span>
 									</div>
-									{[
-										[member.memberFollowerCount, 'Followers'],
-										[member.memberFollowingCount, 'Following'],
-									].map(([value, label]) => (
-										<div key={label}>
-											<strong>{value}</strong>
-											<span>{label}</span>
-										</div>
-									))}
+										<Link href="/mypage/followers" className="profile-stat-link">
+											<strong>
+												{connectionCounts.loading ? '—' : followerCount}
+											</strong>
+											<span>Followers</span>
+										</Link>
+
+										<Link href="/mypage/following" className="profile-stat-link">
+											<strong>
+												{connectionCounts.loading ? '—' : followingCount}
+											</strong>
+											<span>Following</span>
+										</Link>
 								</div>
 							</div>
 							<Button

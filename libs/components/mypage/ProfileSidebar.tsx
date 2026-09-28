@@ -14,7 +14,16 @@ export default function ProfileSidebar({
 	active = 'My Bookings',
 	profileCard,
 }: {
-	active?: 'Overview' | 'My Bookings' | 'Edit Profile' | 'My Articles' | 'My Travel Mates' | 'Join Requests' | 'Saved';
+	active?:
+		| 'Overview'
+		| 'My Bookings'
+		| 'Edit Profile'
+		| 'My Articles'
+		| 'My Travel Mates'
+		| 'Join Requests'
+		| 'Saved'
+		| 'Followers'
+		| 'Following';
 	profileCard?: ReactNode;
 }) {
 	return (
@@ -30,24 +39,30 @@ export default function ProfileSidebar({
 						item === 'My Articles' ||
 						item === 'My Travel Mates' ||
 						item === 'Join Requests' ||
+						item === 'Followers' ||
+						item === 'Following' ||
 						item === 'Saved' ? (
 							<Button
 								key={item}
 								component={Link}
 								href={
-									item === 'Overview'
-										? '/mypage'
-										: item === 'Edit Profile'
-											? '/mypage/edit-profile'
-											: item === 'My Articles'
-												? '/mypage/articles'
-												: item === 'My Travel Mates'
-													? '/mypage/travel-mates'
-													: item === 'Join Requests'
-														? '/mypage/join-requests'
-														: item === 'Saved'
-															? '/mypage/saved'
-															: '/mypage/my-bookings'
+									item === 'Followers'
+										? '/mypage/followers'
+										: item === 'Following'
+											? '/mypage/following'
+											: item === 'Overview'
+												? '/mypage'
+												: item === 'Edit Profile'
+													? '/mypage/edit-profile'
+													: item === 'My Articles'
+														? '/mypage/articles'
+														: item === 'My Travel Mates'
+															? '/mypage/travel-mates'
+															: item === 'Join Requests'
+																? '/mypage/join-requests'
+																: item === 'Saved'
+																	? '/mypage/saved'
+																	: '/mypage/my-bookings'
 								}
 								className={item === active ? 'is-active' : undefined}
 								aria-current={item === active ? 'page' : undefined}

@@ -744,3 +744,99 @@ export const GET_SAVED_PACKAGES: TypedDocumentNode<
 		}
 	}
 `;
+
+export type ConnectionMember = Pick<
+	Member,
+	| '_id'
+	| 'memberNick'
+	| 'memberFullName'
+	| 'memberImage'
+	| 'memberCountry'
+	| 'memberCity'
+	| 'memberFollowerCount'
+	| 'memberFollowingCount'
+>;
+export type ConnectionItem = {
+	_id: string;
+	meFollowed?: Pick<import('@/libs/types/community/follow').MeFollowed, 'myFollowing'>[] | null;
+	followerData?: ConnectionMember | null;
+	followingData?: ConnectionMember | null;
+};
+export type ConnectionResult = { list: ConnectionItem[]; metaCounter?: { total?: number | null }[] | null };
+type ConnectionInput = Pick<import('@/libs/types/community/follow.input').FollowInquiry, 'page' | 'limit' | 'search'>;
+export const GET_MEMBER_FOLLOWERS: TypedDocumentNode<
+	{ getMemberFollowers: ConnectionResult },
+	{ input: ConnectionInput }
+> = gql`
+	query GetMemberFollowers($input: FollowInquiry!) {
+		getMemberFollowers(input: $input) {
+			list {
+				_id
+				meFollowed {
+					myFollowing
+				}
+				followerData {
+					_id
+					memberNick
+					memberFullName
+					memberImage
+					memberCountry
+					memberCity
+					memberFollowerCount
+					memberFollowingCount
+				}
+			}
+			metaCounter {
+				total
+			}
+		}
+	}
+`;
+export const GET_MEMBER_FOLLOWINGS: TypedDocumentNode<
+	{ getMemberFollowings: ConnectionResult },
+	{ input: ConnectionInput }
+> = gql`
+	query GetMemberFollowings($input: FollowInquiry!) {
+		getMemberFollowings(input: $input) {
+			list {
+				_id
+				meFollowed {
+					myFollowing
+				}
+				followingData {
+					_id
+					memberNick
+					memberFullName
+					memberImage
+					memberCountry
+					memberCity
+					memberFollowerCount
+					memberFollowingCount
+				}
+			}
+			metaCounter {
+				total
+			}
+		}
+	}
+`;
+export const GET_CONNECTION_COUNTS: TypedDocumentNode<
+	{
+		getMemberFollowers: Pick<ConnectionResult, 'metaCounter'>;
+		getMemberFollowings: Pick<ConnectionResult, 'metaCounter'>;
+	},
+	{ followers: ConnectionInput; following: ConnectionInput }
+> = gql`
+	query GetConnectionCounts($followers: FollowInquiry!, $following: FollowInquiry!) {
+		getMemberFollowers(input: $followers) {
+			metaCounter {
+				total
+			}
+		}
+		getMemberFollowings(input: $following) {
+			metaCounter {
+				total
+			}
+		}
+	}
+`;

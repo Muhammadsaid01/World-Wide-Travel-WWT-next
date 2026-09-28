@@ -1,7 +1,7 @@
+import type { Booking, BookingHandoff } from '@/libs/types/booking/booking';
+import type { BookingInput, CancelBookingInput } from '@/libs/types/booking/booking.input';
 import type { Payment } from '@/libs/types/booking/payment';
 import type { PaymentInput } from '@/libs/types/booking/payment.input';
-import type { BookingInput, CancelBookingInput } from '@/libs/types/booking/booking.input';
-import type { Booking, BookingHandoff } from '@/libs/types/booking/booking';
 import { gql, type TypedDocumentNode } from '@apollo/client';
 
 export const LOGIN = gql`
@@ -180,3 +180,18 @@ export const TOGGLE_SAVED_PACKAGE: TypedDocumentNode<{ likeTargetPackage: { _id:
 			}
 		}
 	`;
+
+export const SUBSCRIBE_MEMBER: TypedDocumentNode<{ subscribe: { _id: string } }, { input: string }> = gql`
+	mutation SubscribeMember($input: String!) {
+		subscribe(input: $input) {
+			_id
+		}
+	}
+`;
+export const UNSUBSCRIBE_MEMBER: TypedDocumentNode<{ unsubscribe: { _id: string } }, { input: string }> = gql`
+	mutation UnsubscribeMember($input: String!) {
+		unsubscribe(input: $input) {
+			_id
+		}
+	}
+`;

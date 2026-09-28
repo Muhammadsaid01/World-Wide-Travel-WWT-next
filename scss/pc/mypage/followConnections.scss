@@ -1,0 +1,174 @@
+.my-bookings-page.follow-connections-page {
+	width: 100%;
+	background: var(--wwt-background);
+	color: var(--wwt-primary);
+	.my-bookings-layout {
+		padding-top: 32px;
+		gap: 40px;
+	}
+	.follow-connections-main {
+		min-width: 0;
+	}
+	.follow-connections-header {
+		margin-bottom: 28px;
+		h1 {
+			font-size: clamp(36px, 4vw, 48px);
+			font-weight: 700;
+			margin-bottom: 12px;
+		}
+	}
+	.follow-connections-tabs {
+		display: flex;
+		gap: 24px;
+		border-bottom: 1px solid var(--wwt-divider);
+		margin-bottom: 28px;
+		.MuiButton-root {
+			border-radius: 0;
+			padding: 14px 4px;
+			gap: 8px;
+			text-transform: none;
+			color: var(--wwt-muted);
+			border-bottom: 3px solid transparent;
+		}
+		.is-active {
+			color: var(--wwt-primary);
+			font-weight: 700;
+			border-bottom-color: var(--wwt-primary);
+		}
+		span {
+			border-radius: 16px;
+			padding: 2px 8px;
+			background: var(--wwt-background);
+			font-size: 12px;
+		}
+	}
+	.follow-connections-card {
+		overflow: hidden;
+		background: var(--wwt-paper);
+		border: 1px solid var(--wwt-divider);
+		border-radius: 12px;
+		box-shadow: 0 4px 18px rgba(0, 30, 64, 0.04);
+	}
+	.follow-connections-list {
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+	.follow-connection-columns,
+	.follow-connection-row {
+		display: grid;
+		grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr) 140px;
+		align-items: center;
+		gap: 20px;
+		padding: 24px;
+	}
+	.follow-connection-columns {
+		background: var(--wwt-background);
+		padding-block: 16px;
+		text-transform: uppercase;
+		font-size: 11px;
+		font-weight: 700;
+		letter-spacing: 1px;
+		color: var(--wwt-muted);
+	}
+	.follow-connection-row + .follow-connection-row {
+		border-top: 1px solid var(--wwt-divider);
+	}
+	.follow-connection-member {
+		display: flex;
+		align-items: center;
+		gap: 14px;
+		min-width: 0;
+		> .MuiAvatar-root {
+			width: 48px;
+			height: 48px;
+			flex-shrink: 0;
+		}
+		> div:last-child {
+			min-width: 0;
+			overflow-wrap: anywhere;
+		}
+		h2 {
+			font-size: 16px;
+			font-weight: 700;
+		}
+	}
+	.follow-connection-details {
+		display: flex;
+		flex-direction: column;
+		gap: 6px;
+		color: var(--wwt-muted);
+		font-size: 13px;
+		strong {
+			color: var(--wwt-primary);
+		}
+	}
+	.follow-connection-action .MuiButton-root {
+		width: 100%;
+		min-height: 40px;
+		border-radius: 24px;
+		font-size: 11px;
+		font-weight: 700;
+		&.is-follow {
+			background: color-mix(in srgb, var(--wwt-primary) 7%, var(--wwt-paper));
+			color: var(--wwt-primary);
+		}
+		&.is-following {
+			border-color: var(--wwt-divider);
+		}
+		&.Mui-disabled {
+			color: var(--wwt-muted);
+		}
+	}
+	.follow-connections-empty {
+		padding: 48px 24px;
+		text-align: center;
+		border-radius: 12px;
+		h2 {
+			font-size: 24px;
+			margin-bottom: 12px;
+		}
+	}
+	.follow-connections-feedback {
+		margin-bottom: 20px;
+		overflow-wrap: anywhere;
+	}
+	.follow-connections-pagination {
+		display: flex;
+		justify-content: center;
+		margin-top: 32px;
+		.MuiPaginationItem-root {
+			min-width: 40px;
+			height: 40px;
+		}
+	}
+	@media (max-width: 1023px) {
+		.my-bookings-layout {
+			grid-template-columns: minmax(0, 1fr);
+			gap: 24px;
+		}
+	}
+	@media (max-width: 600px) {
+		padding-inline: 16px;
+		.follow-connection-columns {
+			display: none;
+		}
+		.follow-connection-row {
+			grid-template-columns: minmax(0, 1fr);
+			gap: 16px;
+			padding: 20px;
+		}
+		.follow-connection-details {
+			flex-direction: row;
+			flex-wrap: wrap;
+			gap: 16px;
+		}
+		.follow-connections-tabs {
+			gap: 16px;
+		}
+		.follow-connections-pagination .MuiPaginationItem-root {
+			min-width: 32px;
+			margin-inline: 2px;
+		}
+	}
+}
