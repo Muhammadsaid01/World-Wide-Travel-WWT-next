@@ -23,7 +23,8 @@ export default function ProfileSidebar({
 		| 'Join Requests'
 		| 'Saved'
 		| 'Followers'
-		| 'Following';
+		| 'Following'
+		| 'Settings';
 	profileCard?: ReactNode;
 }) {
 	return (
@@ -41,28 +42,31 @@ export default function ProfileSidebar({
 						item === 'Join Requests' ||
 						item === 'Followers' ||
 						item === 'Following' ||
+						item === 'Settings' ||
 						item === 'Saved' ? (
 							<Button
 								key={item}
 								component={Link}
 								href={
-									item === 'Followers'
-										? '/mypage/followers'
-										: item === 'Following'
-											? '/mypage/following'
-											: item === 'Overview'
-												? '/mypage'
-												: item === 'Edit Profile'
-													? '/mypage/edit-profile'
-													: item === 'My Articles'
-														? '/mypage/articles'
-														: item === 'My Travel Mates'
-															? '/mypage/travel-mates'
-															: item === 'Join Requests'
-																? '/mypage/join-requests'
-																: item === 'Saved'
-																	? '/mypage/saved'
-																	: '/mypage/my-bookings'
+									item === 'Settings'
+										? '/mypage/settings'
+										: item === 'Followers'
+											? '/mypage/followers'
+											: item === 'Following'
+												? '/mypage/following'
+												: item === 'Overview'
+													? '/mypage'
+													: item === 'Edit Profile'
+														? '/mypage/edit-profile'
+														: item === 'My Articles'
+															? '/mypage/articles'
+															: item === 'My Travel Mates'
+																? '/mypage/travel-mates'
+																: item === 'Join Requests'
+																	? '/mypage/join-requests'
+																	: item === 'Saved'
+																		? '/mypage/saved'
+																		: '/mypage/my-bookings'
 								}
 								className={item === active ? 'is-active' : undefined}
 								aria-current={item === active ? 'page' : undefined}

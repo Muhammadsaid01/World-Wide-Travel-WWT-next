@@ -195,3 +195,16 @@ export const UNSUBSCRIBE_MEMBER: TypedDocumentNode<{ unsubscribe: { _id: string 
 		}
 	}
 `;
+
+export const DELETE_MEMBER: TypedDocumentNode<
+	{ deleteMember: Pick<import('@/libs/types/member/member').Member, '_id' | 'memberStatus' | 'memberDeletedAt'> },
+	Record<string, never>
+> = gql`
+	mutation DeleteMember {
+		deleteMember {
+			_id
+			memberStatus
+			memberDeletedAt
+		}
+	}
+`;
