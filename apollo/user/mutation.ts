@@ -257,3 +257,31 @@ export const CREATE_PACKAGE_SCHEDULE: TypedDocumentNode<
 		}
 	}
 `;
+
+export const CREATE_PACKAGE_INCLUDE: TypedDocumentNode<
+ { createPackageInclude: { _id: string } },
+ { input: import('@/libs/types/package/package-include.input').PackageIncludeInput }
+> = gql`mutation CreatePackageInclude($input: PackageIncludeInput!) {
+ createPackageInclude(input: $input) { _id }
+}`;
+
+export const CREATE_PACKAGE_EXCLUDE: TypedDocumentNode<
+ { createPackageExclude: { _id: string } },
+ { input: import('@/libs/types/package/package-exclude.input').PackageExcludeInput }
+> = gql`mutation CreatePackageExclude($input: PackageExcludeInput!) {
+ createPackageExclude(input: $input) { _id }
+}`;
+
+export const CREATE_PACKAGE_TAG: TypedDocumentNode<
+ { createPackageTag: { _id: string } },
+ { input: import('@/libs/types/package/package-tag.input').PackageTagInput }
+> = gql`mutation CreatePackageTag($input: PackageTagInput!) {
+ createPackageTag(input: $input) { _id }
+}`;
+
+export const CREATE_PACKAGE_POLICY: TypedDocumentNode<
+ { createPackagePolicy: { _id: string } },
+ { input: import('@/libs/types/package/package-policy.input').PackagePolicyInput }
+> = gql`mutation CreatePackagePolicy($input: PackagePolicyInput!) {
+ createPackagePolicy(input: $input) { _id }
+}`;

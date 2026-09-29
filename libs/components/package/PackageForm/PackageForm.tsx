@@ -1,3 +1,10 @@
+import {
+	initialTripDetails,
+	validateTripDetails,
+	TripDetailsErrors,
+	newTripDetailsProgress,
+	publishTripDetails,
+} from './tripDetailsState';
 import { useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
@@ -7,6 +14,10 @@ import ArrowBack from '@mui/icons-material/ArrowBack';
 import { currentUserVar } from '@/apollo/store';
 import {
 	CREATE_TRAVEL_PACKAGE,
+	CREATE_PACKAGE_INCLUDE,
+	CREATE_PACKAGE_EXCLUDE,
+	CREATE_PACKAGE_TAG,
+	CREATE_PACKAGE_POLICY,
 	CREATE_PACKAGE_ITINERARY,
 	CREATE_PACKAGE_SCHEDULE,
 	UPLOAD_PACKAGE_IMAGE,
@@ -36,6 +47,9 @@ import { publishPackage, PublishProgress } from './publishPackage';
 
 export default function PackageForm({ memberId }: { memberId: string }) {
 	const router = useRouter();
+	const [details, setDetails] = useState(initialTripDetails);
+	const [detailErrors, setDetailErrors] = useState<TripDetailsErrors>({});
+	const detailsProgress = useRef(newTripDetailsProgress());
 	const [values, setValues] = useState(initialValues);
 	const [images, setImages] = useState<string[]>([]);
 	const [itineraries, setItineraries] = useState<ItineraryValues[]>([]);
@@ -57,6 +71,10 @@ export default function PackageForm({ memberId }: { memberId: string }) {
 	const [create] = useMutation(CREATE_TRAVEL_PACKAGE, { fetchPolicy: 'no-cache' });
 	const [createItinerary] = useMutation(CREATE_PACKAGE_ITINERARY, { fetchPolicy: 'no-cache' });
 	const [createSchedule] = useMutation(CREATE_PACKAGE_SCHEDULE, { fetchPolicy: 'no-cache' });
+	const [createInclude] = useMutation(CREATE_PACKAGE_INCLUDE, { fetchPolicy: 'no-cache' });
+	const [createExclude] = useMutation(CREATE_PACKAGE_EXCLUDE, { fetchPolicy: 'no-cache' });
+	const [createTag] = useMutation(CREATE_PACKAGE_TAG, { fetchPolicy: 'no-cache' });
+	const [createPolicy] = useMutation(CREATE_PACKAGE_POLICY, { fetchPolicy: 'no-cache' });
 	const [upload] = useMutation(UPLOAD_PACKAGE_IMAGE, { fetchPolicy: 'no-cache' });
 	function authorized() {
 		const user = currentUserVar();
@@ -108,6 +126,8 @@ export default function PackageForm({ memberId }: { memberId: string }) {
 	}
 	function validate(step?: number) {
 		const packageErrors = validatePackage(values, images);
+		const tripErrors = validateTripDetails(details);
+		if (step === undefined || step === 2) setDetailErrors(tripErrors);
 		const days = validateItineraries(itineraries);
 		const dates = validateSchedules(schedules);
 		setErrors((previous) =>
@@ -124,6 +144,7 @@ export default function PackageForm({ memberId }: { memberId: string }) {
 			(index) =>
 				(step === undefined || index === step) &&
 				(stepFields[index].some((key) => packageErrors[key]) ||
+					(index === 2 && Object.keys(tripErrors).length > 0) ||
 					(index === 3 && days.some(Boolean)) ||
 					(index === 4 && dates.some(Boolean))),
 		);
@@ -160,6 +181,28 @@ export default function PackageForm({ memberId }: { memberId: string }) {
 					return result.data?.createPackageSchedule._id || '';
 				},
 			});
+			await publishTripDetails(progress.current.packageId, details, detailsProgress.current, {
+				createInclude: async (input) => {
+					checkAccess();
+					const result = await createInclude({ variables: { input } });
+					return result.data?.createPackageInclude._id || '';
+				},
+				createExclude: async (input) => {
+					checkAccess();
+					const result = await createExclude({ variables: { input } });
+					return result.data?.createPackageExclude._id || '';
+				},
+				createTag: async (input) => {
+					checkAccess();
+					const result = await createTag({ variables: { input } });
+					return result.data?.createPackageTag._id || '';
+				},
+				createPolicy: async (input) => {
+					checkAccess();
+					const result = await createPolicy({ variables: { input } });
+					return result.data?.createPackagePolicy._id || '';
+				},
+			});
 			setComplete(true);
 			try {
 				await router.push('/mypage/packages?created=1');
@@ -173,7 +216,7 @@ export default function PackageForm({ memberId }: { memberId: string }) {
 			setUncertain(unknownResult);
 			const saved = progress.current;
 			setFailure(
-				`${saved.packageId ? `Package ${saved.packageId} was created and is active. Confirmed: ${saved.itineraries}/${itineraries.length} itinerary days and ${saved.schedules}/${schedules.length} schedules. Publishing is incomplete. ` : 'Publishing did not complete. '}${message}${unknownResult ? ' The last save could not be confirmed. Check My Packages before trying again to avoid duplicates.' : saved.packageId ? ' Retry to save the remaining entries.' : ''}`,
+				`${saved.packageId ? `Package ${saved.packageId} was created and is active. Confirmed: ${saved.itineraries}/${itineraries.length} itinerary days and ${saved.schedules}/${schedules.length} schedules; ${detailsProgress.current.includes} includes, ${detailsProgress.current.excludes} excludes, ${detailsProgress.current.tags} tags, and ${detailsProgress.current.policy ? 1 : 0} policy. Publishing is incomplete. ` : 'Publishing did not complete. '}${message}${unknownResult ? ' The last save could not be confirmed. Check My Packages before trying again to avoid duplicates.' : saved.packageId ? ' Retry to save the remaining entries.' : ''}`,
 			);
 		} finally {
 			setCreated(Boolean(progress.current.packageId));
@@ -206,7 +249,7 @@ export default function PackageForm({ memberId }: { memberId: string }) {
 				<PackageStepper activeStep={activeStep} />
 				<Paper
 					component="form"
-					className="package-form-card"
+					className={`package-form-card ${activeStep === 5 ? 'package-form-pricing' : activeStep === 6 ? 'package-form-review-card' : ''}`}
 					noValidate
 					onSubmit={(event) => {
 						event.preventDefault();
@@ -216,10 +259,23 @@ export default function PackageForm({ memberId }: { memberId: string }) {
 					}}
 				>
 					<header className="package-form-step-heading">
-						<Typography variant="overline">Step {activeStep + 1} of 7</Typography>
-						<Typography component="h2" tabIndex={-1} ref={headingRef}>
-							{stepLabels[activeStep] === 'Basic Info' ? 'Basic Information' : stepLabels[activeStep]}
+						<Typography variant="overline">
+							Step {activeStep + 1} of 7{activeStep === 5 ? ': Pricing' : ''}
 						</Typography>
+						<Typography component="h2" tabIndex={-1} ref={headingRef}>
+							{activeStep === 5
+								? 'Set the base price travelers will pay per person for this package.'
+								: activeStep === 6
+									? 'Review & Publish'
+									: activeStep === 0
+										? 'Basic Information'
+										: stepLabels[activeStep]}
+						</Typography>
+						{activeStep === 6 && (
+							<Typography color="text.secondary">
+								Review your package information before publishing it on WWT.
+							</Typography>
+						)}
 					</header>
 					{activeStep === 0 && (
 						<BasicInfoStep
@@ -231,16 +287,24 @@ export default function PackageForm({ memberId }: { memberId: string }) {
 						/>
 					)}
 					{activeStep === 1 && <DestinationStep {...fields} />}
-					{activeStep === 2 && <TripDetailsStep {...fields} />}
+					{activeStep === 2 && (
+						<TripDetailsStep {...fields} details={details} detailErrors={detailErrors} onDetailsChange={setDetails} />
+					)}
 					{activeStep === 3 && (
 						<ItineraryStep items={itineraries} errors={itineraryErrors} disabled={disabled} onChange={setItineraries} />
 					)}
 					{activeStep === 4 && (
 						<ScheduleStep items={schedules} errors={scheduleErrors} disabled={disabled} onChange={setSchedules} />
 					)}
-					{activeStep === 5 && <PricingStep {...fields} />}
+					{activeStep === 5 && <PricingStep {...fields} scheduleCount={schedules.length} />}
 					{activeStep === 6 && (
-						<ReviewStep values={values} images={images} itineraries={itineraries} schedules={schedules} />
+						<ReviewStep
+							details={details}
+							values={values}
+							images={images}
+							itineraries={itineraries}
+							schedules={schedules}
+						/>
 					)}
 					{failure && (
 						<Alert severity={complete ? 'warning' : 'error'}>
@@ -267,7 +331,15 @@ export default function PackageForm({ memberId }: { memberId: string }) {
 							Previous
 						</Button>
 						<Button type="submit" variant="contained" disabled={busy || uploading || uncertain || complete}>
-							{busy ? 'Publishing…' : activeStep < 6 ? 'Next' : created ? 'Retry Remaining Entries' : 'Publish Package'}
+							{busy
+								? 'Publishing…'
+								: activeStep < 6
+									? activeStep === 5
+										? 'Next Step'
+										: 'Next'
+									: created
+										? 'Retry Remaining Entries'
+										: 'Publish Package'}
 						</Button>
 					</footer>
 				</Paper>

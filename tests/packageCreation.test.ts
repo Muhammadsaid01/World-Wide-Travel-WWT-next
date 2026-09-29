@@ -157,3 +157,127 @@ test('failed schedule is not counted as saved', async () => {
 	);
 	assert.deepEqual(progress, { packageId: 'real-id', itineraries: 0, schedules: 0 });
 });
+
+import {
+	cleanList,
+	initialTripDetails,
+	validateTripDetails,
+	publishTripDetails,
+	newTripDetailsProgress,
+	type TripDetailsValues,
+} from '../libs/components/package/PackageForm/tripDetailsState';
+
+const trip: TripDetailsValues = {
+	...initialTripDetails,
+	packageIncludes: [' Hotel ', '  ', 'Guide'],
+	packageExcludes: ['Flights'],
+	packageTags: ['Nature', ' nature ', 'Hiking'],
+	cancelPolicy: 'Cancel at least seven days before departure.',
+	refundPolicy: 'Eligible refunds are processed within ten days.',
+};
+test('trip lists trim and omit empty rows; tags deduplicate without case sensitivity', () => {
+	assert.deepEqual(cleanList(['  Hotel  ', '  ', 'Guide']), ['Hotel', 'Guide']);
+	assert.deepEqual(cleanList(trip.packageTags, true), ['Nature', 'Hiking']);
+	assert.deepEqual(validateTripDetails(trip), {});
+	assert.deepEqual(validateTripDetails(initialTripDetails), {});
+});
+test('trip resource validation respects text limits and requires paired policies', () => {
+	const errors = validateTripDetails({
+		...initialTripDetails,
+		packageIncludes: ['x'],
+		packageExcludes: ['a'.repeat(201)],
+		packageTags: ['b'.repeat(51)],
+		cancelPolicy: 'A valid cancellation policy.',
+	});
+	assert.ok(errors.packageIncludes);
+	assert.ok(errors.packageExcludes);
+	assert.ok(errors.packageTags);
+	assert.ok(errors.refundPolicy);
+	assert.ok(validateTripDetails({ ...trip, cancelPolicy: 'x'.repeat(3001) }).cancelPolicy);
+});
+test('trip details use the existing child-resource contracts and real package ID', async () => {
+	const calls: unknown[] = [];
+	const progress = newTripDetailsProgress();
+	await publishTripDetails('real-id', trip, progress, {
+		createInclude: async (input) => {
+			calls.push(input);
+			return 'include-id';
+		},
+		createExclude: async (input) => {
+			calls.push(input);
+			return 'exclude-id';
+		},
+		createTag: async (input) => {
+			calls.push(input);
+			return 'tag-id';
+		},
+		createPolicy: async (input) => {
+			calls.push(input);
+			return 'policy-id';
+		},
+	});
+	assert.deepEqual(calls, [
+		{ packageId: 'real-id', content: 'Hotel' },
+		{ packageId: 'real-id', content: 'Guide' },
+		{ packageId: 'real-id', title: 'Flights' },
+		{ packageId: 'real-id', tagName: 'Nature' },
+		{ packageId: 'real-id', tagName: 'Hiking' },
+		{ packageId: 'real-id', cancelPolicy: trip.cancelPolicy, refundPolicy: trip.refundPolicy },
+	]);
+	assert.deepEqual(progress, { includes: 2, excludes: 1, tags: 2, policy: true });
+});
+test('trip details resume after partial failure without recreating confirmed includes or tags', async () => {
+	const progress = newTripDetailsProgress();
+	let includes = 0;
+	let tags = 0;
+	let fail = true;
+	const operations = {
+		createInclude: async () => {
+			includes++;
+			return 'id';
+		},
+		createExclude: async () => 'id',
+		createTag: async () => {
+			tags++;
+			return 'id';
+		},
+		createPolicy: async () => {
+			if (fail) throw new Error('Policy rejected');
+			return 'id';
+		},
+	};
+	await assert.rejects(publishTripDetails('real-id', trip, progress, operations), /Policy rejected/);
+	assert.equal(progress.policy, false);
+	fail = false;
+	await publishTripDetails('real-id', trip, progress, operations);
+	assert.equal(includes, 2);
+	assert.equal(tags, 2);
+	assert.equal(progress.policy, true);
+});
+test('empty trip sections produce no writes and missing package ID is rejected', async () => {
+	let writes = 0;
+	const save = async () => {
+		writes++;
+		return 'id';
+	};
+	const operations = { createInclude: save, createExclude: save, createTag: save, createPolicy: save };
+	await publishTripDetails('real-id', initialTripDetails, newTripDetailsProgress(), operations);
+	assert.equal(writes, 0);
+	await assert.rejects(publishTripDetails('', trip, newTripDetailsProgress(), operations), /confirmed package ID/);
+	assert.equal(writes, 0);
+});
+
+import { formatPrice, nonnegativePrice, groupLabel } from '../libs/components/package/PackageForm/preview';
+test('pricing rejects negatives and non-finite input while preserving free and decimal prices', () => {
+	assert.equal(nonnegativePrice('-1'), '');
+	assert.equal(nonnegativePrice('-0.01'), '');
+	assert.equal(nonnegativePrice('Infinity'), '');
+	assert.equal(nonnegativePrice('0'), '0');
+	assert.equal(nonnegativePrice('12.50'), '12.50');
+	assert.equal(nonnegativePrice(''), '');
+	assert.equal(formatPrice('-1', 'USD'), 'Price not set');
+	assert.equal(formatPrice('', 'USD'), 'Price not set');
+	assert.equal(formatPrice('799', 'USD'), '$799.00');
+	assert.equal(formatPrice('799', ''), '799');
+	assert.equal(groupLabel({ ...initialValues, maxPeople: '12' }), 'Up to 12 Travelers');
+});
