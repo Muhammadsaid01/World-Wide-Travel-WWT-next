@@ -1,85 +1,81 @@
 import type { ReactNode } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
+import { useReactiveVar } from '@apollo/client';
 import { Button, Typography } from '@mui/material';
-const groups = [
-	{
-		title: 'My Profile',
-		items: ['Overview', 'My Bookings', 'My Articles', 'My Travel Mates', 'Join Requests', 'Saved'],
-	},
+import { currentUserVar } from '@/apollo/store';
+import { MemberType } from '@/libs/enums/member.enum';
+
+const routes = {
+	Overview: '/mypage',
+	'My Packages': '/mypage/packages',
+	'My Bookings': '/mypage/my-bookings',
+	'My Articles': '/mypage/articles',
+	'My Travel Mates': '/mypage/travel-mates',
+	'Join Requests': '/mypage/join-requests',
+	Saved: '/mypage/saved',
+	Followers: '/mypage/followers',
+	Following: '/mypage/following',
+	'Edit Profile': '/mypage/edit-profile',
+	Settings: '/mypage/settings',
+} as const;
+type SidebarItem = keyof typeof routes | 'Bookings';
+type SidebarGroup = { title: string; items: SidebarItem[] };
+const sharedGroups: SidebarGroup[] = [
+	{ title: 'Community', items: ['My Articles', 'My Travel Mates', 'Join Requests', 'Saved'] },
 	{ title: 'Connections', items: ['Followers', 'Following'] },
 	{ title: 'Account', items: ['Edit Profile', 'Settings'] },
 ];
 
-export default function ProfileSidebar({
-	active = 'My Bookings',
-	profileCard,
-}: {
-	active?:
-		| 'Overview'
-		| 'My Bookings'
-		| 'Edit Profile'
-		| 'My Articles'
-		| 'My Travel Mates'
-		| 'Join Requests'
-		| 'Saved'
-		| 'Followers'
-		| 'Following'
-		| 'Settings';
-	profileCard?: ReactNode;
-}) {
+export default function ProfileSidebar({ active, profileCard }: { active?: SidebarItem; profileCard?: ReactNode }) {
+	const user = useReactiveVar(currentUserVar);
+	const router = useRouter();
+	const isAgent = user?.memberType === MemberType.AGENT;
+	const groups: SidebarGroup[] = [
+		{ title: isAgent ? 'Agent Profile' : 'My Profile', items: ['Overview', 'My Bookings'] },
+		...(isAgent ? [{ title: 'Business', items: ['My Packages', 'Bookings'] } satisfies SidebarGroup] : []),
+		...sharedGroups,
+	];
+	// Match nested routes too, so booking detail pages retain their sidebar highlight.
+	const routeActive = (Object.keys(routes) as (keyof typeof routes)[]).find(
+		(item) =>
+			router.pathname === routes[item] ||
+			(routes[item] !== '/mypage' && router.pathname.startsWith(`${routes[item]}/`)),
+	);
+	const selected = routeActive ?? active;
 	return (
 		<aside className="my-bookings-sidebar" aria-label="Profile navigation">
 			{profileCard}
 			{groups.map((group) => (
 				<section key={group.title}>
 					<Typography component="h2">{group.title}</Typography>
-					{group.items.map((item) =>
-						item === 'My Bookings' ||
-						item === 'Overview' ||
-						item === 'Edit Profile' ||
-						item === 'My Articles' ||
-						item === 'My Travel Mates' ||
-						item === 'Join Requests' ||
-						item === 'Followers' ||
-						item === 'Following' ||
-						item === 'Settings' ||
-						item === 'Saved' ? (
+					{group.items.map((item) => {
+						if (!(item in routes))
+							return (
+								<Button
+									key={item}
+									disabled
+									title="This business page is not available yet."
+									aria-label={`${item} — not available yet`}
+								>
+									{item}
+								</Button>
+							);
+						const href = routes[item as keyof typeof routes];
+						const isActive = item === selected;
+						return (
 							<Button
 								key={item}
 								component={Link}
-								href={
-									item === 'Settings'
-										? '/mypage/settings'
-										: item === 'Followers'
-											? '/mypage/followers'
-											: item === 'Following'
-												? '/mypage/following'
-												: item === 'Overview'
-													? '/mypage'
-													: item === 'Edit Profile'
-														? '/mypage/edit-profile'
-														: item === 'My Articles'
-															? '/mypage/articles'
-															: item === 'My Travel Mates'
-																? '/mypage/travel-mates'
-																: item === 'Join Requests'
-																	? '/mypage/join-requests'
-																	: item === 'Saved'
-																		? '/mypage/saved'
-																		: '/mypage/my-bookings'
-								}
-								className={item === active ? 'is-active' : undefined}
-								aria-current={item === active ? 'page' : undefined}
+								href={href}
+								className={isActive ? 'is-active' : undefined}
+								aria-current={isActive ? 'page' : undefined}
 							>
 								{item}
-								{item === active && <span className="my-bookings-active-dot" aria-hidden="true" />}
+								{isActive && <span className="my-bookings-active-dot" aria-hidden="true" />}
 							</Button>
-						) : (
-							<Button key={item} disabled>
-								{item}
-							</Button>
-						),
-					)}
+						);
+					})}
 				</section>
 			))}
 		</aside>

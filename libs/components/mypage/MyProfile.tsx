@@ -17,6 +17,7 @@ import { useEffect, useState } from 'react';
 import PackageImage, { packageImageUrl } from '../package/PackageImage';
 import { formatScheduleDate } from '../package/PackageSchedules';
 import ProfileSidebar from './ProfileSidebar';
+import AgentOverview from './AgentOverview';
 
 function UpcomingTrip() {
 	const client = useApolloClient();
@@ -209,6 +210,7 @@ function Activity({ articles }: { articles: ReturnType<typeof useProfileArticles
 }
 export default function MyProfile() {
 	const user = useReactiveVar(currentUserVar);
+	if (user?.memberType === MemberType.AGENT) return <AgentOverview key={user._id} memberId={user._id} />;
 	return <ProfileContent key={user?._id ?? 'guest'} authenticated={Boolean(user)} />;
 }
 function ProfileContent({ authenticated }: { authenticated: boolean }) {

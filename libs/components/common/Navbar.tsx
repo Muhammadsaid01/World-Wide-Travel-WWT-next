@@ -17,7 +17,7 @@ import { useRef, useState } from 'react';
 const navigation = [
 	{ label: 'Home', href: '/' },
 	{ label: 'Packages', href: '/package' },
-	{ label: 'Agents', href: null },
+	{ label: 'Agents', href: '/agent' },
 	{ label: 'Community', href: '/community' },
 	{ label: 'My Profile', href: '/mypage' },
 	{ label: 'CS Center', href: null },

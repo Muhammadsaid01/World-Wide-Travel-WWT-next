@@ -1,0 +1,251 @@
+.my-bookings-page.agent-dashboard-page.my-packages-page {
+	.my-bookings-layout {
+		grid-template-columns: 290px minmax(0, 1fr);
+		gap: 32px;
+	}
+	.my-packages-main {
+		min-width: 0;
+		display: grid;
+		gap: 24px;
+		header h1 {
+			font-size: 32px;
+			font-weight: 700;
+			margin-bottom: 10px;
+		}
+		header p {
+			font-size: 14px;
+		}
+	}
+	.my-packages-toolbar {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		justify-content: space-between;
+		gap: 20px;
+		padding: 20px;
+		border: 1px solid var(--wwt-divider);
+		border-radius: 12px;
+		box-shadow: 0 2px 12px rgba(0, 30, 64, 0.03);
+		> .MuiTextField-root {
+			min-width: 190px;
+		}
+	}
+	.my-packages-filters {
+		display: flex;
+		gap: 8px;
+		flex-wrap: wrap;
+	}
+	.my-packages-total {
+		font-size: 12px;
+		color: var(--wwt-muted);
+		margin-bottom: 12px;
+	}
+	.my-packages-list {
+		display: grid;
+		gap: 18px;
+	}
+	.my-package-card {
+		display: flex;
+		overflow: hidden;
+		border: 1px solid var(--wwt-divider);
+		border-radius: 12px;
+		box-shadow: 0 3px 14px rgba(0, 30, 64, 0.04);
+	}
+	.my-package-image {
+		position: relative;
+		width: 220px;
+		min-height: 210px;
+		flex-shrink: 0;
+		background: #e8eef2;
+		img {
+			object-fit: cover;
+		}
+		.detail-image-fallback {
+			height: 100%;
+			min-height: 210px;
+			display: grid;
+			place-items: center;
+			color: var(--wwt-muted);
+			font-size: 12px;
+		}
+	}
+	.my-package-status {
+		position: absolute;
+		left: 14px;
+		top: 14px;
+		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+	}
+	.my-package-content {
+		padding: 24px;
+		flex: 1;
+		min-width: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 10px;
+		h2 {
+			font-size: 19px;
+			font-weight: 700;
+			line-height: 1.4;
+			overflow-wrap: anywhere;
+		}
+		> p {
+			font-size: 13px;
+		}
+	}
+	.my-package-details {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: space-between;
+		gap: 12px;
+		font-size: 13px;
+		margin-block: 4px 10px;
+		span {
+			color: var(--wwt-muted);
+		}
+		strong {
+			font-size: 17px;
+		}
+	}
+	.my-package-metrics {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 12px 20px;
+		padding-top: 14px;
+		margin-top: auto;
+		border-top: 1px solid var(--wwt-divider);
+		font-size: 12px;
+		color: var(--wwt-muted);
+		span {
+			display: flex;
+			align-items: center;
+			gap: 4px;
+		}
+		svg {
+			color: #e89b32;
+		}
+	}
+	.my-packages-empty {
+		padding: 48px 24px;
+		text-align: center;
+		border-radius: 12px;
+		border: 1px solid var(--wwt-divider);
+	}
+	.my-packages-pagination {
+		display: flex;
+		justify-content: center;
+	}
+	@media (max-width: 1100px) {
+		.my-package-image {
+			width: 180px;
+		}
+		.my-package-content {
+			padding: 20px;
+		}
+	}
+	@media (max-width: 1023px) {
+		.my-bookings-layout {
+			grid-template-columns: minmax(0, 1fr);
+		}
+	}
+	@media (max-width: 600px) {
+		.my-package-card {
+			flex-direction: column;
+		}
+		.my-package-image {
+			width: 100%;
+			height: 200px;
+			min-height: 200px;
+		}
+		.my-packages-toolbar {
+			align-items: stretch;
+			flex-direction: column;
+		}
+	}
+}
+
+.my-bookings-page.my-packages-page {
+	.my-packages-heading {
+		display: flex;
+		align-items: flex-start;
+		justify-content: space-between;
+		gap: 20px;
+	}
+	.my-packages-create {
+		flex-shrink: 0;
+		border-radius: 24px;
+		min-height: 42px;
+		padding-inline: 20px;
+		text-transform: none;
+		font-size: 13px;
+		background: var(--wwt-primary);
+		color: white;
+		box-shadow: none;
+	}
+	@media (max-width: 700px) {
+		.my-packages-heading {
+			flex-direction: column;
+		}
+	}
+}
+.my-bookings-page.create-package-page {
+	.create-package-form {
+		display: grid;
+		gap: 24px;
+		> section {
+			padding: 28px;
+			border: 1px solid var(--wwt-divider);
+			border-radius: 12px;
+			box-shadow: 0 3px 14px rgba(0, 30, 64, 0.04);
+		}
+	}
+	.create-package-fields {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 24px;
+		.full-width {
+			grid-column: 1 / -1;
+		}
+	}
+	.create-package-form section > .MuiButton-root {
+		margin-block: 20px;
+		border-radius: 24px;
+		text-transform: none;
+	}
+	.create-package-images {
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: 16px;
+	}
+	.create-package-image {
+		position: relative;
+		height: 140px;
+		border-radius: 10px;
+		overflow: hidden;
+		background: #e8eef2;
+		img {
+			object-fit: cover;
+		}
+	}
+	.create-package-actions {
+		display: flex;
+		justify-content: flex-end;
+		gap: 12px;
+		.MuiButton-root {
+			border-radius: 24px;
+			min-height: 44px;
+			padding-inline: 24px;
+			text-transform: none;
+		}
+	}
+	@media (max-width: 600px) {
+		.create-package-fields {
+			grid-template-columns: minmax(0, 1fr);
+		}
+		.create-package-images {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+		.create-package-form > section {
+			padding: 20px;
+		}
+	}
+}

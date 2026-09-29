@@ -408,7 +408,7 @@ export type ProfileMember = Pick<
 	| 'memberCountry'
 	| 'memberFollowerCount'
 	| 'memberFollowingCount'
->;
+> & { agentData?: Pick<import('@/libs/types/agent/agent').AgentProfileData, '_id'> | null };
 export const GET_MY_PROFILE: TypedDocumentNode<{ getMyProfile: ProfileMember }, Record<string, never>> = gql`
 	query GetMyProfile {
 		getMyProfile {
@@ -427,6 +427,7 @@ export const GET_MY_PROFILE: TypedDocumentNode<{ getMyProfile: ProfileMember }, 
 			memberCountry
 			memberFollowerCount
 			memberFollowingCount
+			agentData { _id }
 		}
 	}
 `;
@@ -836,6 +837,286 @@ export const GET_CONNECTION_COUNTS: TypedDocumentNode<
 			}
 		}
 		getMemberFollowings(input: $following) {
+			metaCounter {
+				total
+			}
+		}
+	}
+`;
+
+export type AgentListItem = Pick<
+	Agent,
+	| '_id'
+	| 'companyName'
+	| 'officeAddress'
+	| 'agentDesc'
+	| 'verificationStatus'
+	| 'agentRating'
+	| 'agentReviewCount'
+	| 'agentPackageCount'
+> & {
+	memberData?: Pick<
+		Member,
+		'_id' | 'memberNick' | 'memberFullName' | 'memberImage' | 'memberCountry' | 'memberCity' | 'memberLanguage'
+	> | null;
+};
+export type AgentListInput = Omit<import('@/libs/types/agent/agent.input').AgentsInquiry, 'direction'> & {
+	direction?: keyof typeof Direction;
+};
+export const GET_AGENTS: TypedDocumentNode<
+	{ getAgents: { list: AgentListItem[]; metaCounter?: { total?: number | null }[] | null } },
+	{ input: AgentListInput }
+> = gql`
+	query GetAgents($input: AgentsInquiry!) {
+		getAgents(input: $input) {
+			list {
+				_id
+				companyName
+				officeAddress
+				agentDesc
+				verificationStatus
+				agentRating
+				agentReviewCount
+				agentPackageCount
+				memberData {
+					_id
+					memberNick
+					memberFullName
+					memberImage
+					memberCountry
+					memberCity
+					memberLanguage
+				}
+			}
+			metaCounter {
+				total
+			}
+		}
+	}
+`;
+
+export type AgentDetailData = Pick<
+	Agent,
+	| '_id'
+	| 'memberId'
+	| 'companyName'
+	| 'licenseNumber'
+	| 'officeAddress'
+	| 'companyPhone'
+	| 'companyEmail'
+	| 'agentDesc'
+	| 'agentStatus'
+	| 'verificationStatus'
+	| 'agentRating'
+	| 'agentReviewCount'
+	| 'agentFollowerCount'
+	| 'agentPackageCount'
+	| 'agentBookingCount'
+	| 'agentRank'
+	| 'agentApprovedAt'
+> & {
+	memberData?: Pick<
+		Member,
+		| '_id'
+		| 'memberNick'
+		| 'memberFullName'
+		| 'memberImage'
+		| 'memberCountry'
+		| 'memberCity'
+		| 'memberLanguage'
+		| 'memberDesc'
+		| 'memberFollowerCount'
+		| 'memberFollowingCount'
+		| 'memberViewCount'
+	> | null;
+};
+export const GET_AGENT: TypedDocumentNode<{ getAgent: AgentDetailData | null }, { agentId: string }> = gql`
+	query GetAgent($agentId: String!) {
+		getAgent(agentId: $agentId) {
+			_id
+			memberId
+			companyName
+			licenseNumber
+			officeAddress
+			companyPhone
+			companyEmail
+			agentDesc
+			agentStatus
+			verificationStatus
+			agentRating
+			agentReviewCount
+			agentFollowerCount
+			agentPackageCount
+			agentBookingCount
+			agentRank
+			agentApprovedAt
+			memberData {
+				_id
+				memberNick
+				memberFullName
+				memberImage
+				memberCountry
+				memberCity
+				memberLanguage
+				memberDesc
+				memberFollowerCount
+				memberFollowingCount
+				memberViewCount
+			}
+		}
+	}
+`;
+export const GET_MEMBER_FOLLOW_STATE: TypedDocumentNode<
+	{
+		getMember: Pick<Member, '_id' | 'memberFollowerCount' | 'memberFollowingCount'> & {
+			meFollowed?: Pick<import('@/libs/types/community/follow').MeFollowed, 'myFollowing'>[] | null;
+		};
+	},
+	{ memberId: string }
+> = gql`
+	query GetMemberFollowState($memberId: String!) {
+		getMember(memberId: $memberId) {
+			_id
+			memberFollowerCount
+			memberFollowingCount
+			meFollowed {
+				myFollowing
+			}
+		}
+	}
+`;
+
+export const GET_PUBLIC_MEMBER_ARTICLES: TypedDocumentNode<
+	{
+		getBoardArticles: {
+			list: Pick<
+				import('@/libs/types/article/board-article').BoardArticle,
+				'_id' | 'articleTitle' | 'articleViewCount' | 'articleLikeCount' | 'articleCommentCount'
+			>[];
+			metaCounter?: { total?: number | null }[] | null;
+		};
+	},
+	{
+		input: Omit<import('@/libs/types/article/board-article.input').BoardArticlesInquiry, 'direction'> & {
+			direction?: keyof typeof Direction;
+		};
+	}
+> = gql`
+	query GetPublicMemberArticles($input: BoardArticlesInquiry!) {
+		getBoardArticles(input: $input) {
+			list {
+				_id
+				articleTitle
+				articleViewCount
+				articleLikeCount
+				articleCommentCount
+			}
+			metaCounter {
+				total
+			}
+		}
+	}
+`;
+
+export type AgentPackagePreview = Pick<
+	TravelPackage,
+	| '_id'
+	| 'packageImages'
+	| 'packageTitle'
+	| 'packageStatus'
+	| 'packageBookingCount'
+	| 'packageViewCount'
+	| 'packageRating'
+>;
+export const GET_AGENT_DASHBOARD_PACKAGES: TypedDocumentNode<
+	{
+		getMyTravelPackages: { list: AgentPackagePreview[] };
+		active: { metaCounter?: { total?: number | null }[] | null };
+	},
+	Record<string, never>
+> = gql`
+	query GetAgentDashboardPackages {
+		getMyTravelPackages(input: { page: 1, limit: 3, sort: "createdAt", direction: DESC }) {
+			list {
+				_id
+				packageImages
+				packageTitle
+				packageStatus
+				packageBookingCount
+				packageViewCount
+				packageRating
+			}
+		}
+		active: getMyTravelPackages(input: { page: 1, limit: 1, search: { packageStatus: ACTIVE } }) {
+			metaCounter {
+				total
+			}
+		}
+	}
+`;
+export const GET_AGENT_RECENT_BOOKINGS: TypedDocumentNode<
+	{
+		getBookingsByAgent: {
+			list: (Pick<
+				Booking,
+				'_id' | 'contactName' | 'peopleCount' | 'createdAt' | 'bookingStatus' | 'finalPrice' | 'currency'
+			> & {
+				packageData?: Pick<TravelPackage, 'packageTitle'> | null;
+			})[];
+		};
+	},
+	Record<string, never>
+> = gql`
+	query GetAgentRecentBookings {
+		getBookingsByAgent(input: { page: 1, limit: 3, sort: "createdAt", direction: DESC }) {
+			list {
+				_id
+				contactName
+				peopleCount
+				createdAt
+				bookingStatus
+				finalPrice
+				currency
+				packageData {
+					packageTitle
+				}
+			}
+		}
+	}
+`;
+
+export type ManagedPackage = AgentPackagePreview &
+	Pick<
+		TravelPackage,
+		'destinationCity' | 'destinationCountry' | 'packageDays' | 'packageNights' | 'packagePrice' | 'currency'
+	>;
+export type MyPackagesInput = Omit<
+	import('@/libs/types/package/travel-package.input').AgentTravelPackagesInquiry,
+	'direction'
+> & { direction?: keyof typeof Direction };
+export const GET_MY_TRAVEL_PACKAGES: TypedDocumentNode<
+	{
+		getMyTravelPackages: { list: ManagedPackage[]; metaCounter?: { total?: number | null }[] | null };
+	},
+	{ input: MyPackagesInput }
+> = gql`
+	query GetMyTravelPackages($input: AgentTravelPackagesInquiry!) {
+		getMyTravelPackages(input: $input) {
+			list {
+				_id
+				packageTitle
+				packageImages
+				packageStatus
+				destinationCity
+				destinationCountry
+				packageDays
+				packageNights
+				packagePrice
+				currency
+				packageBookingCount
+				packageViewCount
+				packageRating
+			}
 			metaCounter {
 				total
 			}

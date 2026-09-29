@@ -48,6 +48,7 @@ export interface PricesRange {
 }
 
 interface TPISearch {
+	agentId?: string;
 	packageStatus?: PackageStatus;
 	packageCategory?: PackageCategory;
 

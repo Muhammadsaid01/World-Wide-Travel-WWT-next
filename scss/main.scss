@@ -28,3 +28,11 @@
 @use './pc/mypage/followConnections';
 
 @use './pc/mypage/settings';
+
+@use './pc/agent/agent';
+
+@use './pc/agent/agentDetail';
+
+@use './pc/mypage/agentOverview';
+
+@use './pc/mypage/myPackages';

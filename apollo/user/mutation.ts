@@ -208,3 +208,30 @@ export const DELETE_MEMBER: TypedDocumentNode<
 		}
 	}
 `;
+
+export const CREATE_CONVERSATION: TypedDocumentNode<
+	{ createConversation: { _id: string } },
+	{ input: { memberTwoId: string } }
+> = gql`
+	mutation CreateConversation($input: PrivateConversationInput!) {
+		createConversation(input: $input) {
+			_id
+		}
+	}
+`;
+
+export const CREATE_TRAVEL_PACKAGE: TypedDocumentNode<
+	{ createTravelPackage: { _id: string } },
+	{ input: import('@/libs/types/package/travel-package.input').TravelPackageInput }
+> = gql`
+	mutation CreateTravelPackage($input: TravelPackageInput!) {
+		createTravelPackage(input: $input) {
+			_id
+		}
+	}
+`;
+export const UPLOAD_PACKAGE_IMAGE: TypedDocumentNode<{ imageUploader: string }, { file: File }> = gql`
+	mutation UploadPackageImage($file: Upload!) {
+		imageUploader(file: $file, target: "package")
+	}
+`;
