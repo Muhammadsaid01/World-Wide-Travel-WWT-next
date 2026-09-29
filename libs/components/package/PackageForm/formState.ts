@@ -1,5 +1,10 @@
-import { PackageCategory, PackageLevel, PackageType, TransportType, ScheduleStatus } from '../../../enums/package.enum';
+import type { PackageDetailData } from '@/apollo/user/query';
+import { Itinerary } from '@/libs/types/package/itinerary';
+import { PackageSchedule } from '@/libs/types/package/package-schedule';
+import { PackageCategory, PackageLevel, PackageType, ScheduleStatus, TransportType } from '../../../enums/package.enum';
 import type { TravelPackageInput } from '../../../types/package/travel-package.input';
+
+
 export type FieldName = Exclude<keyof TravelPackageInput, 'packageImages'>;
 export type Values = Record<FieldName, string>;
 export const initialValues: Values = {
@@ -161,4 +166,50 @@ export function validateSchedules(items: ScheduleValues[]): string[] {
 		if (!validInt(item.availableSeats, 0)) return 'Enter a whole number of seats (0–2147483647).';
 		return '';
 	});
+}
+
+
+
+export function packageToValues(pkg: PackageDetailData): Values {
+        return {
+                packageTitle: pkg.packageTitle ?? '',
+                packageDesc: pkg.packageDesc ?? '',
+                packageShortDesc: pkg.packageShortDesc ?? '',
+                packageType: pkg.packageType ?? '',
+                packageCategory: pkg.packageCategory ?? '',
+                packageLevel: pkg.packageLevel ?? '',
+                destinationCountry: pkg.destinationCountry ?? '',
+                destinationCity: pkg.destinationCity ?? '',
+                packageDays: pkg.packageDays != null ? String(pkg.packageDays) : '',
+                packageNights: pkg.packageNights != null ? String(pkg.packageNights) : '',
+                meetingPoint: pkg.meetingPoint ?? '',
+                latitude: pkg.latitude != null ? String(pkg.latitude) : '',
+                longitude: pkg.longitude != null ? String(pkg.longitude) : '',
+                packagePrice: pkg.packagePrice != null ? String(pkg.packagePrice) : '',
+                currency: pkg.currency ?? '',
+                minPeople: pkg.minPeople != null ? String(pkg.minPeople) : '',
+                maxPeople: pkg.maxPeople != null ? String(pkg.maxPeople) : '',
+                transportType: pkg.transportType ?? '',
+        };
+}
+
+export function itinerariesToValues(
+        items: Pick<Itinerary, 'dayNumber' | 'title' | 'description'>[],
+): ItineraryValues[] {
+        return items.map((item) => ({
+                dayNumber: String(item.dayNumber),
+                title: item.title ?? '',
+                description: item.description ?? '',
+        }));
+}
+
+export function schedulesToValues(
+        items: Pick<PackageSchedule, 'startDate' | 'endDate' | 'availableSeats' | 'scheduleStatus'>[],
+): ScheduleValues[] {
+        return items.map((item) => ({
+                startDate: String(item.startDate),
+                endDate: String(item.endDate),
+                availableSeats: String(item.availableSeats),
+                scheduleStatus: item.scheduleStatus ?? '',
+        }));
 }

@@ -44,7 +44,7 @@ export default function MyBookingDetail({ id, ready }: { id: string; ready: bool
 	const [cancelBooking] = useMutation(CANCEL_BOOKING);
 
 	const user = useReactiveVar(currentUserVar);
-	const allowed = user?.memberType === MemberType.USER;
+	const allowed = user?.memberType === MemberType.USER || user?.memberType === MemberType.AGENT;
 	const validId = /^[a-f\d]{24}$/i.test(id);
 	const query = useQuery(GET_MY_BOOKING, {
 		variables: { bookingId: id },

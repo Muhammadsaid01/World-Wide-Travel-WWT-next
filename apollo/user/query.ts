@@ -46,10 +46,6 @@ export const GET_TRAVEL_PACKAGES: TypedDocumentNode<
 			metaCounter?: { total?: number | null }[] | null;
 		};
 	},
-
-	
-
-
 	{ input: PackageListInput }
 > = gql`
 	query GetTravelPackages($input: TravelPackagesInquiry!) {
@@ -93,7 +89,19 @@ export const GET_PACKAGE_SCHEDULES: TypedDocumentNode<
 
 type PublicMember = Pick<Member, 'memberNick' | 'memberImage'>;
 export type PackageDetailData = PackageListItem &
-	Pick<TravelPackage, 'packageDesc' | 'packageCategory' | 'minPeople' | 'maxPeople'> & {
+	Pick<TravelPackage,
+    | 'packageDesc'
+    | 'packageCategory'
+    | 'packageType'
+    | 'packageLevel'
+    | 'packageStatus'
+    | 'minPeople'
+    | 'maxPeople'
+    | 'meetingPoint'
+    | 'latitude'
+    | 'longitude'
+    | 'transportType'
+  > & {
 		packageShortDesc?: string | null;
 		agentData?:
 			| (Pick<
@@ -119,6 +127,9 @@ export const GET_TRAVEL_PACKAGE: TypedDocumentNode<{ getTravelPackage: PackageDe
 				packageDesc
 				packageShortDesc
 				packageCategory
+				packageType
+				packageLevel
+				packageStatus
 				destinationCountry
 				destinationCity
 				packageImages
@@ -127,6 +138,10 @@ export const GET_TRAVEL_PACKAGE: TypedDocumentNode<{ getTravelPackage: PackageDe
 				packagePrice
 				minPeople
 				maxPeople
+				meetingPoint
+				latitude
+				longitude
+				transportType
 				currency
 				packageRating
 				packageReviewCount

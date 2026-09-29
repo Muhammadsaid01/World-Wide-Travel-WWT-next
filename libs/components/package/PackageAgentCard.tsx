@@ -1,10 +1,11 @@
-import { useState } from 'react';
-import { Avatar, Box, Button, Paper, Snackbar, Stack, Tooltip, Typography } from '@mui/material';
-import Verified from '@mui/icons-material/Verified';
-import Star from '@mui/icons-material/Star';
-import LuggageOutlined from '@mui/icons-material/LuggageOutlined';
 import type { PackageDetailData } from '@/apollo/user/query';
 import { AgentVerificationStatus } from '@/libs/enums/member.enum';
+import LuggageOutlined from '@mui/icons-material/LuggageOutlined';
+import Star from '@mui/icons-material/Star';
+import Verified from '@mui/icons-material/Verified';
+import { Avatar, Box, Button, Paper, Snackbar, Stack, Tooltip, Typography } from '@mui/material';
+import { useRouter } from 'next/router';
+import { useState } from 'react';
 import { packageImageUrl } from './PackageImage';
 
 export default function PackageAgentCard({ agent }: { agent: NonNullable<PackageDetailData['agentData']> }) {
@@ -14,6 +15,7 @@ export default function PackageAgentCard({ agent }: { agent: NonNullable<Package
 		agent.memberData?.memberNick?.trim() ||
 		agent.companyName?.trim() ||
 		'Travel Agent';
+	const router = useRouter();
 
 	function handleAskQuestion(memberId: string) {
 		if (!memberId) return;
@@ -83,12 +85,9 @@ export default function PackageAgentCard({ agent }: { agent: NonNullable<Package
 							Ask a Question
 						</Button>
 						{/* No Agent Profile route exists. Future navigation must use agent._id. */}
-						<Button variant="outlined" disabled aria-describedby="agent-profile-unavailable">
+						<Button variant="outlined"  aria-describedby="agent-profile-unavailable" onClick={() => router.push(`/agent/${agent._id}`)}>
 							View Profile
 						</Button>
-						<Typography id="agent-profile-unavailable" variant="caption" color="text.secondary">
-							Agent profiles coming soon.
-						</Typography>
 					</Stack>
 				</Stack>
 			</Paper>

@@ -248,9 +248,7 @@ export const CREATE_PACKAGE_ITINERARY: TypedDocumentNode<
 `;
 
 export const CREATE_PACKAGE_SCHEDULE: TypedDocumentNode<
-	{ createPackageSchedule: { _id: string } },
-	{ input: import('@/libs/types/package/package-schedule.input').PackageScheduleInput }
-> = gql`
+{ createPackageSchedule: { _id: string } },{ input: import('@/libs/types/package/package-schedule.input').PackageScheduleInput }> = gql`
 	mutation CreatePackageSchedule($input: PackageScheduleInput!) {
 		createPackageSchedule(input: $input) {
 			_id
@@ -285,3 +283,20 @@ export const CREATE_PACKAGE_POLICY: TypedDocumentNode<
 > = gql`mutation CreatePackagePolicy($input: PackagePolicyInput!) {
  createPackagePolicy(input: $input) { _id }
 }`;
+
+
+export const UPDATE_PACKAGE_POLICY = gql`
+  mutation UpdatePackagePolicy(
+    $policyId: String!
+    $input: PackagePolicyUpdate!
+  ) {
+    updatePackagePolicy(
+      policyId: $policyId
+      input: $input
+    ) {
+      _id
+      cancelPolicy
+      refundPolicy
+    }
+  }
+`;

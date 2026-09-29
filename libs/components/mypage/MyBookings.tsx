@@ -1,4 +1,3 @@
-import ProfileSidebar from './ProfileSidebar';
 import { currentUserVar } from '@/apollo/store';
 import { GET_MY_BOOKINGS, type MyBookingsInput, type PaymentBooking } from '@/apollo/user/query';
 import PackageImage from '@/libs/components/package/PackageImage';
@@ -24,6 +23,7 @@ import {
 } from '@mui/material';
 import Link from 'next/link';
 import { useState } from 'react';
+import ProfileSidebar from './ProfileSidebar';
 
 const PAGE_SIZE = 6;
 function BookingCard({ booking }: { booking: PaymentBooking }) {
@@ -110,7 +110,10 @@ export default function MyBookings() {
 		<MyBookingsContent
 			key={user?._id ?? 'guest'}
 			authenticated={Boolean(user)}
-			allowed={user?.memberType === MemberType.USER}
+			allowed={
+								user?.memberType === MemberType.USER ||
+								user?.memberType === MemberType.AGENT
+							}
 		/>
 	);
 }

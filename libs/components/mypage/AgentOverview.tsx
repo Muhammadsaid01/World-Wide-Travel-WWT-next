@@ -1,4 +1,15 @@
-import Link from 'next/link';
+import {
+	GET_AGENT,
+	GET_AGENT_DASHBOARD_PACKAGES,
+	GET_AGENT_RECENT_BOOKINGS,
+	GET_MY_INCOMING_TRAVEL_MATE_JOIN_REQUESTS,
+	GET_MY_PROFILE,
+	GET_PROFILE_TRAVEL_MATES,
+	GET_PUBLIC_MEMBER_ARTICLES,
+	type AgentDetailData,
+	type ProfileMember,
+} from '@/apollo/user/query';
+import { TravelMateJoinStatus } from '@/libs/enums/community.enum';
 import { useQuery } from '@apollo/client';
 import {
 	Alert,
@@ -15,22 +26,12 @@ import {
 	TableRow,
 	Typography,
 } from '@mui/material';
-import {
-	GET_MY_PROFILE,
-	GET_AGENT,
-	GET_AGENT_DASHBOARD_PACKAGES,
-	GET_AGENT_RECENT_BOOKINGS,
-	GET_PUBLIC_MEMBER_ARTICLES,
-	GET_PROFILE_TRAVEL_MATES,
-	GET_MY_INCOMING_TRAVEL_MATE_JOIN_REQUESTS,
-	type ProfileMember,
-	type AgentDetailData,
-} from '@/apollo/user/query';
-import { TravelMateJoinStatus } from '@/libs/enums/community.enum';
-import ProfileSidebar from './ProfileSidebar';
-import AgentProfileCard from './AgentProfileCard';
+import Link from 'next/link';
+import { useRouter } from 'next/router';
 import PackageImage from '../package/PackageImage';
 import { formatScheduleDate } from '../package/PackageSchedules';
+import AgentProfileCard from './AgentProfileCard';
+import ProfileSidebar from './ProfileSidebar';
 
 function Failure({ children, retry }: { children: string; retry: () => void }) {
 	return (
@@ -152,6 +153,7 @@ function RecentBookings() {
 	);
 }
 function Business({ agent }: { agent: AgentDetailData }) {
+	const router = useRouter();
 	const packages = useQuery(GET_AGENT_DASHBOARD_PACKAGES, { fetchPolicy: 'no-cache' });
 	return (
 		<>
@@ -190,7 +192,13 @@ function Business({ agent }: { agent: AgentDetailData }) {
 				) : (
 					<div className="agent-dashboard-packages">
 						{packages.data.getMyTravelPackages.list.map((item) => (
-							<Paper component="article" className="agent-dashboard-package" key={item._id}>
+							<Paper component="article" className="agent-dashboard-package"
+							 key={item._id}
+							 onClick={() => {
+									void router.push(`/package/${item._id}`);
+								}}
+								role="link"
+								tabIndex={0}>
 								<div className="agent-dashboard-package-image">
 									<PackageImage path={item.packageImages[0]} alt={item.packageTitle} />
 								</div>

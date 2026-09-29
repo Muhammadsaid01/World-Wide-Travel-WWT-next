@@ -1,8 +1,10 @@
-import { useState } from 'react';
-import Link from 'next/link';
-import { useRouter } from 'next/router';
-import Add from '@mui/icons-material/Add';
+import { currentUserVar } from '@/apollo/store';
+import { GET_AGENT, GET_MY_PROFILE, GET_MY_TRAVEL_PACKAGES } from '@/apollo/user/query';
+import { MemberType } from '@/libs/enums/member.enum';
+import { PackageStatus } from '@/libs/enums/package.enum';
 import { useQuery, useReactiveVar } from '@apollo/client';
+import Add from '@mui/icons-material/Add';
+import Star from '@mui/icons-material/Star';
 import {
 	Alert,
 	Breadcrumbs,
@@ -15,14 +17,12 @@ import {
 	TextField,
 	Typography,
 } from '@mui/material';
-import Star from '@mui/icons-material/Star';
-import { currentUserVar } from '@/apollo/store';
-import { GET_MY_TRAVEL_PACKAGES, GET_MY_PROFILE, GET_AGENT } from '@/apollo/user/query';
-import { MemberType } from '@/libs/enums/member.enum';
-import { PackageStatus } from '@/libs/enums/package.enum';
-import ProfileSidebar from './ProfileSidebar';
-import AgentProfileCard from './AgentProfileCard';
+import Link from 'next/link';
+import { useRouter } from 'next/router';
+import { useState } from 'react';
 import PackageImage from '../package/PackageImage';
+import AgentProfileCard from './AgentProfileCard';
+import ProfileSidebar from './ProfileSidebar';
 
 const LIMIT = 6;
 const statuses = [PackageStatus.ACTIVE, PackageStatus.SOLD, PackageStatus.HIDDEN, PackageStatus.EXPIRED];
@@ -201,7 +201,16 @@ function AgentPackages({ memberId }: { memberId: string }) {
 							</Typography>
 							<div className="my-packages-list">
 								{result.list.map((item) => (
-									<Paper component="article" className="my-package-card" key={item._id}>
+									<Paper
+										component="article"
+										className="my-package-card"
+										key={item._id}
+										onClick={() => {
+											void router.push(`/package/${item._id}`);
+										}}
+										role="link"
+										tabIndex={0}
+									>
 										<div className="my-package-image">
 											<PackageImage path={item.packageImages?.[0]} alt={item.packageTitle} />
 											<Chip

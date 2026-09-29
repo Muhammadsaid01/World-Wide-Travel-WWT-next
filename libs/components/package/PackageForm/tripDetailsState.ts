@@ -1,8 +1,11 @@
-import type { PackageIncludeInput } from '../../../types/package/package-include.input';
+import type { PackageExclude } from '../../../types/package/package-exclude';
 import type { PackageExcludeInput } from '../../../types/package/package-exclude.input';
-import type { PackageTagInput } from '../../../types/package/package-tag.input';
+import type { PackageInclude } from '../../../types/package/package-include';
+import type { PackageIncludeInput } from '../../../types/package/package-include.input';
+import type { PackagePolicy } from '../../../types/package/package-policy';
 import type { PackagePolicyInput } from '../../../types/package/package-policy.input';
-
+import type { PackageTag } from '../../../types/package/package-tag';
+import type { PackageTagInput } from '../../../types/package/package-tag.input';
 export interface TripDetailsValues {
 	packageIncludes: string[];
 	packageExcludes: string[];
@@ -89,4 +92,23 @@ export async function publishTripDetails(
 		if (!id) throw new Error('Policy creation was not confirmed by the server.');
 		progress.policy = true;
 	}
+}
+
+
+
+export function packageTripDetailsToValues(
+        includes: Pick<PackageInclude, 'content'>[],
+        excludes: Pick<PackageExclude, 'title'>[],
+        tags: Pick<PackageTag, 'tagName'>[],
+        policies: Pick<PackagePolicy, 'cancelPolicy' | 'refundPolicy'>[],
+): TripDetailsValues {
+        const policy = policies[0];
+
+        return {
+                packageIncludes: includes.map((item) => item.content),
+                packageExcludes: excludes.map((item) => item.title),
+                packageTags: tags.map((item) => item.tagName),
+                cancelPolicy: policy?.cancelPolicy ?? '',
+                refundPolicy: policy?.refundPolicy ?? '',
+        };
 }
