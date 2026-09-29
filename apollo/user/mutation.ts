@@ -235,3 +235,25 @@ export const UPLOAD_PACKAGE_IMAGE: TypedDocumentNode<{ imageUploader: string }, 
 		imageUploader(file: $file, target: "package")
 	}
 `;
+
+export const CREATE_PACKAGE_ITINERARY: TypedDocumentNode<
+	{ createItinerary: { _id: string } },
+	{ input: import('@/libs/types/package/itinerary.input').ItineraryInput }
+> = gql`
+	mutation CreatePackageItinerary($input: ItineraryInput!) {
+		createItinerary(input: $input) {
+			_id
+		}
+	}
+`;
+
+export const CREATE_PACKAGE_SCHEDULE: TypedDocumentNode<
+	{ createPackageSchedule: { _id: string } },
+	{ input: import('@/libs/types/package/package-schedule.input').PackageScheduleInput }
+> = gql`
+	mutation CreatePackageSchedule($input: PackageScheduleInput!) {
+		createPackageSchedule(input: $input) {
+			_id
+		}
+	}
+`;
