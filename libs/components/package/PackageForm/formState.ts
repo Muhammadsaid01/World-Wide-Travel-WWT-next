@@ -4,7 +4,6 @@ import { PackageSchedule } from '@/libs/types/package/package-schedule';
 import { PackageCategory, PackageLevel, PackageType, ScheduleStatus, TransportType } from '../../../enums/package.enum';
 import type { TravelPackageInput } from '../../../types/package/travel-package.input';
 
-
 export type FieldName = Exclude<keyof TravelPackageInput, 'packageImages'>;
 export type Values = Record<FieldName, string>;
 export const initialValues: Values = {
@@ -52,7 +51,7 @@ export const integerMinimums = { packageDays: 1, packageNights: 0, minPeople: 1,
 export type Errors = Partial<Record<FieldName | 'packageImages', string>>;
 export type ItineraryValues = { _id?: string; dayNumber: string; title: string; description: string };
 export type ScheduleValues = {
-	 _id?: string;
+	_id?: string;
 	startDate: string;
 	endDate: string;
 	availableSeats: string;
@@ -169,50 +168,68 @@ export function validateSchedules(items: ScheduleValues[]): string[] {
 	});
 }
 
-
-
 export function packageToValues(pkg: PackageDetailData): Values {
-        return {
-                packageTitle: pkg.packageTitle ?? '',
-                packageDesc: pkg.packageDesc ?? '',
-                packageShortDesc: pkg.packageShortDesc ?? '',
-                packageType: pkg.packageType ?? '',
-                packageCategory: pkg.packageCategory ?? '',
-                packageLevel: pkg.packageLevel ?? '',
-                destinationCountry: pkg.destinationCountry ?? '',
-                destinationCity: pkg.destinationCity ?? '',
-                packageDays: pkg.packageDays != null ? String(pkg.packageDays) : '',
-                packageNights: pkg.packageNights != null ? String(pkg.packageNights) : '',
-                meetingPoint: pkg.meetingPoint ?? '',
-                latitude: pkg.latitude != null ? String(pkg.latitude) : '',
-                longitude: pkg.longitude != null ? String(pkg.longitude) : '',
-                packagePrice: pkg.packagePrice != null ? String(pkg.packagePrice) : '',
-                currency: pkg.currency ?? '',
-                minPeople: pkg.minPeople != null ? String(pkg.minPeople) : '',
-                maxPeople: pkg.maxPeople != null ? String(pkg.maxPeople) : '',
-                transportType: pkg.transportType ?? '',
-        };
+	return {
+		packageTitle: pkg.packageTitle ?? '',
+		packageDesc: pkg.packageDesc ?? '',
+		packageShortDesc: pkg.packageShortDesc ?? '',
+		packageType: pkg.packageType ?? '',
+		packageCategory: pkg.packageCategory ?? '',
+		packageLevel: pkg.packageLevel ?? '',
+		destinationCountry: pkg.destinationCountry ?? '',
+		destinationCity: pkg.destinationCity ?? '',
+		packageDays: pkg.packageDays != null ? String(pkg.packageDays) : '',
+		packageNights: pkg.packageNights != null ? String(pkg.packageNights) : '',
+		meetingPoint: pkg.meetingPoint ?? '',
+		latitude: pkg.latitude != null ? String(pkg.latitude) : '',
+		longitude: pkg.longitude != null ? String(pkg.longitude) : '',
+		packagePrice: pkg.packagePrice != null ? String(pkg.packagePrice) : '',
+		currency: pkg.currency ?? '',
+		minPeople: pkg.minPeople != null ? String(pkg.minPeople) : '',
+		maxPeople: pkg.maxPeople != null ? String(pkg.maxPeople) : '',
+		transportType: pkg.transportType ?? '',
+	};
 }
 
 export function itinerariesToValues(
-        items: Pick<Itinerary,'_id' | 'dayNumber' | 'title' | 'description'>[],
+	items: Pick<Itinerary, '_id' | 'dayNumber' | 'title' | 'description'>[],
 ): ItineraryValues[] {
-        return items.map((item) => ({
-								_id: String(item._id),
-                dayNumber: String(item.dayNumber),
-                title: item.title ?? '',
-                description: item.description ?? '',
-        }));
+	return items.map((item) => ({
+		_id: String(item._id),
+		dayNumber: String(item.dayNumber),
+		title: item.title ?? '',
+		description: item.description ?? '',
+	}));
 }
 
 export function schedulesToValues(
-        items: Pick<PackageSchedule,'_id' | 'startDate' | 'endDate' | 'availableSeats' | 'scheduleStatus'>[],
+	items: Pick<PackageSchedule, '_id' | 'startDate' | 'endDate' | 'availableSeats' | 'scheduleStatus'>[],
 ): ScheduleValues[] {
-        return items.map((item) => ({
-                _id: String(item._id),
-                startDate: String(item.startDate),
-                endDate: String(item.endDate),
-                availableSeats: String(item.availableSeats),
-                scheduleStatus: item.scheduleStatus ?? '',
-        }));
+	return items.map((item) => ({
+		_id: String(item._id),
+		startDate: String(item.startDate).slice(0, 10),
+		endDate: String(item.endDate).slice(0, 10),
+		availableSeats: String(item.availableSeats),
+		scheduleStatus: item.scheduleStatus ?? '',
+	}));
+}
+
+export function buildPackageUpdate(
+	id: string,
+	values: Values,
+	images: string[],
+): import('../../../types/package/travel-package.update').TravelPackageUpdate {
+	return {
+		_id: id,
+		...buildPackageInput(values, images),
+		packageShortDesc: values.packageShortDesc.trim(),
+		meetingPoint: values.meetingPoint.trim(),
+		latitude: values.latitude.trim() ? Number(values.latitude) : null,
+		longitude: values.longitude.trim() ? Number(values.longitude) : null,
+		currency: values.currency.trim() || 'USD',
+		minPeople: values.minPeople.trim() ? Number(values.minPeople) : 1,
+		packageType: (values.packageType || PackageType.TOUR) as PackageType,
+		packageLevel: (values.packageLevel || PackageLevel.STANDARD) as PackageLevel,
+		transportType: (values.transportType || TransportType.MIXED) as TransportType,
+	};
 }

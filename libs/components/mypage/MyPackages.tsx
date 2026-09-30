@@ -91,14 +91,14 @@ function AgentPackages({ memberId }: { memberId: string }) {
 						Create New Package
 					</Button>
 				</header>
-				{router.query.created === '1' && (
+				{(router.query.created === '1' || router.query.updated === '1') && (
 					<Alert
 						severity="success"
 						onClose={() => {
 							void router.replace('/mypage/packages', undefined, { shallow: true });
 						}}
 					>
-						Package created successfully.
+						{router.query.updated === '1' ? 'Package updated successfully.' : 'Package created successfully.'}
 					</Alert>
 				)}
 				{(profile.error || agentQuery.error) && (
@@ -201,16 +201,7 @@ function AgentPackages({ memberId }: { memberId: string }) {
 							</Typography>
 							<div className="my-packages-list">
 								{result.list.map((item) => (
-									<Paper
-										component="article"
-										className="my-package-card"
-										key={item._id}
-										onClick={() => {
-											void router.push(`/package/${item._id}`);
-										}}
-										role="link"
-										tabIndex={0}
-									>
+									<Paper component="article" className="my-package-card" key={item._id}>
 										<div className="my-package-image">
 											<PackageImage path={item.packageImages?.[0]} alt={item.packageTitle} />
 											<Chip
@@ -221,7 +212,9 @@ function AgentPackages({ memberId }: { memberId: string }) {
 											/>
 										</div>
 										<div className="my-package-content">
-											<Typography component="h2">{item.packageTitle}</Typography>
+											<Typography component="h2">
+												<Link href={`/package/${item._id}`}>{item.packageTitle}</Link>
+											</Typography>
 											<Typography color="text.secondary">
 												{[item.destinationCity, item.destinationCountry].filter(Boolean).join(', ')}
 											</Typography>
@@ -242,22 +235,24 @@ function AgentPackages({ memberId }: { memberId: string }) {
 												</span>
 											</div>
 											<div className="my-package-actions">
-															<Button
-																			variant="outlined"
-																			size="small"
-																			onClick={(event) => {
-																							event.stopPropagation();
-
-																							void router.push({
-																											pathname: '/mypage/packages',
-																											query: {
-																															edit: item._id,
-																											},
-																							});
-																			}}
-															>
-																			Edit
-															</Button>
+												<Button component={Link} href={`/package/${item._id}`} size="small">
+													View Package
+												</Button>
+												{item.packageStatus === PackageStatus.ACTIVE ? (
+													<Button
+														component={Link}
+														href={`/mypage/packages?edit=${item._id}`}
+														variant="outlined"
+														size="small"
+														aria-label={`Edit ${item.packageTitle}`}
+													>
+														Edit
+													</Button>
+												) : (
+													<Typography variant="caption" color="text.secondary">
+														Only active packages can be edited.
+													</Typography>
+												)}
 											</div>
 										</div>
 									</Paper>

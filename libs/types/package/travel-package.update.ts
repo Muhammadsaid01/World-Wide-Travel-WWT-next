@@ -1,10 +1,4 @@
-import {
-	PackageCategory,
-	PackageLevel,
-	PackageStatus,
-	PackageType,
-	TransportType,
-} from '../../enums/package.enum';
+import { PackageCategory, PackageLevel, PackageStatus, PackageType, TransportType } from '../../enums/package.enum';
 
 export interface TravelPackageUpdate {
 	_id: string;
@@ -25,8 +19,8 @@ export interface TravelPackageUpdate {
 	packageNights?: number;
 
 	meetingPoint?: string;
-	latitude?: number;
-	longitude?: number;
+	latitude?: number | null;
+	longitude?: number | null;
 
 	packagePrice?: number;
 	currency?: string;

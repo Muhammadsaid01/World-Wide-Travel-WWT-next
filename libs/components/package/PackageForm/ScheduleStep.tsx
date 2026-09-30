@@ -7,10 +7,12 @@ export default function ScheduleStep({
 	errors,
 	disabled,
 	onChange,
+	protectExisting = false,
 }: {
 	items: ScheduleValues[];
 	errors: string[];
 	disabled: boolean;
+	protectExisting?: boolean;
 	onChange: (items: ScheduleValues[]) => void;
 }) {
 	const update = (index: number, value: Partial<ScheduleValues>) =>
@@ -26,7 +28,11 @@ export default function ScheduleStep({
 				<section className="package-form-entry" key={index}>
 					<header>
 						<Typography component="h3">Schedule {index + 1}</Typography>
-						<Button color="error" disabled={disabled} onClick={() => onChange(items.filter((_, i) => i !== index))}>
+						<Button
+							color="error"
+							disabled={disabled || (protectExisting && Boolean(item._id))}
+							onClick={() => onChange(items.filter((_, i) => i !== index))}
+						>
 							Remove Schedule
 						</Button>
 					</header>
@@ -37,7 +43,7 @@ export default function ScheduleStep({
 							type="date"
 							slotProps={{ inputLabel: { shrink: true } }}
 							value={item.startDate}
-							disabled={disabled}
+							disabled={disabled || (protectExisting && Boolean(item._id))}
 							onChange={(e) => update(index, { startDate: e.target.value })}
 						/>
 						<TextField
@@ -46,7 +52,7 @@ export default function ScheduleStep({
 							type="date"
 							slotProps={{ inputLabel: { shrink: true } }}
 							value={item.endDate}
-							disabled={disabled}
+							disabled={disabled || (protectExisting && Boolean(item._id))}
 							onChange={(e) => update(index, { endDate: e.target.value })}
 						/>
 						<TextField
@@ -55,7 +61,7 @@ export default function ScheduleStep({
 							type="number"
 							slotProps={{ htmlInput: { min: 0, step: 1 } }}
 							value={item.availableSeats}
-							disabled={disabled}
+							disabled={disabled || (protectExisting && Boolean(item._id))}
 							onChange={(e) => update(index, { availableSeats: e.target.value })}
 						/>
 						<TextField
@@ -65,7 +71,7 @@ export default function ScheduleStep({
 							disabled={disabled}
 							onChange={(e) => update(index, { scheduleStatus: e.target.value as ScheduleStatus | '' })}
 						>
-							<MenuItem value="">Use default</MenuItem>
+							{!item._id && <MenuItem value="">Use default</MenuItem>}
 							{Object.values(ScheduleStatus).map((status) => (
 								<MenuItem key={status} value={status}>
 									{status}

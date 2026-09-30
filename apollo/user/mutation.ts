@@ -285,99 +285,121 @@ export const CREATE_PACKAGE_POLICY: TypedDocumentNode<
 }`;
 
 
-export const UPDATE_PACKAGE_POLICY = gql`
-  mutation UpdatePackagePolicy(
-    $policyId: String!
-    $input: PackagePolicyUpdate!
-  ) {
-    updatePackagePolicy(
-      policyId: $policyId
-      input: $input
-    ) {
-      _id
-      cancelPolicy
-      refundPolicy
-    }
-  }
+export const UPDATE_PACKAGE_POLICY: TypedDocumentNode<
+	{ updatePackagePolicy: { _id: string } },
+	{ policyId: string; input: import('@/libs/types/package/package-policy.update').PackagePolicyUpdate }
+> = gql`
+	mutation UpdatePackagePolicy($policyId: String!, $input: PackagePolicyUpdate!) {
+		updatePackagePolicy(policyId: $policyId, input: $input) {
+			_id
+			cancelPolicy
+			refundPolicy
+		}
+	}
 `;
 
-export const UPDATE_TRAVEL_PACKAGE = gql`
-        mutation UpdateTravelPackage($input: TravelPackageUpdate!) {
-                updateTravelPackage(input: $input) {
-                        _id
-                        packageTitle
-                        packageStatus
-                }
-        }
+export const UPDATE_TRAVEL_PACKAGE: TypedDocumentNode<
+	{ updateTravelPackage: { _id: string } },
+	{ input: import('@/libs/types/package/travel-package.update').TravelPackageUpdate }
+> = gql`
+	mutation UpdateTravelPackage($input: TravelPackageUpdate!) {
+		updateTravelPackage(input: $input) {
+			_id
+			packageTitle
+			packageStatus
+		}
+	}
 `;
 
-export const UPDATE_PACKAGE_ITINERARY = gql`
-        mutation UpdatePackageItinerary($input: ItineraryUpdate!) {
-                updateItinerary(input: $input) {
-                        _id
-                        dayNumber
-                        title
-                        description
-                }
-        }
+export const UPDATE_PACKAGE_ITINERARY: TypedDocumentNode<
+	{ updateItinerary: { _id: string } },
+	{ input: import('@/libs/types/package/itinerary.update').ItineraryUpdate }
+> = gql`
+	mutation UpdatePackageItinerary($input: ItineraryUpdate!) {
+		updateItinerary(input: $input) {
+			_id
+			dayNumber
+			title
+			description
+		}
+	}
 `;
 
-export const UPDATE_PACKAGE_SCHEDULE = gql`
-        mutation UpdatePackageSchedule($input: PackageScheduleUpdate!) {
-                updatePackageSchedule(input: $input) {
-                        _id
-                        startDate
-                        endDate
-                        availableSeats
-                        scheduleStatus
-                }
-        }
+export const UPDATE_PACKAGE_SCHEDULE: TypedDocumentNode<
+	{ updatePackageSchedule: { _id: string } },
+	{ input: import('@/libs/types/package/package-schedule.update').PackageScheduleUpdate }
+> = gql`
+	mutation UpdatePackageSchedule($input: PackageScheduleUpdate!) {
+		updatePackageSchedule(input: $input) {
+			_id
+			startDate
+			endDate
+			availableSeats
+			scheduleStatus
+		}
+	}
 `;
 
-export const DELETE_PACKAGE_SCHEDULE = gql`
-        mutation DeletePackageSchedule($input: DeletePackageScheduleInput!) {
-                deletePackageSchedule(input: $input) {
-                        _id
-                }
-        }
+export const DELETE_PACKAGE_SCHEDULE: TypedDocumentNode<
+	{ deletePackageSchedule: { _id: string } },
+	{ input: { _id: string } }
+> = gql`
+	mutation DeletePackageSchedule($input: DeletePackageScheduleInput!) {
+		deletePackageSchedule(input: $input) {
+			_id
+		}
+	}
 `;
 
-export const DELETE_PACKAGE_ITINERARY = gql`
-        mutation DeletePackageItinerary($input: DeleteItineraryInput!) {
-                deleteItinerary(input: $input) {
-                        _id
-                }
-        }
+export const DELETE_PACKAGE_ITINERARY: TypedDocumentNode<
+	{ deleteItinerary: { _id: string } },
+	{ input: { _id: string } }
+> = gql`
+	mutation DeletePackageItinerary($input: DeleteItineraryInput!) {
+		deleteItinerary(input: $input) {
+			_id
+		}
+	}
 `;
 
-export const DELETE_PACKAGE_INCLUDE = gql`
-        mutation DeletePackageInclude($input: DeletePackageIncludeInput!) {
-                deletePackageInclude(input: $input) {
-                        _id
-                }
-        }
+export const DELETE_PACKAGE_INCLUDE: TypedDocumentNode<
+	{ deletePackageInclude: { _id: string } },
+	{ input: { _id: string } }
+> = gql`
+	mutation DeletePackageInclude($input: DeletePackageIncludeInput!) {
+		deletePackageInclude(input: $input) {
+			_id
+		}
+	}
 `;
 
-export const DELETE_PACKAGE_EXCLUDE = gql`
-        mutation DeletePackageExclude($input: DeletePackageExcludeInput!) {
-                deletePackageExclude(input: $input) {
-                        _id
-                }
-        }
+export const DELETE_PACKAGE_EXCLUDE: TypedDocumentNode<
+	{ deletePackageExclude: { _id: string } },
+	{ input: { _id: string } }
+> = gql`
+	mutation DeletePackageExclude($input: DeletePackageExcludeInput!) {
+		deletePackageExclude(input: $input) {
+			_id
+		}
+	}
 `;
 
-export const DELETE_PACKAGE_TAG = gql`
-        mutation DeletePackageTag($input: DeletePackageTagInput!) {
-                deletePackageTag(input: $input) {
-                        _id
-                }
-        }
-`;
+export const DELETE_PACKAGE_TAG: TypedDocumentNode<{ deletePackageTag: { _id: string } }, { input: { _id: string } }> =
+	gql`
+		mutation DeletePackageTag($input: DeletePackageTagInput!) {
+			deletePackageTag(input: $input) {
+				_id
+			}
+		}
+	`;
 
-export const DELETE_PACKAGE_POLICY = gql`
-        mutation DeletePackagePolicy($input: DeletePackagePolicyInput!) {
-                deletePackagePolicy(input: $input) {
-                        _id
-                }
-        }
+export const DELETE_PACKAGE_POLICY: TypedDocumentNode<
+	{ deletePackagePolicy: { _id: string } },
+	{ input: { _id: string } }
+> = gql`
+	mutation DeletePackagePolicy($input: DeletePackagePolicyInput!) {
+		deletePackagePolicy(input: $input) {
+			_id
+		}
+	}
 `;

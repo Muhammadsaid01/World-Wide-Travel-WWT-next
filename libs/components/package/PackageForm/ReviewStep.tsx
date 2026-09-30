@@ -28,12 +28,14 @@ function Definitions({ items }: { items: [string, string][] }) {
 	);
 }
 export default function ReviewStep({
+	mode = 'create',
 	details,
 	values,
 	images,
 	itineraries,
 	schedules,
 }: {
+	mode?: 'create' | 'edit';
 	details: TripDetailsValues;
 	values: Values;
 	images: string[];
@@ -218,8 +220,8 @@ export default function ReviewStep({
 				<div className="review-info-notice">
 					<InfoOutlined fontSize="small" />
 					<p>
-						By publishing this package, you confirm that the information provided is accurate and ready to be shown on
-						WWT.
+						By {mode === 'edit' ? 'saving these changes' : 'publishing this package'}, you confirm that the information
+						provided is accurate and ready to be shown on WWT.
 					</p>
 				</div>
 			</aside>

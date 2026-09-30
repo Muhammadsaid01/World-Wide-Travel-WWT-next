@@ -188,3 +188,12 @@
 		}
 	}
 }
+
+.my-bookings-page.agent-dashboard-page.my-packages-page .my-package-actions {
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	flex-wrap: wrap;
+	gap: 12px;
+	padding-top: 8px;
+}

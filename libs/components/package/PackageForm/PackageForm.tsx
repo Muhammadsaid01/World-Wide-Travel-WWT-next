@@ -11,7 +11,6 @@ import {
 	DELETE_PACKAGE_INCLUDE,
 	DELETE_PACKAGE_ITINERARY,
 	DELETE_PACKAGE_POLICY,
-	DELETE_PACKAGE_SCHEDULE,
 	DELETE_PACKAGE_TAG,
 	UPDATE_PACKAGE_ITINERARY,
 	UPDATE_PACKAGE_POLICY,
@@ -30,10 +29,11 @@ import {
 import { MemberType } from '@/libs/enums/member.enum';
 import { ApolloError, useMutation, useQuery } from '@apollo/client';
 import ArrowBack from '@mui/icons-material/ArrowBack';
-import { Alert, Breadcrumbs, Button, Paper, Typography } from '@mui/material';
+import { Alert, Breadcrumbs, Button, Paper, Skeleton, Typography } from '@mui/material';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useEffect, useRef, useState } from 'react';
+import { EditAction, EditProgress, runEditActions } from './editProgress';
 import BasicInfoStep from './BasicInfoStep';
 import DestinationStep from './DestinationStep';
 import ItineraryStep from './ItineraryStep';
@@ -44,6 +44,7 @@ import ScheduleStep from './ScheduleStep';
 import TripDetailsStep from './TripDetailsStep';
 import {
 	buildPackageInput,
+	buildPackageUpdate,
 	Errors,
 	FieldName,
 	initialValues,
@@ -55,7 +56,7 @@ import {
 	stepFields,
 	validateItineraries,
 	validatePackage,
-	validateSchedules
+	validateSchedules,
 } from './formState';
 
 import { publishPackage, PublishProgress } from './publishPackage';
@@ -65,19 +66,18 @@ import {
 	packageTripDetailsToValues,
 	publishTripDetails,
 	TripDetailsErrors,
-	validateTripDetails
+	validateTripDetails,
 } from './tripDetailsState';
 
-	type PackageFormProps = {
-					memberId: string;
-					mode?: 'create' | 'edit';
-					packageId?: string;
-	};
+type PackageFormProps = {
+	memberId: string;
+	mode?: 'create' | 'edit';
+	packageId?: string;
+};
 
-
-export default function PackageForm({ memberId, mode = 'create', packageId}: PackageFormProps) {
-  const router = useRouter();
-  const isEdit = mode === 'edit';
+export default function PackageForm({ memberId, mode = 'create', packageId }: PackageFormProps) {
+	const router = useRouter();
+	const isEdit = mode === 'edit';
 	const [details, setDetails] = useState(initialTripDetails);
 	const [detailErrors, setDetailErrors] = useState<TripDetailsErrors>({});
 	const detailsProgress = useRef(newTripDetailsProgress());
@@ -98,158 +98,170 @@ export default function PackageForm({ memberId, mode = 'create', packageId}: Pac
 	const lock = useRef(false);
 	const uploadLock = useRef(false);
 	const hydrated = useRef(false);
-	const originalItineraries = useRef<{ _id: string }[]>([]);
-const originalSchedules = useRef<{ _id: string }[]>([]);
+	const [editReady, setEditReady] = useState(false);
+	const [editStarted, setEditStarted] = useState(false);
+	const editActions = useRef<EditAction[]>([]);
+	const editProgress = useRef<EditProgress>({ next: 0 });
+	const originalItineraries = useRef<ItineraryValues[]>([]);
+	const originalSchedules = useRef<ScheduleValues[]>([]);
 
-const originalIncludes = useRef<
-        { _id: string; content: string }[]
->([]);
+	const originalIncludes = useRef<{ _id: string; content: string }[]>([]);
 
-const originalExcludes = useRef<
-        { _id: string; title: string }[]
->([]);
+	const originalExcludes = useRef<{ _id: string; title: string }[]>([]);
 
-const originalTags = useRef<
-        { _id: string; tagName: string }[]
->([]);
+	const originalTags = useRef<{ _id: string; tagName: string }[]>([]);
 
-const originalPolicy = useRef<{
-        _id: string;
-        cancelPolicy: string;
-        refundPolicy: string;
-} | null>(null);
+	const originalPolicy = useRef<{
+		_id: string;
+		cancelPolicy: string;
+		refundPolicy: string;
+	} | null>(null);
 	const progress = useRef<PublishProgress>({ packageId: '', itineraries: 0, schedules: 0 });
 	const headingRef = useRef<HTMLHeadingElement>(null);
 	const shouldLoadEditData = isEdit && Boolean(packageId);
 
-	const { data: packageData, loading: packageLoading } = useQuery(GET_TRAVEL_PACKAGE, {
-					variables: { input: packageId ?? '' },
-					skip: !shouldLoadEditData,
-					fetchPolicy: 'no-cache',
+	const {
+		data: packageData,
+		loading: packageLoading,
+		error: packageError,
+	} = useQuery(GET_TRAVEL_PACKAGE, {
+		variables: { input: packageId ?? '' },
+		skip: !shouldLoadEditData,
+		fetchPolicy: 'no-cache',
 	});
 
-	const { data: itineraryData, loading: itineraryLoading } = useQuery(GET_PACKAGE_ITINERARIES, {
-					variables: { packageId: packageId ?? '' },
-					skip: !shouldLoadEditData,
-					fetchPolicy: 'no-cache',
+	const {
+		data: itineraryData,
+		loading: itineraryLoading,
+		error: itineraryError,
+	} = useQuery(GET_PACKAGE_ITINERARIES, {
+		variables: { packageId: packageId ?? '' },
+		skip: !shouldLoadEditData,
+		fetchPolicy: 'no-cache',
 	});
 
-	const { data: scheduleData, loading: scheduleLoading } = useQuery(GET_PACKAGE_SCHEDULES, {
-					variables: { packageId: packageId ?? '' },
-					skip: !shouldLoadEditData,
-					fetchPolicy: 'no-cache',
+	const {
+		data: scheduleData,
+		loading: scheduleLoading,
+		error: scheduleError,
+	} = useQuery(GET_PACKAGE_SCHEDULES, {
+		variables: { packageId: packageId ?? '' },
+		skip: !shouldLoadEditData,
+		fetchPolicy: 'no-cache',
 	});
 
-	const { data: inclusionData, loading: inclusionLoading } = useQuery(GET_PACKAGE_INCLUSIONS, {
-					variables: { packageId: packageId ?? '' },
-					skip: !shouldLoadEditData,
-					fetchPolicy: 'no-cache',
+	const {
+		data: inclusionData,
+		loading: inclusionLoading,
+		error: inclusionError,
+	} = useQuery(GET_PACKAGE_INCLUSIONS, {
+		variables: { packageId: packageId ?? '' },
+		skip: !shouldLoadEditData,
+		fetchPolicy: 'no-cache',
 	});
 
-	const { data: tagData, loading: tagLoading } = useQuery(GET_PACKAGE_TAGS, {
-					variables: { packageId: packageId ?? '' },
-					skip: !shouldLoadEditData,
-					fetchPolicy: 'no-cache',
+	const {
+		data: tagData,
+		loading: tagLoading,
+		error: tagError,
+	} = useQuery(GET_PACKAGE_TAGS, {
+		variables: { packageId: packageId ?? '' },
+		skip: !shouldLoadEditData,
+		fetchPolicy: 'no-cache',
 	});
 
-	const { data: policyData, loading: policyLoading } = useQuery(GET_PACKAGE_POLICY, {
-					variables: { packageId: packageId ?? '' },
-					skip: !shouldLoadEditData,
-					fetchPolicy: 'no-cache',
+	const {
+		data: policyData,
+		loading: policyLoading,
+		error: policyError,
+	} = useQuery(GET_PACKAGE_POLICY, {
+		variables: { packageId: packageId ?? '' },
+		skip: !shouldLoadEditData,
+		fetchPolicy: 'no-cache',
 	});
-
 
 	const editLoading =
-					packageLoading ||
-					itineraryLoading ||
-					scheduleLoading ||
-					inclusionLoading ||
-					tagLoading ||
-					policyLoading;
+		packageLoading || itineraryLoading || scheduleLoading || inclusionLoading || tagLoading || policyLoading;
 
+	const editError = packageError || itineraryError || scheduleError || inclusionError || tagError || policyError;
+	const editDataComplete = Boolean(
+		packageData?.getTravelPackage &&
+		itineraryData?.getItineraries &&
+		scheduleData?.getPackageSchedules &&
+		inclusionData?.getPackageIncludes &&
+		inclusionData?.getPackageExcludes &&
+		tagData?.getPackageTags &&
+		policyData?.getPackagePolicy,
+	);
+	const ownsPackage = packageData?.getTravelPackage?.agentData?.memberId === memberId;
 	useEffect(() => {
-					if (
-									hydrated.current ||
-									!isEdit ||
-									editLoading
-					) {
-									return;
-					}
+		if (hydrated.current || !isEdit || editLoading || editError || !editDataComplete || !ownsPackage) {
+			return;
+		}
 
-					const pkg = packageData?.getTravelPackage;
-					if (!pkg) return;
+		const pkg = packageData?.getTravelPackage;
+		if (!pkg) return;
 
-					hydrated.current = true;
+		hydrated.current = true;
 
-					originalItineraries.current =
-									(itineraryData?.getItineraries ?? []).map((item) => ({
-													_id: String(item._id),
-									}));
+		originalItineraries.current = itinerariesToValues(itineraryData?.getItineraries ?? []);
+		originalSchedules.current = schedulesToValues(scheduleData?.getPackageSchedules ?? []);
+		originalIncludes.current = (inclusionData?.getPackageIncludes ?? []).map((item) => ({
+			_id: String(item._id),
+			content: item.content,
+		}));
 
-					originalSchedules.current =
-									(scheduleData?.getPackageSchedules ?? []).map((item) => ({
-													_id: String(item._id),
-									}));
+		originalExcludes.current = (inclusionData?.getPackageExcludes ?? []).map((item) => ({
+			_id: String(item._id),
+			title: item.title,
+		}));
 
-					originalIncludes.current =
-									(inclusionData?.getPackageIncludes ?? []).map((item) => ({
-													_id: String(item._id),
-													content: item.content,
-									}));
+		originalTags.current = (tagData?.getPackageTags ?? []).map((item) => ({
+			_id: String(item._id),
+			tagName: item.tagName,
+		}));
 
-					originalExcludes.current =
-									(inclusionData?.getPackageExcludes ?? []).map((item) => ({
-													_id: String(item._id),
-													title: item.title,
-									}));
+		const policy = policyData?.getPackagePolicy?.[0];
 
-					originalTags.current =
-									(tagData?.getPackageTags ?? []).map((item) => ({
-													_id: String(item._id),
-													tagName: item.tagName,
-									}));
+		originalPolicy.current = policy
+			? {
+					_id: String(policy._id),
+					cancelPolicy: policy.cancelPolicy,
+					refundPolicy: policy.refundPolicy,
+				}
+			: null;
 
-					const policy = policyData?.getPackagePolicy?.[0];
+		queueMicrotask(() => {
+			setEditReady(true);
+			setValues(packageToValues(pkg));
+			setImages(pkg.packageImages ?? []);
 
-					originalPolicy.current = policy
-									? {
-													_id: String(policy._id),
-													cancelPolicy: policy.cancelPolicy,
-													refundPolicy: policy.refundPolicy,
-									}
-									: null;
+			setItineraries(itinerariesToValues(itineraryData?.getItineraries ?? []));
 
-					queueMicrotask(() => {
-									setValues(packageToValues(pkg));
-									setImages(pkg.packageImages ?? []);
+			setSchedules(schedulesToValues(scheduleData?.getPackageSchedules ?? []));
 
-									setItineraries(
-													itinerariesToValues(itineraryData?.getItineraries ?? []),
-									);
-
-									setSchedules(
-													schedulesToValues(scheduleData?.getPackageSchedules ?? []),
-									);
-
-									setDetails(
-													packageTripDetailsToValues(
-																	inclusionData?.getPackageIncludes ?? [],
-																	inclusionData?.getPackageExcludes ?? [],
-																	tagData?.getPackageTags ?? [],
-																	policyData?.getPackagePolicy ?? [],
-													),
-									);
-					});
+			setDetails(
+				packageTripDetailsToValues(
+					inclusionData?.getPackageIncludes ?? [],
+					inclusionData?.getPackageExcludes ?? [],
+					tagData?.getPackageTags ?? [],
+					policyData?.getPackagePolicy ?? [],
+				),
+			);
+		});
 	}, [
-					isEdit,
-					editLoading,
-					packageData,
-					itineraryData,
-					scheduleData,
-					inclusionData,
-					tagData,
-					policyData,
-	]);			
+		editError,
+		editDataComplete,
+		ownsPackage,
+		isEdit,
+		editLoading,
+		packageData,
+		itineraryData,
+		scheduleData,
+		inclusionData,
+		tagData,
+		policyData,
+	]);
 	const [create] = useMutation(CREATE_TRAVEL_PACKAGE, { fetchPolicy: 'no-cache' });
 	const [createItinerary] = useMutation(CREATE_PACKAGE_ITINERARY, { fetchPolicy: 'no-cache' });
 	const [createSchedule] = useMutation(CREATE_PACKAGE_SCHEDULE, { fetchPolicy: 'no-cache' });
@@ -258,48 +270,44 @@ const originalPolicy = useRef<{
 	const [createTag] = useMutation(CREATE_PACKAGE_TAG, { fetchPolicy: 'no-cache' });
 	const [createPolicy] = useMutation(CREATE_PACKAGE_POLICY, { fetchPolicy: 'no-cache' });
 	const [updatePackage] = useMutation(UPDATE_TRAVEL_PACKAGE, {
-					fetchPolicy: 'no-cache',
+		fetchPolicy: 'no-cache',
 	});
 
 	const [updateItinerary] = useMutation(UPDATE_PACKAGE_ITINERARY, {
-					fetchPolicy: 'no-cache',
+		fetchPolicy: 'no-cache',
 	});
 
 	const [updateSchedule] = useMutation(UPDATE_PACKAGE_SCHEDULE, {
-					fetchPolicy: 'no-cache',
+		fetchPolicy: 'no-cache',
 	});
 
 	const [updatePolicy] = useMutation(UPDATE_PACKAGE_POLICY, {
-					fetchPolicy: 'no-cache',
+		fetchPolicy: 'no-cache',
 	});
 	const [upload] = useMutation(UPLOAD_PACKAGE_IMAGE, { fetchPolicy: 'no-cache' });
 
-	const [deleteSchedule] = useMutation(DELETE_PACKAGE_SCHEDULE, {
-        fetchPolicy: 'no-cache',
-});
-
 	const [deleteItinerary] = useMutation(DELETE_PACKAGE_ITINERARY, {
-					fetchPolicy: 'no-cache',
+		fetchPolicy: 'no-cache',
 	});
 
 	const [deleteInclude] = useMutation(DELETE_PACKAGE_INCLUDE, {
-					fetchPolicy: 'no-cache',
+		fetchPolicy: 'no-cache',
 	});
 
 	const [deleteExclude] = useMutation(DELETE_PACKAGE_EXCLUDE, {
-					fetchPolicy: 'no-cache',
+		fetchPolicy: 'no-cache',
 	});
 
 	const [deleteTag] = useMutation(DELETE_PACKAGE_TAG, {
-					fetchPolicy: 'no-cache',
+		fetchPolicy: 'no-cache',
 	});
 
 	const [deletePolicy] = useMutation(DELETE_PACKAGE_POLICY, {
-					fetchPolicy: 'no-cache',
+		fetchPolicy: 'no-cache',
 	});
 	function authorized() {
 		const user = currentUserVar();
-		return user?._id === memberId && user.memberType === MemberType.AGENT;
+		return user?._id === memberId && user.memberType === MemberType.AGENT && (!isEdit || (editReady && ownsPackage));
 	}
 	async function selectImages(files: File[]) {
 		if (!authorized() || uploadLock.current || lock.current || progress.current.packageId) return;
@@ -350,7 +358,12 @@ const originalPolicy = useRef<{
 		const tripErrors = validateTripDetails(details);
 		if (step === undefined || step === 2) setDetailErrors(tripErrors);
 		const days = validateItineraries(itineraries);
-		const dates = validateSchedules(schedules);
+		const dates = validateSchedules(
+			schedules.map((item) => {
+				const original = scheduleData?.getPackageSchedules.find((row) => row._id === item._id);
+				return original ? { ...item, startDate: String(original.startDate), endDate: String(original.endDate) } : item;
+			}),
+		);
 		setErrors((previous) =>
 			step === undefined
 				? packageErrors
@@ -379,314 +392,161 @@ const originalPolicy = useRef<{
 		if (!authorized() || lock.current || uploadLock.current || uncertain || complete) return;
 		if (!validate()) return;
 		if (isEdit) {
-        if (!packageId) {
-                setFailure('Package ID is missing.');
-                return;
-        }
+			if (!packageId || !editReady) return;
+			lock.current = true;
+			setBusy(true);
+			setFailure('');
+			try {
+				if (!editStarted) {
+					const actions: EditAction[] = [];
+					const add = (action: EditAction) => actions.push(action);
+					add(() =>
+						updatePackage({
+							variables: {
+								input: buildPackageUpdate(packageId, values, images),
+							},
+						}),
+					);
+					// Free removed day numbers before creating replacements. Stage renumbered rows
+					// away from all original/final numbers so swaps respect the unique day index.
+					const retained = new Set(itineraries.map((item) => item._id));
+					for (const original of originalItineraries.current) {
+						if (!retained.has(original._id))
+							add(() => deleteItinerary({ variables: { input: { _id: original._id! } } }));
+					}
+					const used = new Set([...itineraries, ...originalItineraries.current].map((item) => Number(item.dayNumber)));
+					let temporaryDay = 1;
+					for (const item of itineraries) {
+						const original = originalItineraries.current.find((row) => row._id === item._id);
+						if (original && original.dayNumber !== item.dayNumber) {
+							while (used.has(temporaryDay)) temporaryDay++;
+							const dayNumber = temporaryDay++;
+							used.add(dayNumber);
+							add(() => updateItinerary({ variables: { input: { _id: item._id!, packageId, dayNumber } } }));
+						}
+					}
+					for (const item of itineraries) {
+						const original = originalItineraries.current.find((row) => row._id === item._id);
+						const input = {
+							packageId,
+							dayNumber: Number(item.dayNumber),
+							title: item.title.trim(),
+							description: item.description.trim(),
+						};
+						if (item._id) {
+							if (JSON.stringify(original) !== JSON.stringify(item))
+								add(() => updateItinerary({ variables: { input: { _id: item._id!, ...input } } }));
+						} else add(() => createItinerary({ variables: { input } }));
+					}
 
-        lock.current = true;
-        setBusy(true);
-        setFailure('');
-
-        try {
-                const checkAccess = () => {
-                        if (!authorized()) {
-                                throw new Error('Your agent session changed. Please sign in again.');
-                        }
-                };
-
-                checkAccess();
-
-                await updatePackage({
-                        variables: {
-                                input: {
-                                        _id: packageId,
-                                        ...buildPackageInput(values, images),
-                                },
-                        },
-                });
-
-                for (const item of itineraries) {
-												checkAccess();
-
-												if (item._id) {
-																await updateItinerary({
-																				variables: {
-																								input: {
-																												_id: item._id,
-																												packageId,
-																												dayNumber: Number(item.dayNumber),
-																												title: item.title,
-																												description: item.description,
-																								},
-																				},
-																});
-												} else {
-																await createItinerary({
-																				variables: {
-																								input: {
-																												packageId,
-																												dayNumber: Number(item.dayNumber),
-																												title: item.title,
-																												description: item.description,
-																								},
-																				},
-																});
-												}
-								}
-								const currentItineraryIds = new Set(
-												itineraries
-																.map((item) => item._id)
-																.filter((id): id is string => Boolean(id)),
+					for (const item of schedules) {
+						const original = originalSchedules.current.find((row) => row._id === item._id);
+						if (item._id && original) {
+							if (item.scheduleStatus && item.scheduleStatus !== original.scheduleStatus) {
+								add(() =>
+									updateSchedule({
+										variables: {
+											input: { _id: item._id!, packageId, scheduleStatus: item.scheduleStatus || undefined },
+										},
+									}),
 								);
-
-								for (const original of originalItineraries.current) {
-												if (!currentItineraryIds.has(original._id)) {
-																checkAccess();
-
-																await deleteItinerary({
-																				variables: {
-																								input: {
-																												_id: original._id,
-																								},
-																				},
-																});
-												}
-								}
-
-                for (const item of schedules) {
-												checkAccess();
-
-												if (item._id) {
-																await updateSchedule({
-																				variables: {
-																								input: {
-																												_id: item._id,
-																												packageId,
-																												startDate: item.startDate,
-																												endDate: item.endDate,
-																												availableSeats: Number(item.availableSeats),
-																												scheduleStatus: item.scheduleStatus,
-																								},
-																				},
-																});
-												} else {
-																await createSchedule({
-																				variables: {
-																								input: {
-																												packageId,
-																												startDate: item.startDate,
-																												endDate: item.endDate,
-																												availableSeats: Number(item.availableSeats),
-																												scheduleStatus: item.scheduleStatus || undefined,
-																								},
-																				},
-																});
-												}
-								}
-								const currentScheduleIds = new Set(
-												schedules
-																.map((item) => item._id)
-																.filter((id): id is string => Boolean(id)),
-								);
-
-								for (const original of originalSchedules.current) {
-												if (!currentScheduleIds.has(original._id)) {
-																checkAccess();
-
-																await deleteSchedule({
-																				variables: {
-																								input: {
-																												_id: original._id,
-																								},
-																				},
-																});
-												}
-								}
-
-								const currentIncludes = new Set(
-												details.packageIncludes.map((item) => item.trim()).filter(Boolean),
-								);
-
-								for (const original of originalIncludes.current) {
-												if (!currentIncludes.has(original.content.trim())) {
-																checkAccess();
-
-																await deleteInclude({
-																				variables: {
-																								input: {
-																												_id: original._id,
-																								},
-																				},
-																});
-												}
-								}
-
-								for (const content of currentIncludes) {
-												const exists = originalIncludes.current.some(
-																(item) => item.content.trim() === content,
-												);
-
-												if (!exists) {
-																checkAccess();
-
-																await createInclude({
-																				variables: {
-																								input: {
-																												packageId,
-																												content,
-																								},
-																				},
-																});
-												}
-								}
-
-								const currentExcludes = new Set(
-												details.packageExcludes.map((item) => item.trim()).filter(Boolean),
-								);
-
-								for (const original of originalExcludes.current) {
-												if (!currentExcludes.has(original.title.trim())) {
-																checkAccess();
-
-																await deleteExclude({
-																				variables: {
-																								input: {
-																												_id: original._id,
-																								},
-																				},
-																});
-												}
-								}
-
-								for (const title of currentExcludes) {
-												const exists = originalExcludes.current.some(
-																(item) => item.title.trim() === title,
-												);
-
-												if (!exists) {
-																checkAccess();
-
-																await createExclude({
-																				variables: {
-																								input: {
-																												packageId,
-																												title,
-																								},
-																				},
-																});
-												}
-								}
-
-								const currentTags = new Set(
-												details.packageTags.map((item) => item.trim()).filter(Boolean),
-								);
-
-								for (const original of originalTags.current) {
-												if (!currentTags.has(original.tagName.trim())) {
-																checkAccess();
-
-																await deleteTag({
-																				variables: {
-																								input: {
-																												_id: original._id,
-																								},
-																				},
-																});
-												}
-								}
-
-								for (const tagName of currentTags) {
-												const exists = originalTags.current.some(
-																(item) => item.tagName.trim() === tagName,
-												);
-
-												if (!exists) {
-																checkAccess();
-
-																await createTag({
-																				variables: {
-																								input: {
-																												packageId,
-																												tagName,
-																								},
-																				},
-																});
-												}
-								}
-
-                const policy = policyData?.getPackagePolicy?.[0];
-
-                if (policy?._id) {
-                        await updatePolicy({
-                                variables: {
-                                        policyId: policy._id,
-                                        input: {
-                                                cancelPolicy: details.cancelPolicy,
-                                                refundPolicy: details.refundPolicy,
-                                        },
-                                },
-                        });
-                }
-
-								const hasPolicy =
-												Boolean(details.cancelPolicy.trim()) ||
-												Boolean(details.refundPolicy.trim());
-
-								if (originalPolicy.current?._id) {
-												if (hasPolicy) {
-																checkAccess();
-
-																await updatePolicy({
-																				variables: {
-																								policyId: originalPolicy.current._id,
-																								input: {
-																												cancelPolicy: details.cancelPolicy,
-																												refundPolicy: details.refundPolicy,
-																								},
-																				},
-																});
-												} else {
-																checkAccess();
-
-																await deletePolicy({
-																				variables: {
-																								input: {
-																												_id: originalPolicy.current._id,
-																								},
-																				},
-																});
-												}
-								} else if (hasPolicy) {
-												checkAccess();
-
-												await createPolicy({
-																variables: {
-																				input: {
-																								packageId,
-																								cancelPolicy: details.cancelPolicy,
-																								refundPolicy: details.refundPolicy,
-																				},
-																},
-												});
-								}
-
-                setComplete(true);
-
-                await router.push('/mypage/packages?updated=1');
-        } catch (error) {
-                setFailure(
-                        error instanceof Error
-                                ? error.message
-                                : 'Unable to update package.',
-                );
-        } finally {
-                lock.current = false;
-                setBusy(false);
-        }
-
-        return;
-}
+							}
+						} else {
+							add(() =>
+								createSchedule({
+									variables: {
+										input: {
+											packageId,
+											startDate: item.startDate,
+											endDate: item.endDate,
+											availableSeats: Number(item.availableSeats),
+											scheduleStatus: item.scheduleStatus || undefined,
+										},
+									},
+								}),
+							);
+						}
+					}
+					const syncList = (
+						original: { _id: string; value: string }[],
+						values: string[],
+						create: (value: string) => ReturnType<EditAction>,
+						remove: (_id: string) => ReturnType<EditAction>,
+						lowercase = false,
+					) => {
+						const normalize = (value: string) => (lowercase ? value.trim().toLowerCase() : value.trim());
+						const remaining = new Set(values.map(normalize).filter(Boolean));
+						for (const item of original) {
+							if (remaining.has(normalize(item.value))) remaining.delete(normalize(item.value));
+							else add(() => remove(item._id));
+						}
+						for (const value of remaining) add(() => create(value));
+					};
+					syncList(
+						originalIncludes.current.map((item) => ({ _id: item._id, value: item.content })),
+						details.packageIncludes,
+						(content) => createInclude({ variables: { input: { packageId, content } } }),
+						(_id) => deleteInclude({ variables: { input: { _id } } }),
+					);
+					syncList(
+						originalExcludes.current.map((item) => ({ _id: item._id, value: item.title })),
+						details.packageExcludes,
+						(title) => createExclude({ variables: { input: { packageId, title } } }),
+						(_id) => deleteExclude({ variables: { input: { _id } } }),
+					);
+					syncList(
+						originalTags.current.map((item) => ({ _id: item._id, value: item.tagName })),
+						details.packageTags,
+						(tagName) => createTag({ variables: { input: { packageId, tagName } } }),
+						(_id) => deleteTag({ variables: { input: { _id } } }),
+						true,
+					);
+					const policy = originalPolicy.current;
+					const input = { cancelPolicy: details.cancelPolicy.trim(), refundPolicy: details.refundPolicy.trim() };
+					if (policy) {
+						if (!input.cancelPolicy && !input.refundPolicy)
+							add(() => deletePolicy({ variables: { input: { _id: policy._id } } }));
+						else if (input.cancelPolicy !== policy.cancelPolicy || input.refundPolicy !== policy.refundPolicy)
+							add(() => updatePolicy({ variables: { policyId: policy._id, input } }));
+					} else if (input.cancelPolicy && input.refundPolicy)
+						add(() => createPolicy({ variables: { input: { packageId, ...input } } }));
+					editActions.current = actions;
+					setEditStarted(true);
+				}
+				await runEditActions(editActions.current, editProgress.current, () => {
+					if (!authorized()) throw new Error('Your agent session changed. Please sign in again.');
+				});
+				setComplete(true);
+				try {
+					await router.push('/mypage/packages?updated=1');
+				} catch {
+					setFailure('Changes saved. Use Back to My Packages.');
+				}
+			} catch (error) {
+				const rejectedBeforeWrite =
+					error instanceof ApolloError &&
+					!error.networkError &&
+					error.graphQLErrors.length > 0 &&
+					error.graphQLErrors.every((item) =>
+						[
+							'GRAPHQL_PARSE_FAILED',
+							'GRAPHQL_VALIDATION_FAILED',
+							'BAD_USER_INPUT',
+							'UNAUTHENTICATED',
+							'FORBIDDEN',
+						].includes(String(item.extensions?.code)),
+					);
+				const unknownResult = !rejectedBeforeWrite;
+				setUncertain(unknownResult);
+				setFailure(
+					`${editProgress.current.next}/${editActions.current.length} changes confirmed. ${error instanceof Error ? error.message : 'Saving failed.'} ${unknownResult ? 'Check My Packages and reload before editing again; the last write may have completed.' : 'Retry to save the remaining changes. Inputs are locked to avoid repeating completed writes.'}`,
+				);
+			} finally {
+				lock.current = false;
+				setBusy(false);
+			}
+			return;
+		}
 		lock.current = true;
 		setBusy(true);
 		setFailure('');
@@ -754,37 +614,49 @@ const originalPolicy = useRef<{
 			setBusy(false);
 		}
 	}
-	const disabled = busy || uploading || created || uncertain;
+	const disabled = busy || uploading || created || uncertain || complete || editStarted;
 	const fields = {
 		values,
 		errors,
 		disabled,
 		onChange: (key: FieldName, value: string) => setValues((previous) => ({ ...previous, [key]: value })),
 	};
+	if (isEdit && (editLoading || (!editReady && !editError && editDataComplete && ownsPackage)))
+		return <Skeleton aria-label="Loading package editor" height={400} />;
+	if (isEdit && (!editReady || editError || !ownsPackage))
+		return (
+			<Alert severity="error">
+				Unable to load this package for editing. Only your own active packages can be edited. {editError?.message}{' '}
+				<Link href="/mypage/packages">Back to My Packages</Link>
+			</Alert>
+		);
 	return (
 		<div className="package-creation-page">
 			<div className="package-creation-container">
 				<Breadcrumbs separator="/" aria-label="Breadcrumb">
 					<Link href="/">Home</Link>
 					<Link href="/mypage/packages">My Packages</Link>
-					<span aria-current="page">
-        			{isEdit ? 'Edit Package' : 'Create New Package'}
-					</span>
+					<span aria-current="page">{isEdit ? 'Edit Package' : 'Create New Package'}</span>
 				</Breadcrumbs>
 				<Button component={Link} href="/mypage/packages" startIcon={<ArrowBack />} disabled={busy || uploading}>
 					Back to My Packages
 				</Button>
 				<header className="package-creation-heading">
-					<Typography component="h1">
-									{isEdit ? 'Edit Package' : 'Create New Package'}
-					</Typography>
+					<Typography component="h1">{isEdit ? 'Edit Package' : 'Create New Package'}</Typography>
 
 					<Typography color="text.secondary">
-									{isEdit
-													? 'Update your travel package information.'
-													: 'Build your next travel experience, one step at a time.'}
+						{isEdit
+							? 'Update your travel package information.'
+							: 'Build your next travel experience, one step at a time.'}
 					</Typography>
 				</header>
+				{isEdit && (
+					<Alert severity="info">
+						Only open schedules are shown. Closed and finished schedules remain unchanged. Existing dates and seats
+						cannot be edited, and existing schedules cannot be removed here. You can add departures or change an open
+						schedule’s status.
+					</Alert>
+				)}
 				<PackageStepper activeStep={activeStep} />
 				<Paper
 					component="form"
@@ -806,17 +678,17 @@ const originalPolicy = useRef<{
 								? 'Set the base price travelers will pay per person for this package.'
 								: activeStep === 6
 									? isEdit
-													? 'Review & Save'
-													: 'Review & Publish'
+										? 'Review & Save'
+										: 'Review & Publish'
 									: activeStep === 0
 										? 'Basic Information'
 										: stepLabels[activeStep]}
 						</Typography>
 						{activeStep === 6 && (
 							<Typography color="text.secondary">
-       				 {isEdit
-                ? 'Review your changes before saving them.'
-                : 'Review your package information before publishing it on WWT.'}
+								{isEdit
+									? 'Review your changes before saving them.'
+									: 'Review your package information before publishing it on WWT.'}
 							</Typography>
 						)}
 					</header>
@@ -837,11 +709,18 @@ const originalPolicy = useRef<{
 						<ItineraryStep items={itineraries} errors={itineraryErrors} disabled={disabled} onChange={setItineraries} />
 					)}
 					{activeStep === 4 && (
-						<ScheduleStep items={schedules} errors={scheduleErrors} disabled={disabled} onChange={setSchedules} />
+						<ScheduleStep
+							protectExisting={isEdit}
+							items={schedules}
+							errors={scheduleErrors}
+							disabled={disabled}
+							onChange={setSchedules}
+						/>
 					)}
 					{activeStep === 5 && <PricingStep {...fields} scheduleCount={schedules.length} />}
 					{activeStep === 6 && (
 						<ReviewStep
+							mode={mode}
 							details={details}
 							values={values}
 							images={images}
@@ -862,7 +741,8 @@ const originalPolicy = useRef<{
 					)}
 					{complete && (
 						<Alert severity="success">
-							Package published successfully. <Link href="/mypage/packages">Back to My Packages</Link>
+							{isEdit ? 'Package updated successfully.' : 'Package published successfully.'}{' '}
+							<Link href="/mypage/packages">Back to My Packages</Link>
 						</Alert>
 					)}
 					<footer className="package-form-actions">
@@ -875,18 +755,20 @@ const originalPolicy = useRef<{
 						</Button>
 						<Button type="submit" variant="contained" disabled={busy || uploading || uncertain || complete}>
 							{busy
-											? isEdit
-															? 'Saving…'
-															: 'Publishing…'
-											: activeStep < 6
-															? activeStep === 5
-																			? 'Next Step'
-																			: 'Next'
-															: created
-																			? 'Retry Remaining Entries'
-																			: isEdit
-																							? 'Save Changes'
-																							: 'Publish Package'}
+								? isEdit
+									? 'Saving…'
+									: 'Publishing…'
+								: activeStep < 6
+									? activeStep === 5
+										? 'Next Step'
+										: 'Next'
+									: created
+										? 'Retry Remaining Entries'
+										: isEdit
+											? editStarted
+												? 'Retry Remaining Changes'
+												: 'Save Changes'
+											: 'Publish Package'}
 						</Button>
 					</footer>
 				</Paper>
