@@ -241,6 +241,24 @@ function AgentPackages({ memberId }: { memberId: string }) {
 													{item.packageRating} rating
 												</span>
 											</div>
+											<div className="my-package-actions">
+															<Button
+																			variant="outlined"
+																			size="small"
+																			onClick={(event) => {
+																							event.stopPropagation();
+
+																							void router.push({
+																											pathname: '/mypage/packages',
+																											query: {
+																															edit: item._id,
+																											},
+																							});
+																			}}
+															>
+																			Edit
+															</Button>
+											</div>
 										</div>
 									</Paper>
 								))}

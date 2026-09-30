@@ -1,52 +1,83 @@
-import {
-	initialTripDetails,
-	validateTripDetails,
-	TripDetailsErrors,
-	newTripDetailsProgress,
-	publishTripDetails,
-} from './tripDetailsState';
-import { useRef, useState } from 'react';
-import Link from 'next/link';
-import { useRouter } from 'next/router';
-import { ApolloError, useMutation } from '@apollo/client';
-import { Alert, Breadcrumbs, Button, Paper, Typography } from '@mui/material';
-import ArrowBack from '@mui/icons-material/ArrowBack';
 import { currentUserVar } from '@/apollo/store';
 import {
-	CREATE_TRAVEL_PACKAGE,
-	CREATE_PACKAGE_INCLUDE,
 	CREATE_PACKAGE_EXCLUDE,
-	CREATE_PACKAGE_TAG,
-	CREATE_PACKAGE_POLICY,
+	CREATE_PACKAGE_INCLUDE,
 	CREATE_PACKAGE_ITINERARY,
+	CREATE_PACKAGE_POLICY,
 	CREATE_PACKAGE_SCHEDULE,
+	CREATE_PACKAGE_TAG,
+	CREATE_TRAVEL_PACKAGE,
+	DELETE_PACKAGE_EXCLUDE,
+	DELETE_PACKAGE_INCLUDE,
+	DELETE_PACKAGE_ITINERARY,
+	DELETE_PACKAGE_POLICY,
+	DELETE_PACKAGE_SCHEDULE,
+	DELETE_PACKAGE_TAG,
+	UPDATE_PACKAGE_ITINERARY,
+	UPDATE_PACKAGE_POLICY,
+	UPDATE_PACKAGE_SCHEDULE,
+	UPDATE_TRAVEL_PACKAGE,
 	UPLOAD_PACKAGE_IMAGE,
 } from '@/apollo/user/mutation';
+import {
+	GET_PACKAGE_INCLUSIONS,
+	GET_PACKAGE_ITINERARIES,
+	GET_PACKAGE_POLICY,
+	GET_PACKAGE_SCHEDULES,
+	GET_PACKAGE_TAGS,
+	GET_TRAVEL_PACKAGE,
+} from '@/apollo/user/query';
 import { MemberType } from '@/libs/enums/member.enum';
+import { ApolloError, useMutation, useQuery } from '@apollo/client';
+import ArrowBack from '@mui/icons-material/ArrowBack';
+import { Alert, Breadcrumbs, Button, Paper, Typography } from '@mui/material';
+import Link from 'next/link';
+import { useRouter } from 'next/router';
+import { useEffect, useRef, useState } from 'react';
 import BasicInfoStep from './BasicInfoStep';
 import DestinationStep from './DestinationStep';
-import TripDetailsStep from './TripDetailsStep';
 import ItineraryStep from './ItineraryStep';
-import ScheduleStep from './ScheduleStep';
+import PackageStepper, { stepLabels } from './PackageStepper';
 import PricingStep from './PricingStep';
 import ReviewStep from './ReviewStep';
-import PackageStepper, { stepLabels } from './PackageStepper';
+import ScheduleStep from './ScheduleStep';
+import TripDetailsStep from './TripDetailsStep';
 import {
 	buildPackageInput,
 	Errors,
 	FieldName,
 	initialValues,
+	itinerariesToValues,
 	ItineraryValues,
+	packageToValues,
+	schedulesToValues,
 	ScheduleValues,
 	stepFields,
 	validateItineraries,
 	validatePackage,
-	validateSchedules,
+	validateSchedules
 } from './formState';
-import { publishPackage, PublishProgress } from './publishPackage';
 
-export default function PackageForm({ memberId }: { memberId: string }) {
-	const router = useRouter();
+import { publishPackage, PublishProgress } from './publishPackage';
+import {
+	initialTripDetails,
+	newTripDetailsProgress,
+	packageTripDetailsToValues,
+	publishTripDetails,
+	TripDetailsErrors,
+	validateTripDetails
+} from './tripDetailsState';
+
+	type PackageFormProps = {
+					memberId: string;
+					mode?: 'create' | 'edit';
+					packageId?: string;
+	};
+
+
+export default function PackageForm({ memberId, mode = 'create', packageId}: PackageFormProps) {
+  const router = useRouter();
+  const isEdit = mode === 'edit';
 	const [details, setDetails] = useState(initialTripDetails);
 	const [detailErrors, setDetailErrors] = useState<TripDetailsErrors>({});
 	const detailsProgress = useRef(newTripDetailsProgress());
@@ -66,8 +97,159 @@ export default function PackageForm({ memberId }: { memberId: string }) {
 	const [uncertain, setUncertain] = useState(false);
 	const lock = useRef(false);
 	const uploadLock = useRef(false);
+	const hydrated = useRef(false);
+	const originalItineraries = useRef<{ _id: string }[]>([]);
+const originalSchedules = useRef<{ _id: string }[]>([]);
+
+const originalIncludes = useRef<
+        { _id: string; content: string }[]
+>([]);
+
+const originalExcludes = useRef<
+        { _id: string; title: string }[]
+>([]);
+
+const originalTags = useRef<
+        { _id: string; tagName: string }[]
+>([]);
+
+const originalPolicy = useRef<{
+        _id: string;
+        cancelPolicy: string;
+        refundPolicy: string;
+} | null>(null);
 	const progress = useRef<PublishProgress>({ packageId: '', itineraries: 0, schedules: 0 });
 	const headingRef = useRef<HTMLHeadingElement>(null);
+	const shouldLoadEditData = isEdit && Boolean(packageId);
+
+	const { data: packageData, loading: packageLoading } = useQuery(GET_TRAVEL_PACKAGE, {
+					variables: { input: packageId ?? '' },
+					skip: !shouldLoadEditData,
+					fetchPolicy: 'no-cache',
+	});
+
+	const { data: itineraryData, loading: itineraryLoading } = useQuery(GET_PACKAGE_ITINERARIES, {
+					variables: { packageId: packageId ?? '' },
+					skip: !shouldLoadEditData,
+					fetchPolicy: 'no-cache',
+	});
+
+	const { data: scheduleData, loading: scheduleLoading } = useQuery(GET_PACKAGE_SCHEDULES, {
+					variables: { packageId: packageId ?? '' },
+					skip: !shouldLoadEditData,
+					fetchPolicy: 'no-cache',
+	});
+
+	const { data: inclusionData, loading: inclusionLoading } = useQuery(GET_PACKAGE_INCLUSIONS, {
+					variables: { packageId: packageId ?? '' },
+					skip: !shouldLoadEditData,
+					fetchPolicy: 'no-cache',
+	});
+
+	const { data: tagData, loading: tagLoading } = useQuery(GET_PACKAGE_TAGS, {
+					variables: { packageId: packageId ?? '' },
+					skip: !shouldLoadEditData,
+					fetchPolicy: 'no-cache',
+	});
+
+	const { data: policyData, loading: policyLoading } = useQuery(GET_PACKAGE_POLICY, {
+					variables: { packageId: packageId ?? '' },
+					skip: !shouldLoadEditData,
+					fetchPolicy: 'no-cache',
+	});
+
+
+	const editLoading =
+					packageLoading ||
+					itineraryLoading ||
+					scheduleLoading ||
+					inclusionLoading ||
+					tagLoading ||
+					policyLoading;
+
+	useEffect(() => {
+					if (
+									hydrated.current ||
+									!isEdit ||
+									editLoading
+					) {
+									return;
+					}
+
+					const pkg = packageData?.getTravelPackage;
+					if (!pkg) return;
+
+					hydrated.current = true;
+
+					originalItineraries.current =
+									(itineraryData?.getItineraries ?? []).map((item) => ({
+													_id: String(item._id),
+									}));
+
+					originalSchedules.current =
+									(scheduleData?.getPackageSchedules ?? []).map((item) => ({
+													_id: String(item._id),
+									}));
+
+					originalIncludes.current =
+									(inclusionData?.getPackageIncludes ?? []).map((item) => ({
+													_id: String(item._id),
+													content: item.content,
+									}));
+
+					originalExcludes.current =
+									(inclusionData?.getPackageExcludes ?? []).map((item) => ({
+													_id: String(item._id),
+													title: item.title,
+									}));
+
+					originalTags.current =
+									(tagData?.getPackageTags ?? []).map((item) => ({
+													_id: String(item._id),
+													tagName: item.tagName,
+									}));
+
+					const policy = policyData?.getPackagePolicy?.[0];
+
+					originalPolicy.current = policy
+									? {
+													_id: String(policy._id),
+													cancelPolicy: policy.cancelPolicy,
+													refundPolicy: policy.refundPolicy,
+									}
+									: null;
+
+					queueMicrotask(() => {
+									setValues(packageToValues(pkg));
+									setImages(pkg.packageImages ?? []);
+
+									setItineraries(
+													itinerariesToValues(itineraryData?.getItineraries ?? []),
+									);
+
+									setSchedules(
+													schedulesToValues(scheduleData?.getPackageSchedules ?? []),
+									);
+
+									setDetails(
+													packageTripDetailsToValues(
+																	inclusionData?.getPackageIncludes ?? [],
+																	inclusionData?.getPackageExcludes ?? [],
+																	tagData?.getPackageTags ?? [],
+																	policyData?.getPackagePolicy ?? [],
+													),
+									);
+					});
+	}, [
+					isEdit,
+					editLoading,
+					packageData,
+					itineraryData,
+					scheduleData,
+					inclusionData,
+					tagData,
+					policyData,
+	]);			
 	const [create] = useMutation(CREATE_TRAVEL_PACKAGE, { fetchPolicy: 'no-cache' });
 	const [createItinerary] = useMutation(CREATE_PACKAGE_ITINERARY, { fetchPolicy: 'no-cache' });
 	const [createSchedule] = useMutation(CREATE_PACKAGE_SCHEDULE, { fetchPolicy: 'no-cache' });
@@ -75,7 +257,46 @@ export default function PackageForm({ memberId }: { memberId: string }) {
 	const [createExclude] = useMutation(CREATE_PACKAGE_EXCLUDE, { fetchPolicy: 'no-cache' });
 	const [createTag] = useMutation(CREATE_PACKAGE_TAG, { fetchPolicy: 'no-cache' });
 	const [createPolicy] = useMutation(CREATE_PACKAGE_POLICY, { fetchPolicy: 'no-cache' });
+	const [updatePackage] = useMutation(UPDATE_TRAVEL_PACKAGE, {
+					fetchPolicy: 'no-cache',
+	});
+
+	const [updateItinerary] = useMutation(UPDATE_PACKAGE_ITINERARY, {
+					fetchPolicy: 'no-cache',
+	});
+
+	const [updateSchedule] = useMutation(UPDATE_PACKAGE_SCHEDULE, {
+					fetchPolicy: 'no-cache',
+	});
+
+	const [updatePolicy] = useMutation(UPDATE_PACKAGE_POLICY, {
+					fetchPolicy: 'no-cache',
+	});
 	const [upload] = useMutation(UPLOAD_PACKAGE_IMAGE, { fetchPolicy: 'no-cache' });
+
+	const [deleteSchedule] = useMutation(DELETE_PACKAGE_SCHEDULE, {
+        fetchPolicy: 'no-cache',
+});
+
+	const [deleteItinerary] = useMutation(DELETE_PACKAGE_ITINERARY, {
+					fetchPolicy: 'no-cache',
+	});
+
+	const [deleteInclude] = useMutation(DELETE_PACKAGE_INCLUDE, {
+					fetchPolicy: 'no-cache',
+	});
+
+	const [deleteExclude] = useMutation(DELETE_PACKAGE_EXCLUDE, {
+					fetchPolicy: 'no-cache',
+	});
+
+	const [deleteTag] = useMutation(DELETE_PACKAGE_TAG, {
+					fetchPolicy: 'no-cache',
+	});
+
+	const [deletePolicy] = useMutation(DELETE_PACKAGE_POLICY, {
+					fetchPolicy: 'no-cache',
+	});
 	function authorized() {
 		const user = currentUserVar();
 		return user?._id === memberId && user.memberType === MemberType.AGENT;
@@ -157,6 +378,315 @@ export default function PackageForm({ memberId }: { memberId: string }) {
 	async function publish() {
 		if (!authorized() || lock.current || uploadLock.current || uncertain || complete) return;
 		if (!validate()) return;
+		if (isEdit) {
+        if (!packageId) {
+                setFailure('Package ID is missing.');
+                return;
+        }
+
+        lock.current = true;
+        setBusy(true);
+        setFailure('');
+
+        try {
+                const checkAccess = () => {
+                        if (!authorized()) {
+                                throw new Error('Your agent session changed. Please sign in again.');
+                        }
+                };
+
+                checkAccess();
+
+                await updatePackage({
+                        variables: {
+                                input: {
+                                        _id: packageId,
+                                        ...buildPackageInput(values, images),
+                                },
+                        },
+                });
+
+                for (const item of itineraries) {
+												checkAccess();
+
+												if (item._id) {
+																await updateItinerary({
+																				variables: {
+																								input: {
+																												_id: item._id,
+																												packageId,
+																												dayNumber: Number(item.dayNumber),
+																												title: item.title,
+																												description: item.description,
+																								},
+																				},
+																});
+												} else {
+																await createItinerary({
+																				variables: {
+																								input: {
+																												packageId,
+																												dayNumber: Number(item.dayNumber),
+																												title: item.title,
+																												description: item.description,
+																								},
+																				},
+																});
+												}
+								}
+								const currentItineraryIds = new Set(
+												itineraries
+																.map((item) => item._id)
+																.filter((id): id is string => Boolean(id)),
+								);
+
+								for (const original of originalItineraries.current) {
+												if (!currentItineraryIds.has(original._id)) {
+																checkAccess();
+
+																await deleteItinerary({
+																				variables: {
+																								input: {
+																												_id: original._id,
+																								},
+																				},
+																});
+												}
+								}
+
+                for (const item of schedules) {
+												checkAccess();
+
+												if (item._id) {
+																await updateSchedule({
+																				variables: {
+																								input: {
+																												_id: item._id,
+																												packageId,
+																												startDate: item.startDate,
+																												endDate: item.endDate,
+																												availableSeats: Number(item.availableSeats),
+																												scheduleStatus: item.scheduleStatus,
+																								},
+																				},
+																});
+												} else {
+																await createSchedule({
+																				variables: {
+																								input: {
+																												packageId,
+																												startDate: item.startDate,
+																												endDate: item.endDate,
+																												availableSeats: Number(item.availableSeats),
+																												scheduleStatus: item.scheduleStatus || undefined,
+																								},
+																				},
+																});
+												}
+								}
+								const currentScheduleIds = new Set(
+												schedules
+																.map((item) => item._id)
+																.filter((id): id is string => Boolean(id)),
+								);
+
+								for (const original of originalSchedules.current) {
+												if (!currentScheduleIds.has(original._id)) {
+																checkAccess();
+
+																await deleteSchedule({
+																				variables: {
+																								input: {
+																												_id: original._id,
+																								},
+																				},
+																});
+												}
+								}
+
+								const currentIncludes = new Set(
+												details.packageIncludes.map((item) => item.trim()).filter(Boolean),
+								);
+
+								for (const original of originalIncludes.current) {
+												if (!currentIncludes.has(original.content.trim())) {
+																checkAccess();
+
+																await deleteInclude({
+																				variables: {
+																								input: {
+																												_id: original._id,
+																								},
+																				},
+																});
+												}
+								}
+
+								for (const content of currentIncludes) {
+												const exists = originalIncludes.current.some(
+																(item) => item.content.trim() === content,
+												);
+
+												if (!exists) {
+																checkAccess();
+
+																await createInclude({
+																				variables: {
+																								input: {
+																												packageId,
+																												content,
+																								},
+																				},
+																});
+												}
+								}
+
+								const currentExcludes = new Set(
+												details.packageExcludes.map((item) => item.trim()).filter(Boolean),
+								);
+
+								for (const original of originalExcludes.current) {
+												if (!currentExcludes.has(original.title.trim())) {
+																checkAccess();
+
+																await deleteExclude({
+																				variables: {
+																								input: {
+																												_id: original._id,
+																								},
+																				},
+																});
+												}
+								}
+
+								for (const title of currentExcludes) {
+												const exists = originalExcludes.current.some(
+																(item) => item.title.trim() === title,
+												);
+
+												if (!exists) {
+																checkAccess();
+
+																await createExclude({
+																				variables: {
+																								input: {
+																												packageId,
+																												title,
+																								},
+																				},
+																});
+												}
+								}
+
+								const currentTags = new Set(
+												details.packageTags.map((item) => item.trim()).filter(Boolean),
+								);
+
+								for (const original of originalTags.current) {
+												if (!currentTags.has(original.tagName.trim())) {
+																checkAccess();
+
+																await deleteTag({
+																				variables: {
+																								input: {
+																												_id: original._id,
+																								},
+																				},
+																});
+												}
+								}
+
+								for (const tagName of currentTags) {
+												const exists = originalTags.current.some(
+																(item) => item.tagName.trim() === tagName,
+												);
+
+												if (!exists) {
+																checkAccess();
+
+																await createTag({
+																				variables: {
+																								input: {
+																												packageId,
+																												tagName,
+																								},
+																				},
+																});
+												}
+								}
+
+                const policy = policyData?.getPackagePolicy?.[0];
+
+                if (policy?._id) {
+                        await updatePolicy({
+                                variables: {
+                                        policyId: policy._id,
+                                        input: {
+                                                cancelPolicy: details.cancelPolicy,
+                                                refundPolicy: details.refundPolicy,
+                                        },
+                                },
+                        });
+                }
+
+								const hasPolicy =
+												Boolean(details.cancelPolicy.trim()) ||
+												Boolean(details.refundPolicy.trim());
+
+								if (originalPolicy.current?._id) {
+												if (hasPolicy) {
+																checkAccess();
+
+																await updatePolicy({
+																				variables: {
+																								policyId: originalPolicy.current._id,
+																								input: {
+																												cancelPolicy: details.cancelPolicy,
+																												refundPolicy: details.refundPolicy,
+																								},
+																				},
+																});
+												} else {
+																checkAccess();
+
+																await deletePolicy({
+																				variables: {
+																								input: {
+																												_id: originalPolicy.current._id,
+																								},
+																				},
+																});
+												}
+								} else if (hasPolicy) {
+												checkAccess();
+
+												await createPolicy({
+																variables: {
+																				input: {
+																								packageId,
+																								cancelPolicy: details.cancelPolicy,
+																								refundPolicy: details.refundPolicy,
+																				},
+																},
+												});
+								}
+
+                setComplete(true);
+
+                await router.push('/mypage/packages?updated=1');
+        } catch (error) {
+                setFailure(
+                        error instanceof Error
+                                ? error.message
+                                : 'Unable to update package.',
+                );
+        } finally {
+                lock.current = false;
+                setBusy(false);
+        }
+
+        return;
+}
 		lock.current = true;
 		setBusy(true);
 		setFailure('');
@@ -237,14 +767,23 @@ export default function PackageForm({ memberId }: { memberId: string }) {
 				<Breadcrumbs separator="/" aria-label="Breadcrumb">
 					<Link href="/">Home</Link>
 					<Link href="/mypage/packages">My Packages</Link>
-					<span aria-current="page">Create New Package</span>
+					<span aria-current="page">
+        			{isEdit ? 'Edit Package' : 'Create New Package'}
+					</span>
 				</Breadcrumbs>
 				<Button component={Link} href="/mypage/packages" startIcon={<ArrowBack />} disabled={busy || uploading}>
 					Back to My Packages
 				</Button>
 				<header className="package-creation-heading">
-					<Typography component="h1">Create New Package</Typography>
-					<Typography color="text.secondary">Build your next travel experience, one step at a time.</Typography>
+					<Typography component="h1">
+									{isEdit ? 'Edit Package' : 'Create New Package'}
+					</Typography>
+
+					<Typography color="text.secondary">
+									{isEdit
+													? 'Update your travel package information.'
+													: 'Build your next travel experience, one step at a time.'}
+					</Typography>
 				</header>
 				<PackageStepper activeStep={activeStep} />
 				<Paper
@@ -266,14 +805,18 @@ export default function PackageForm({ memberId }: { memberId: string }) {
 							{activeStep === 5
 								? 'Set the base price travelers will pay per person for this package.'
 								: activeStep === 6
-									? 'Review & Publish'
+									? isEdit
+													? 'Review & Save'
+													: 'Review & Publish'
 									: activeStep === 0
 										? 'Basic Information'
 										: stepLabels[activeStep]}
 						</Typography>
 						{activeStep === 6 && (
 							<Typography color="text.secondary">
-								Review your package information before publishing it on WWT.
+       				 {isEdit
+                ? 'Review your changes before saving them.'
+                : 'Review your package information before publishing it on WWT.'}
 							</Typography>
 						)}
 					</header>
@@ -332,14 +875,18 @@ export default function PackageForm({ memberId }: { memberId: string }) {
 						</Button>
 						<Button type="submit" variant="contained" disabled={busy || uploading || uncertain || complete}>
 							{busy
-								? 'Publishing…'
-								: activeStep < 6
-									? activeStep === 5
-										? 'Next Step'
-										: 'Next'
-									: created
-										? 'Retry Remaining Entries'
-										: 'Publish Package'}
+											? isEdit
+															? 'Saving…'
+															: 'Publishing…'
+											: activeStep < 6
+															? activeStep === 5
+																			? 'Next Step'
+																			: 'Next'
+															: created
+																			? 'Retry Remaining Entries'
+																			: isEdit
+																							? 'Save Changes'
+																							: 'Publish Package'}
 						</Button>
 					</footer>
 				</Paper>

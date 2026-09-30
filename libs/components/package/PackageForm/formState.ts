@@ -50,8 +50,9 @@ export const requiredFields: FieldName[] = [
 export const integerMinimums = { packageDays: 1, packageNights: 0, minPeople: 1, maxPeople: 1 } as const;
 
 export type Errors = Partial<Record<FieldName | 'packageImages', string>>;
-export type ItineraryValues = { dayNumber: string; title: string; description: string };
+export type ItineraryValues = { _id?: string; dayNumber: string; title: string; description: string };
 export type ScheduleValues = {
+	 _id?: string;
 	startDate: string;
 	endDate: string;
 	availableSeats: string;
@@ -194,9 +195,10 @@ export function packageToValues(pkg: PackageDetailData): Values {
 }
 
 export function itinerariesToValues(
-        items: Pick<Itinerary, 'dayNumber' | 'title' | 'description'>[],
+        items: Pick<Itinerary,'_id' | 'dayNumber' | 'title' | 'description'>[],
 ): ItineraryValues[] {
         return items.map((item) => ({
+								_id: String(item._id),
                 dayNumber: String(item.dayNumber),
                 title: item.title ?? '',
                 description: item.description ?? '',
@@ -204,9 +206,10 @@ export function itinerariesToValues(
 }
 
 export function schedulesToValues(
-        items: Pick<PackageSchedule, 'startDate' | 'endDate' | 'availableSeats' | 'scheduleStatus'>[],
+        items: Pick<PackageSchedule,'_id' | 'startDate' | 'endDate' | 'availableSeats' | 'scheduleStatus'>[],
 ): ScheduleValues[] {
         return items.map((item) => ({
+                _id: String(item._id),
                 startDate: String(item.startDate),
                 endDate: String(item.endDate),
                 availableSeats: String(item.availableSeats),
