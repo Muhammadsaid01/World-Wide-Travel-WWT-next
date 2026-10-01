@@ -1,0 +1,44 @@
+.my-bookings-page.agent-bookings-page {
+	.my-bookings-header h1 {
+		font-size: clamp(32px, 4vw, 44px);
+		letter-spacing: -1px;
+	}
+	.my-bookings-controls {
+		align-items: flex-start;
+	}
+	.my-bookings-controls > .MuiTextField-root {
+		min-width: 150px;
+	}
+	.agent-bookings-search {
+		display: flex;
+		align-items: flex-start;
+		gap: 8px;
+		flex: 1 1 280px;
+	}
+	.agent-bookings-search .MuiTextField-root {
+		flex: 1;
+	}
+	.agent-bookings-search .MuiButton-root {
+		min-height: 40px;
+	}
+	.agent-dashboard-table td {
+		overflow-wrap: anywhere;
+	}
+	.agent-bookings-nowrap {
+		white-space: nowrap;
+	}
+	.agent-bookings-actions {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 4px;
+		min-width: 85px;
+	}
+	@media (max-width: 600px) {
+		.agent-bookings-search {
+			flex-basis: 100%;
+		}
+		.my-bookings-controls > .MuiTextField-root {
+			flex: 1;
+		}
+	}
+}

@@ -403,3 +403,12 @@ export const DELETE_PACKAGE_POLICY: TypedDocumentNode<
 		}
 	}
 `;
+
+export const UPDATE_BOOKING_STATUS: TypedDocumentNode<
+ { updateBookingStatus: Pick<Booking, '_id' | 'bookingStatus'> },
+ { input: import('@/libs/types/booking/booking.input').UpdateBookingStatusInput }
+> = gql`
+ mutation UpdateBookingStatus($input: UpdateBookingStatusInput!) {
+  updateBookingStatus(input: $input) { _id bookingStatus }
+ }
+`;

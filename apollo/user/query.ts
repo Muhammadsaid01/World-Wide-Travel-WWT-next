@@ -1138,3 +1138,38 @@ export const GET_MY_TRAVEL_PACKAGES: TypedDocumentNode<
 		}
 	}
 `;
+
+export type AgentBooking = Pick<
+ Booking,
+ '_id' | 'contactName' | 'contactPhone' | 'peopleCount' | 'createdAt' | 'bookingStatus' | 'finalPrice' | 'currency'
+> & {
+ contactEmail?: string | null;
+ packageData?: Pick<TravelPackage, '_id' | 'packageTitle'> | null;
+};
+// GraphQL enum variables use names, unlike the numeric Direction enum in the DTO model.
+export type AgentBookingsInput = Omit<BookingsInquiry, 'direction' | 'search'> & {
+ direction?: keyof typeof Direction;
+ search?: Pick<NonNullable<BookingsInquiry['search']>, 'bookingStatus' | 'text'>;
+};
+export const GET_AGENT_BOOKINGS: TypedDocumentNode<
+ { getBookingsByAgent: { list: AgentBooking[]; metaCounter?: { total: number }[] | null } },
+ { input: AgentBookingsInput }
+> = gql`
+ query GetAgentBookings($input: BookingsInquiry!) {
+  getBookingsByAgent(input: $input) {
+   list {
+    _id
+    contactName
+    contactPhone
+    contactEmail
+    peopleCount
+    createdAt
+    bookingStatus
+    finalPrice
+    currency
+    packageData { _id packageTitle }
+   }
+   metaCounter { total }
+  }
+ }
+`;

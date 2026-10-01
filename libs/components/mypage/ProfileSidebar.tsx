@@ -9,6 +9,7 @@ import { MemberType } from '@/libs/enums/member.enum';
 const routes = {
 	Overview: '/mypage',
 	'My Packages': '/mypage/packages',
+	Bookings: '/mypage/bookings',
 	'My Bookings': '/mypage/my-bookings',
 	'My Articles': '/mypage/articles',
 	'My Travel Mates': '/mypage/travel-mates',
@@ -19,7 +20,7 @@ const routes = {
 	'Edit Profile': '/mypage/edit-profile',
 	Settings: '/mypage/settings',
 } as const;
-type SidebarItem = keyof typeof routes | 'Bookings';
+type SidebarItem = keyof typeof routes;
 type SidebarGroup = { title: string; items: SidebarItem[] };
 const sharedGroups: SidebarGroup[] = [
 	{ title: 'Community', items: ['My Articles', 'My Travel Mates', 'Join Requests', 'Saved'] },
@@ -50,17 +51,6 @@ export default function ProfileSidebar({ active, profileCard }: { active?: Sideb
 				<section key={group.title}>
 					<Typography component="h2">{group.title}</Typography>
 					{group.items.map((item) => {
-						if (!(item in routes))
-							return (
-								<Button
-									key={item}
-									disabled
-									title="This business page is not available yet."
-									aria-label={`${item} — not available yet`}
-								>
-									{item}
-								</Button>
-							);
 						const href = routes[item as keyof typeof routes];
 						const isActive = item === selected;
 						return (
