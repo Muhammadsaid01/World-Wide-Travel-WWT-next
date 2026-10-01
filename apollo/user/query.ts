@@ -89,19 +89,20 @@ export const GET_PACKAGE_SCHEDULES: TypedDocumentNode<
 
 type PublicMember = Pick<Member, 'memberNick' | 'memberImage'>;
 export type PackageDetailData = PackageListItem &
-	Pick<TravelPackage,
-    | 'packageDesc'
-    | 'packageCategory'
-    | 'packageType'
-    | 'packageLevel'
-    | 'packageStatus'
-    | 'minPeople'
-    | 'maxPeople'
-    | 'meetingPoint'
-    | 'latitude'
-    | 'longitude'
-    | 'transportType'
-  > & {
+	Pick<
+		TravelPackage,
+		| 'packageDesc'
+		| 'packageCategory'
+		| 'packageType'
+		| 'packageLevel'
+		| 'packageStatus'
+		| 'minPeople'
+		| 'maxPeople'
+		| 'meetingPoint'
+		| 'latitude'
+		| 'longitude'
+		| 'transportType'
+	> & {
 		packageShortDesc?: string | null;
 		agentData?:
 			| (Pick<
@@ -442,7 +443,9 @@ export const GET_MY_PROFILE: TypedDocumentNode<{ getMyProfile: ProfileMember }, 
 			memberCountry
 			memberFollowerCount
 			memberFollowingCount
-			agentData { _id }
+			agentData {
+				_id
+			}
 		}
 	}
 `;
@@ -548,20 +551,43 @@ export const GET_MY_ARTICLES: TypedDocumentNode<
 `;
 
 export type MyTravelMateItem = Pick<
- import('@/libs/types/travel-mate/travel-mate-post').TravelMatePost,
- '_id' | 'memberId' | 'matePostTitle' | 'matePostStatus' | 'destinationCity' | 'destinationCountry' | 'travelDate' | 'currentMembers' | 'maxMembers'
+	import('@/libs/types/travel-mate/travel-mate-post').TravelMatePost,
+	| '_id'
+	| 'memberId'
+	| 'matePostTitle'
+	| 'matePostStatus'
+	| 'destinationCity'
+	| 'destinationCountry'
+	| 'travelDate'
+	| 'currentMembers'
+	| 'maxMembers'
 >;
-export type MyTravelMatesInput = Omit<import('@/libs/types/travel-mate/travel-mate-post.input').TravelMatePostsInquiry, 'direction'> & { direction?: keyof typeof Direction };
+export type MyTravelMatesInput = Omit<
+	import('@/libs/types/travel-mate/travel-mate-post.input').TravelMatePostsInquiry,
+	'direction'
+> & { direction?: keyof typeof Direction };
 export const GET_MY_TRAVEL_MATES: TypedDocumentNode<
- { getMyTravelMatePosts: { list: MyTravelMateItem[]; metaCounter?: { total: number }[] | null } },
- { input: MyTravelMatesInput }
+	{ getMyTravelMatePosts: { list: MyTravelMateItem[]; metaCounter?: { total: number }[] | null } },
+	{ input: MyTravelMatesInput }
 > = gql`
- query GetMyTravelMates($input: TravelMatePostsInquiry!) {
-  getMyTravelMatePosts(input: $input) {
-   list { _id memberId matePostTitle matePostStatus destinationCity destinationCountry travelDate currentMembers maxMembers }
-   metaCounter { total }
-  }
- }
+	query GetMyTravelMates($input: TravelMatePostsInquiry!) {
+		getMyTravelMatePosts(input: $input) {
+			list {
+				_id
+				memberId
+				matePostTitle
+				matePostStatus
+				destinationCity
+				destinationCountry
+				travelDate
+				currentMembers
+				maxMembers
+			}
+			metaCounter {
+				total
+			}
+		}
+	}
 `;
 
 export type TravelMateMember = Pick<
@@ -668,8 +694,17 @@ export const GET_MY_TRAVEL_MATE_JOIN: TypedDocumentNode<
 		}
 	}
 `;
+export type CommunityTravelMateItem = MyTravelMateItem &
+	Pick<import('@/libs/types/travel-mate/travel-mate-post').TravelMatePost, 'matePostContent' | 'createdAt'> & {
+		memberData?: Pick<Member, '_id' | 'memberNick' | 'memberFullName' | 'memberImage' | 'memberType'> | null;
+	};
 export const GET_MORE_TRAVEL_MATES: TypedDocumentNode<
-	{ getTravelMatePosts: { list: MyTravelMateItem[] } },
+	{
+		getTravelMatePosts: {
+			list: CommunityTravelMateItem[];
+			metaCounter?: { total: number }[] | null;
+		};
+	},
 	{ input: MyTravelMatesInput }
 > = gql`
 	query GetMoreTravelMates($input: TravelMatePostsInquiry!) {
@@ -684,6 +719,75 @@ export const GET_MORE_TRAVEL_MATES: TypedDocumentNode<
 				travelDate
 				currentMembers
 				maxMembers
+				matePostContent
+				createdAt
+				memberData {
+					_id
+					memberNick
+					memberFullName
+					memberImage
+					memberType
+				}
+			}
+			metaCounter {
+				total
+			}
+		}
+	}
+`;
+
+export type CommunityArticleItem = Pick<
+	import('@/libs/types/article/board-article').BoardArticle,
+	| '_id'
+	| 'articleTitle'
+	| 'articleContent'
+	| 'articleImages'
+	| 'articleCategory'
+	| 'articleViewCount'
+	| 'articleLikeCount'
+	| 'articleCommentCount'
+	| 'createdAt'
+> & {
+	memberData?: Pick<Member, '_id' | 'memberNick' | 'memberFullName' | 'memberImage' | 'memberType'> | null;
+};
+export type CommunityArticlesInput = Omit<
+	import('@/libs/types/article/board-article.input').BoardArticlesInquiry,
+	'direction' | 'search'
+> & {
+	direction?: keyof typeof Direction;
+	search?: Pick<NonNullable<import('@/libs/types/article/board-article.input').BoardArticlesInquiry['search']>, 'text'>;
+};
+export const GET_COMMUNITY_ARTICLES: TypedDocumentNode<
+	{
+		getBoardArticles: {
+			list: CommunityArticleItem[];
+			metaCounter?: { total: number }[] | null;
+		};
+	},
+	{ input: CommunityArticlesInput }
+> = gql`
+	query GetCommunityArticles($input: BoardArticlesInquiry!) {
+		getBoardArticles(input: $input) {
+			list {
+				_id
+				articleTitle
+				articleContent
+				articleImages
+				articleCategory
+				articleViewCount
+				articleLikeCount
+				articleCommentCount
+				createdAt
+				memberData {
+					_id
+					memberNick
+					memberFullName
+					memberImage
+					memberType
+				}
+			}
+			metaCounter {
+				total
 			}
 		}
 	}
@@ -1140,36 +1244,41 @@ export const GET_MY_TRAVEL_PACKAGES: TypedDocumentNode<
 `;
 
 export type AgentBooking = Pick<
- Booking,
- '_id' | 'contactName' | 'contactPhone' | 'peopleCount' | 'createdAt' | 'bookingStatus' | 'finalPrice' | 'currency'
+	Booking,
+	'_id' | 'contactName' | 'contactPhone' | 'peopleCount' | 'createdAt' | 'bookingStatus' | 'finalPrice' | 'currency'
 > & {
- contactEmail?: string | null;
- packageData?: Pick<TravelPackage, '_id' | 'packageTitle'> | null;
+	contactEmail?: string | null;
+	packageData?: Pick<TravelPackage, '_id' | 'packageTitle'> | null;
 };
 // GraphQL enum variables use names, unlike the numeric Direction enum in the DTO model.
 export type AgentBookingsInput = Omit<BookingsInquiry, 'direction' | 'search'> & {
- direction?: keyof typeof Direction;
- search?: Pick<NonNullable<BookingsInquiry['search']>, 'bookingStatus' | 'text'>;
+	direction?: keyof typeof Direction;
+	search?: Pick<NonNullable<BookingsInquiry['search']>, 'bookingStatus' | 'text'>;
 };
 export const GET_AGENT_BOOKINGS: TypedDocumentNode<
- { getBookingsByAgent: { list: AgentBooking[]; metaCounter?: { total: number }[] | null } },
- { input: AgentBookingsInput }
+	{ getBookingsByAgent: { list: AgentBooking[]; metaCounter?: { total: number }[] | null } },
+	{ input: AgentBookingsInput }
 > = gql`
- query GetAgentBookings($input: BookingsInquiry!) {
-  getBookingsByAgent(input: $input) {
-   list {
-    _id
-    contactName
-    contactPhone
-    contactEmail
-    peopleCount
-    createdAt
-    bookingStatus
-    finalPrice
-    currency
-    packageData { _id packageTitle }
-   }
-   metaCounter { total }
-  }
- }
+	query GetAgentBookings($input: BookingsInquiry!) {
+		getBookingsByAgent(input: $input) {
+			list {
+				_id
+				contactName
+				contactPhone
+				contactEmail
+				peopleCount
+				createdAt
+				bookingStatus
+				finalPrice
+				currency
+				packageData {
+					_id
+					packageTitle
+				}
+			}
+			metaCounter {
+				total
+			}
+		}
+	}
 `;
