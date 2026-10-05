@@ -4,6 +4,8 @@ import type { Payment } from '@/libs/types/booking/payment';
 import type { PaymentInput } from '@/libs/types/booking/payment.input';
 import type { BoardArticle } from '@/libs/types/article/board-article';
 import type { BoardArticleInput } from '@/libs/types/article/board-article.input';
+import type { CommentEntity } from '@/libs/types/article/comment';
+import type { CommentInput } from '@/libs/types/article/comment.input';
 import { gql, type TypedDocumentNode } from '@apollo/client';
 
 export const LOGIN = gql`
@@ -143,6 +145,73 @@ export const CREATE_BOARD_ARTICLE: TypedDocumentNode<
 			articleImages
 			articleStatus
 			createdAt
+		}
+	}
+`;
+
+export const LIKE_TARGET_BOARD_ARTICLE: TypedDocumentNode<
+	{ likeTargetBoardArticle: Pick<BoardArticle, '_id' | 'articleLikeCount'> },
+	{ articleId: string }
+> = gql`
+	mutation LikeTargetBoardArticle($articleId: String!) {
+		likeTargetBoardArticle(articleId: $articleId) {
+			_id
+			articleLikeCount
+		}
+	}
+`;
+
+export const CREATE_COMMENT: TypedDocumentNode<
+	{
+		createComment: Pick<
+			CommentEntity,
+			| '_id'
+			| 'articleId'
+			| 'memberId'
+			| 'parentCommentId'
+			| 'commentContent'
+			| 'commentLikeCount'
+			| 'commentStatus'
+			| 'createdAt'
+		>;
+	},
+	{ input: CommentInput }
+> = gql`
+	mutation CreateComment($input: CommentInput!) {
+		createComment(input: $input) {
+			_id
+			articleId
+			memberId
+			parentCommentId
+			commentContent
+			commentLikeCount
+			commentStatus
+			createdAt
+		}
+	}
+`;
+
+export const LIKE_TARGET_COMMENT: TypedDocumentNode<
+	{ likeTargetComment: Pick<CommentEntity, '_id' | 'commentLikeCount'> },
+	{ commentId: string }
+> = gql`
+	mutation LikeTargetComment($commentId: String!) {
+		likeTargetComment(commentId: $commentId) {
+			_id
+			commentLikeCount
+		}
+	}
+`;
+
+export const DELETE_COMMENT: TypedDocumentNode<
+	{ deleteComment: Pick<CommentEntity, '_id' | 'articleId' | 'memberId'> },
+	{ commentId: string }
+> = gql`
+	mutation DeleteComment($commentId: String!) {
+		deleteComment(commentId: $commentId) {
+			_id
+			articleId
+			memberId
 		}
 	}
 `;

@@ -5,9 +5,11 @@
 	--travel-stories-gold: #b77b43;
 	background: #f8fafb;
 	color: var(--wwt-text);
+	overflow-x: clip;
 
 	.travel-stories-container {
-		width: min(1200px, calc(100% - 48px));
+		width: calc(100% - 48px);
+		max-width: 1200px;
 		margin-inline: auto;
 	}
 
@@ -26,6 +28,18 @@
 
 		.MuiBreadcrumbs-separator {
 			color: #abb4bc;
+		}
+
+		.MuiBreadcrumbs-ol {
+			min-width: 0;
+			flex-wrap: nowrap;
+		}
+
+		.MuiBreadcrumbs-li:last-child {
+			min-width: 0;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
 		}
 
 		span[aria-current='page'] {
@@ -73,7 +87,7 @@
 	.travel-stories-header > .MuiButton-root {
 		min-height: 48px;
 		padding: 12px 23px;
-		border-radius: 5px;
+		border-radius: 6px;
 		background: var(--travel-stories-navy);
 		box-shadow: 0 5px 14px rgba(8, 44, 77, 0.16);
 		font-size: 12px;
@@ -85,7 +99,7 @@
 	.travel-stories-toolbar {
 		padding: 24px;
 		border: 1px solid #e0e6ea;
-		border-radius: 8px;
+		border-radius: 10px;
 		background: #fff;
 		box-shadow: 0 4px 18px rgba(8, 44, 77, 0.035);
 	}
@@ -100,6 +114,7 @@
 
 		.MuiButton-root {
 			min-width: 98px;
+			min-height: 44px;
 			background: var(--travel-stories-navy);
 			font-size: 11px;
 			font-weight: 800;
@@ -120,10 +135,10 @@
 		gap: 7px;
 
 		.MuiButton-root {
-			min-height: 34px;
-			padding: 7px 14px;
+			min-height: 40px;
+			padding: 8px 15px;
 			border: 1px solid #d8e0e5;
-			border-radius: 18px;
+			border-radius: 999px;
 			color: #687682;
 			font-size: 11px;
 			font-weight: 700;
@@ -135,10 +150,24 @@
 			background: #fff4e9;
 			color: #965d2a;
 		}
+
+		.MuiButton-root:hover {
+			border-color: #b9c6ce;
+			background: #f7f9fa;
+		}
+
+		.MuiButton-root.is-active:hover {
+			border-color: var(--travel-stories-gold);
+			background: #ffefe0;
+		}
 	}
 
 	.travel-stories-filter-row > .MuiTextField-root {
 		min-width: 142px;
+
+		.MuiInputBase-root {
+			min-height: 44px;
+		}
 	}
 
 	.travel-stories-results {
@@ -179,13 +208,14 @@
 	.travel-stories-grid {
 		display: grid;
 		grid-template-columns: repeat(3, minmax(0, 1fr));
-		gap: 24px;
+		gap: 26px;
 	}
 
 	.travel-story-card {
 		display: flex;
 		min-width: 0;
-		min-height: 485px;
+		min-height: 510px;
+		height: 100%;
 		flex-direction: column;
 		overflow: hidden;
 		border: 1px solid #dfe6ea;
@@ -203,6 +233,11 @@
 			transform: translateY(-3px);
 			box-shadow: 0 10px 26px rgba(8, 44, 77, 0.12);
 		}
+
+		&:focus-visible {
+			outline: 3px solid rgba(183, 123, 67, 0.38);
+			outline-offset: 3px;
+		}
 	}
 
 	.travel-story-card-cover {
@@ -219,7 +254,8 @@
 			display: grid;
 			height: 100%;
 			place-items: center;
-			color: #7d8992;
+			background: linear-gradient(135deg, rgba(255, 255, 255, 0.45), transparent), #e7edf0;
+			color: #667681;
 			font-size: 12px;
 		}
 
@@ -245,13 +281,18 @@
 		padding: 21px 22px 17px;
 
 		h2 {
+			display: -webkit-box;
+			min-height: 56px;
 			margin: 17px 0 9px;
+			overflow: hidden;
 			color: var(--travel-stories-navy);
 			font-family: Georgia, 'Times New Roman', serif;
 			font-size: 22px;
 			font-weight: 600;
 			line-height: 1.28;
 			letter-spacing: -0.4px;
+			-webkit-box-orient: vertical;
+			-webkit-line-clamp: 2;
 		}
 	}
 
@@ -259,6 +300,7 @@
 		display: flex;
 		align-items: center;
 		gap: 9px;
+		margin-top: 15px;
 
 		.MuiAvatar-root {
 			width: 34px;
@@ -291,6 +333,7 @@
 
 	.travel-story-card-excerpt {
 		display: -webkit-box;
+		min-height: 59px;
 		overflow: hidden;
 		color: #6c7983;
 		font-size: 12px;
@@ -309,6 +352,7 @@
 		border-top: 1px solid #edf0f2;
 		color: #7a8790;
 		font-size: 9px;
+		line-height: 1.4;
 
 		time {
 			flex-shrink: 0;
@@ -334,6 +378,15 @@
 		display: flex;
 		justify-content: center;
 		margin-top: 42px;
+
+		.MuiPagination-ul {
+			justify-content: center;
+		}
+
+		.MuiPaginationItem-root {
+			min-width: 40px;
+			height: 40px;
+		}
 	}
 
 	.travel-stories-empty {
@@ -369,7 +422,8 @@
 	padding-bottom: 90px;
 
 	.travel-story-detail-back {
-		margin: 22px 0;
+		min-height: 40px;
+		margin: 18px 0 26px;
 		color: var(--travel-stories-navy);
 		font-size: 12px;
 		font-weight: 700;
@@ -384,10 +438,12 @@
 	}
 
 	.travel-story-form-card {
+		width: 100%;
 		max-width: 860px;
 		margin: 36px auto 0;
 		padding: 42px 48px 30px;
 		border-color: #dfe6ea;
+		border-radius: 12px;
 		box-shadow: 0 7px 24px rgba(8, 44, 77, 0.06);
 	}
 
@@ -429,7 +485,7 @@
 		gap: 16px;
 		padding: 20px;
 		border: 1px solid #e0e6ea;
-		border-radius: 8px;
+		border-radius: 10px;
 		background: #fbfcfd;
 
 		h2 {
@@ -451,6 +507,15 @@
 
 	.travel-story-form-upload {
 		border-style: dashed;
+		border-color: #c6d2da;
+		background: #f9fbfc;
+
+		> .MuiButton-root {
+			min-height: 50px;
+			border-color: #c7d1d8;
+			color: var(--travel-stories-navy);
+			font-weight: 700;
+		}
 	}
 
 	.travel-story-cover-selected {
@@ -459,20 +524,32 @@
 		gap: 16px;
 
 		> img {
-			width: 150px;
-			height: 100px;
-			border-radius: 6px;
+			width: 190px;
+			height: 118px;
+			border-radius: 8px;
 			object-fit: cover;
 		}
 
-		> div {
+		.travel-story-cover-details {
+			display: grid;
 			min-width: 0;
+			gap: 10px;
 		}
 
 		.MuiTypography-root {
 			overflow: hidden;
 			text-overflow: ellipsis;
 			white-space: nowrap;
+		}
+	}
+
+	.travel-story-cover-actions {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 6px;
+
+		.MuiButton-root {
+			min-height: 40px;
 		}
 	}
 
@@ -496,6 +573,12 @@
 			flex-direction: column;
 		}
 
+		strong {
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+		}
+
 		small {
 			margin-top: 3px;
 			color: #7a8790;
@@ -513,6 +596,7 @@
 
 		.MuiButton-root {
 			min-width: 120px;
+			min-height: 46px;
 		}
 
 		.MuiButton-contained {
@@ -521,19 +605,21 @@
 	}
 }
 
-.travel-story-detail article {
+.travel-story-detail .travel-story-article {
+	box-sizing: border-box;
+	width: 100%;
 	max-width: 920px;
 	margin: 12px auto 0;
 	overflow: hidden;
 	border: 1px solid #dfe6ea;
-	border-radius: 12px;
+	border-radius: 14px;
 	background: #fff;
 	box-shadow: 0 7px 24px rgba(8, 44, 77, 0.06);
 }
 
 .travel-story-detail-cover {
 	position: relative;
-	height: 410px;
+	height: clamp(320px, 37vw, 440px);
 	background: #e7edf0;
 
 	img {
@@ -544,7 +630,8 @@
 		display: grid;
 		height: 100%;
 		place-items: center;
-		color: #7d8992;
+		background: linear-gradient(135deg, rgba(255, 255, 255, 0.45), transparent), #e7edf0;
+		color: #667681;
 		font-size: 12px;
 	}
 }
@@ -568,24 +655,56 @@
 		font-weight: 500;
 		letter-spacing: -1.4px;
 		line-height: 1.1;
-	}
-
-	> p {
-		margin-top: 25px;
-		color: #596974;
-		font-size: 16px;
-		line-height: 1.85;
+		overflow-wrap: anywhere;
 	}
 
 	.travel-story-detail-content {
+		max-width: 720px;
 		margin-top: 25px;
 
 		p {
 			margin: 0 0 18px;
 			color: #596974;
-			font-size: 16px;
+			font-size: 17px;
 			line-height: 1.85;
+			overflow-wrap: anywhere;
 		}
+	}
+}
+
+.travel-story-detail-author {
+	display: flex;
+	align-items: center;
+	min-width: 0;
+	gap: 10px;
+
+	.MuiAvatar-root {
+		width: 42px;
+		height: 42px;
+		background: #dce7ed;
+		color: var(--travel-stories-navy);
+		font-size: 12px;
+		font-weight: 800;
+	}
+
+	span {
+		display: flex;
+		min-width: 0;
+		flex-direction: column;
+	}
+
+	strong {
+		overflow: hidden;
+		color: var(--travel-stories-navy);
+		font-size: 13px;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	small {
+		margin-top: 3px;
+		color: #7a8790;
+		font-size: 10px;
 	}
 }
 
@@ -615,8 +734,205 @@
 		gap: 5px;
 	}
 
+	.travel-story-like-control {
+		display: inline-flex;
+		align-items: center;
+		gap: 5px;
+		min-height: 40px;
+		padding: 7px 4px;
+		border: 0;
+		background: transparent;
+		color: inherit;
+		font: inherit;
+		cursor: pointer;
+
+		&.is-liked {
+			color: #d8525d;
+		}
+
+		&:disabled {
+			cursor: wait;
+			opacity: 0.65;
+		}
+
+		&:focus-visible {
+			outline: 2px solid var(--travel-stories-navy);
+			outline-offset: 3px;
+		}
+	}
+
 	svg {
 		font-size: 15px;
+	}
+}
+
+.travel-story-like-error {
+	margin-top: 16px;
+}
+
+.travel-story-comments {
+	box-sizing: border-box;
+	width: 100%;
+	max-width: 920px;
+	margin: 28px auto 0;
+	padding: 30px 54px 36px;
+	border: 1px solid #dfe6ea;
+	border-radius: 12px;
+	background: #fff;
+	box-shadow: 0 7px 24px rgba(8, 44, 77, 0.06);
+}
+
+.travel-story-comments-header {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 18px;
+	padding-bottom: 22px;
+	border-bottom: 1px solid #edf0f2;
+
+	h2 {
+		margin: 0 0 6px;
+		color: var(--travel-stories-navy);
+		font-family: Georgia, 'Times New Roman', serif;
+		font-size: 28px;
+		font-weight: 500;
+	}
+}
+
+.travel-story-comments-count {
+	min-width: 34px;
+	padding: 5px 10px;
+	border-radius: 999px;
+	background: #f2f6f8;
+	color: var(--travel-stories-navy);
+	font-size: 12px;
+	font-weight: 800;
+	text-align: center;
+}
+
+.travel-story-comments-loading,
+.travel-story-comments-list {
+	display: grid;
+	gap: 16px;
+	margin-top: 22px;
+}
+
+.travel-story-comment {
+	padding: 0 0 18px;
+	border-bottom: 1px solid #edf0f2;
+}
+
+.travel-story-comment-header,
+.travel-story-comment-author,
+.travel-story-comment-actions,
+.travel-story-comment-form-actions {
+	display: flex;
+	align-items: center;
+}
+
+.travel-story-comment-header {
+	justify-content: space-between;
+	gap: 16px;
+}
+
+.travel-story-comment-author {
+	min-width: 0;
+	gap: 10px;
+
+	> div {
+		min-width: 0;
+	}
+
+	.MuiAvatar-root {
+		width: 42px;
+		height: 42px;
+		flex-shrink: 0;
+		background: #dce7ed;
+		color: var(--travel-stories-navy);
+		font-size: 12px;
+		font-weight: 800;
+	}
+
+	strong,
+	small {
+		display: block;
+	}
+
+	strong {
+		overflow: hidden;
+		color: var(--travel-stories-navy);
+		font-size: 13px;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	small {
+		margin-top: 3px;
+		color: #82909a;
+		font-size: 11px;
+		line-height: 1.45;
+	}
+}
+
+.travel-story-comment-header > .MuiButton-root {
+	min-height: 40px;
+}
+
+.travel-story-comment-content {
+	margin: 15px 0 8px;
+	color: #596974;
+	font-size: 14px;
+	line-height: 1.75;
+	white-space: pre-wrap;
+	word-break: break-word;
+}
+
+.travel-story-comment-actions {
+	flex-wrap: wrap;
+	gap: 4px;
+	color: #74828d;
+	font-size: 11px;
+
+	.MuiIconButton-root {
+		width: 40px;
+		height: 40px;
+		padding: 8px;
+		color: inherit;
+
+		&.is-liked {
+			color: #d8525d;
+		}
+	}
+
+	.MuiTypography-root {
+		margin-left: 8px;
+	}
+}
+
+.travel-story-comments-load-more {
+	display: block;
+	margin: 24px auto 0;
+	color: var(--travel-stories-navy);
+	border-color: #b8c6cf;
+}
+
+.travel-story-comment-form {
+	display: grid;
+	gap: 14px;
+	margin-top: 28px;
+	padding-top: 24px;
+	border-top: 1px solid #edf0f2;
+}
+
+.travel-story-comment-form-actions {
+	justify-content: space-between;
+	gap: 16px;
+
+	.MuiButton-root {
+		min-width: 132px;
+		min-height: 44px;
+		margin-left: auto;
+		background: var(--travel-stories-navy);
 	}
 }
 
@@ -646,12 +962,33 @@
 	}
 }
 
+@media (max-width: 820px) {
+	.travel-stories-page {
+		.travel-stories-header {
+			align-items: flex-start;
+			flex-direction: column;
+			gap: 24px;
+		}
+
+		.travel-stories-filter-row {
+			align-items: stretch;
+			flex-direction: column;
+		}
+
+		.travel-stories-filter-row > .MuiTextField-root {
+			width: 170px;
+		}
+	}
+}
+
 @media (max-width: 620px) {
 	.travel-stories-page,
 	.travel-story-detail,
 	.travel-story-create {
 		.travel-stories-container {
-			width: min(calc(100% - 32px), 1200px);
+			width: auto;
+			max-width: none;
+			margin-inline: 16px;
 		}
 	}
 
@@ -659,9 +996,13 @@
 		.travel-stories-header {
 			align-items: flex-start;
 			flex-direction: column;
-			gap: 24px;
+			gap: 22px;
 			padding-top: 38px;
 			padding-bottom: 30px;
+		}
+		.travel-stories-header h1 {
+			font-size: clamp(40px, 13vw, 52px);
+			letter-spacing: -1.5px;
 		}
 		.travel-stories-header > .MuiButton-root {
 			width: 100%;
@@ -683,6 +1024,7 @@
 			flex-wrap: nowrap;
 			overflow-x: auto;
 			padding-bottom: 4px;
+			scrollbar-width: thin;
 		}
 		.travel-stories-categories .MuiButton-root {
 			flex-shrink: 0;
@@ -702,19 +1044,56 @@
 			grid-template-columns: 1fr;
 		}
 		.travel-story-card {
-			min-height: 470px;
+			min-height: 500px;
+		}
+		.travel-story-card-cover {
+			height: 215px;
+		}
+		.travel-story-card-footer {
+			align-items: flex-start;
+			flex-wrap: wrap;
 		}
 	}
 
 	.travel-story-detail-body {
 		padding: 28px 22px 34px;
+
+		h1 {
+			font-size: clamp(32px, 11vw, 42px);
+			letter-spacing: -0.8px;
+		}
 	}
 	.travel-story-detail-cover {
-		height: 260px;
+		height: 230px;
 	}
 	.travel-story-detail-meta {
 		align-items: flex-start;
 		flex-direction: column;
+	}
+	.travel-story-comments {
+		margin-top: 22px;
+		padding: 24px 22px 28px;
+	}
+	.travel-story-detail-stats {
+		gap: 8px 14px;
+	}
+	.travel-story-comments-header h2 {
+		font-size: 25px;
+	}
+	.travel-story-comment-header {
+		align-items: flex-start;
+	}
+	.travel-story-comment-header > .MuiButton-root {
+		min-height: 40px;
+	}
+	.travel-story-comment-form-actions {
+		align-items: flex-start;
+		flex-direction: column;
+
+		.MuiButton-root {
+			width: 100%;
+			margin-left: 0;
+		}
 	}
 	.travel-story-create .travel-story-form-card {
 		width: 100%;
@@ -729,11 +1108,30 @@
 		width: 100%;
 		height: 180px;
 	}
+	.travel-story-create .travel-story-cover-details {
+		width: 100%;
+	}
+	.travel-story-create .travel-story-cover-actions {
+		.MuiButton-root {
+			flex: 1;
+		}
+	}
 	.travel-story-create .travel-story-form-actions {
 		justify-content: stretch;
 
 		.MuiButton-root {
 			flex: 1;
+		}
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.travel-stories-page .travel-story-card {
+		transition: none;
+
+		&:hover,
+		&:focus-visible {
+			transform: none;
 		}
 	}
 }

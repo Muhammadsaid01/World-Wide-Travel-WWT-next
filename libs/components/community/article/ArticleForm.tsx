@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Alert, Avatar, Box, Button, MenuItem, Paper, TextField, Typography } from '@mui/material';
+import { Alert, Avatar, Box, Button, CircularProgress, MenuItem, Paper, TextField, Typography } from '@mui/material';
 import AddPhotoAlternateOutlined from '@mui/icons-material/AddPhotoAlternateOutlined';
 import DeleteOutlineOutlined from '@mui/icons-material/DeleteOutlineOutlined';
 import { ArticleCategory } from '@/libs/enums/community.enum';
@@ -101,6 +101,7 @@ export default function ArticleForm({ member, submitting, submitError, onSubmit,
 			component="form"
 			className="travel-story-form-card"
 			variant="outlined"
+			aria-busy={submitting}
 			onSubmit={(event) => {
 				event.preventDefault();
 				if (!submitting) {
@@ -120,6 +121,7 @@ export default function ArticleForm({ member, submitting, submitError, onSubmit,
 				<TextField
 					fullWidth
 					label="Article Title"
+					disabled={submitting}
 					value={articleTitle}
 					onChange={(event) => {
 						setArticleTitle(event.target.value);
@@ -133,6 +135,7 @@ export default function ArticleForm({ member, submitting, submitError, onSubmit,
 					fullWidth
 					select
 					label="Category"
+					disabled={submitting}
 					value={articleCategory}
 					onChange={(event) => {
 						setArticleCategory(event.target.value as ArticleCategory | '');
@@ -157,24 +160,26 @@ export default function ArticleForm({ member, submitting, submitError, onSubmit,
 					{coverPreview ? (
 						<div className="travel-story-cover-selected">
 							<Box component="img" src={coverPreview} alt="Selected cover preview" />
-							<div>
-								<Typography>{coverFile?.name}</Typography>
-								<Button component="label" type="button" color="inherit" startIcon={<AddPhotoAlternateOutlined />} disabled={submitting}>
-									Change image
-									<input
-										hidden
-										type="file"
-										accept="image/jpeg,image/jpg,image/png"
-										disabled={submitting}
-										onChange={(event) => {
-											selectCover(event.target.files?.[0]);
-											event.target.value = '';
-										}}
-									/>
-								</Button>
-								<Button type="button" color="inherit" startIcon={<DeleteOutlineOutlined />} onClick={removeCover} disabled={submitting}>
-									Remove image
-								</Button>
+							<div className="travel-story-cover-details">
+								<Typography title={coverFile?.name}>{coverFile?.name}</Typography>
+								<div className="travel-story-cover-actions">
+									<Button component="label" type="button" color="inherit" startIcon={<AddPhotoAlternateOutlined />} disabled={submitting}>
+										Change image
+										<input
+											hidden
+											type="file"
+											accept="image/jpeg,image/jpg,image/png"
+											disabled={submitting}
+											onChange={(event) => {
+												selectCover(event.target.files?.[0]);
+												event.target.value = '';
+											}}
+										/>
+									</Button>
+									<Button type="button" color="inherit" startIcon={<DeleteOutlineOutlined />} onClick={removeCover} disabled={submitting}>
+										Remove image
+									</Button>
+								</div>
 							</div>
 						</div>
 					) : (
@@ -198,6 +203,7 @@ export default function ArticleForm({ member, submitting, submitError, onSubmit,
 				<TextField
 					fullWidth
 					label="Story Content"
+					disabled={submitting}
 					value={articleContent}
 					onChange={(event) => {
 						setArticleContent(event.target.value);
@@ -227,10 +233,15 @@ export default function ArticleForm({ member, submitting, submitError, onSubmit,
 			</div>
 
 			<footer className="travel-story-form-actions">
-				<Button type="button" variant="outlined" onClick={onCancel}>
+				<Button type="button" variant="outlined" onClick={onCancel} disabled={submitting}>
 					Cancel
 				</Button>
-				<Button type="submit" variant="contained" disabled={submitting}>
+				<Button
+					type="submit"
+					variant="contained"
+					disabled={submitting}
+					startIcon={submitting ? <CircularProgress size={16} color="inherit" /> : undefined}
+				>
 					{submitting ? 'Publishing…' : 'Publish Story'}
 				</Button>
 			</footer>

@@ -4,6 +4,8 @@ import type { Booking, BookingHandoff } from '@/libs/types/booking/booking';
 import type { BookingsInquiry } from '@/libs/types/booking/booking.input';
 import type { CouponValidation } from '@/libs/types/booking/coupon';
 import type { ValidateCouponInput } from '@/libs/types/booking/coupon.input';
+import type { MeLiked } from '@/libs/types/community/like';
+import type { CommentEntity } from '@/libs/types/article/comment';
 import type { Payment } from '@/libs/types/booking/payment';
 import type { Traveler } from '@/libs/types/booking/traveler';
 import type { Review } from '@/libs/types/community/review';
@@ -809,6 +811,7 @@ export type CommunityArticleDetail = Pick<
 	| 'createdAt'
 > & {
 	memberData?: Pick<Member, '_id' | 'memberNick' | 'memberFullName' | 'memberImage' | 'memberType'> | null;
+	meLiked?: MeLiked[] | null;
 };
 export const GET_COMMUNITY_ARTICLE_DETAIL: TypedDocumentNode<
 	{ getBoardArticle: CommunityArticleDetail | null },
@@ -831,6 +834,70 @@ export const GET_COMMUNITY_ARTICLE_DETAIL: TypedDocumentNode<
 				memberFullName
 				memberImage
 				memberType
+			}
+			meLiked {
+				memberId
+				targetId
+				targetType
+				meLiked
+			}
+		}
+	}
+`;
+
+export type CommunityCommentItem = Pick<
+	CommentEntity,
+	'_id' | 'articleId' | 'memberId' | 'parentCommentId' | 'commentContent' | 'commentLikeCount' | 'commentStatus' | 'createdAt'
+> & {
+	memberData?: Pick<Member, '_id' | 'memberNick' | 'memberFullName' | 'memberImage' | 'memberType'> | null;
+	meLiked?: MeLiked[] | null;
+};
+export type CommunityCommentsInput = {
+	page: number;
+	limit: number;
+	sort?: string;
+	direction?: keyof typeof Direction;
+	search?: {
+		articleId?: string;
+		parentCommentId?: string;
+	};
+};
+export const GET_COMMENTS_BY_ARTICLE: TypedDocumentNode<
+	{
+		getCommentsByArticle: {
+			list: CommunityCommentItem[];
+			metaCounter?: { total?: number | null }[] | null;
+		};
+	},
+	{ input: CommunityCommentsInput }
+> = gql`
+	query GetCommentsByArticle($input: CommentsInquiry!) {
+		getCommentsByArticle(input: $input) {
+			list {
+				_id
+				articleId
+				memberId
+				parentCommentId
+				commentContent
+				commentLikeCount
+				commentStatus
+				createdAt
+				memberData {
+					_id
+					memberNick
+					memberFullName
+					memberImage
+					memberType
+				}
+				meLiked {
+					memberId
+					targetId
+					targetType
+					meLiked
+				}
+			}
+			metaCounter {
+				total
 			}
 		}
 	}
