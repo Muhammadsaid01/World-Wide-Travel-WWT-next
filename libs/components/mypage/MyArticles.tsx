@@ -73,12 +73,9 @@ function ArticleList({ authenticated }: { authenticated: boolean }) {
 							<Typography color="text.secondary">Manage the travel stories you&apos;ve shared on WWT.</Typography>
 						</div>
 						<div>
-							<Button disabled variant="contained" startIcon={<Add />}>
+							<Button component={Link} href="/community/stories/create" variant="contained" startIcon={<Add />}>
 								Create Article
 							</Button>
-							<Typography variant="caption" color="text.secondary">
-								Article editor coming soon
-							</Typography>
 						</div>
 					</header>
 					{!authenticated ? (
@@ -204,9 +201,9 @@ function ArticleList({ authenticated }: { authenticated: boolean }) {
 												Clear filters
 											</Button>
 										) : (
-											<Typography color="text.secondary">
-												Share your first travel story on WWT when the editor becomes available.
-											</Typography>
+											<Button component={Link} href="/community/stories/create">
+												Share your first travel story
+											</Button>
 										)}
 									</Paper>
 								) : (

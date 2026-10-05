@@ -2,6 +2,8 @@ import type { Booking, BookingHandoff } from '@/libs/types/booking/booking';
 import type { BookingInput, CancelBookingInput } from '@/libs/types/booking/booking.input';
 import type { Payment } from '@/libs/types/booking/payment';
 import type { PaymentInput } from '@/libs/types/booking/payment.input';
+import type { BoardArticle } from '@/libs/types/article/board-article';
+import type { BoardArticleInput } from '@/libs/types/article/board-article.input';
 import { gql, type TypedDocumentNode } from '@apollo/client';
 
 export const LOGIN = gql`
@@ -120,6 +122,34 @@ export const UPDATE_MEMBER: TypedDocumentNode<
 export const UPLOAD_PROFILE_IMAGE: TypedDocumentNode<{ imageUploader: string }, { file: File }> = gql`
 	mutation UploadProfileImage($file: Upload!) {
 		imageUploader(file: $file, target: "member")
+	}
+`;
+
+export const CREATE_BOARD_ARTICLE: TypedDocumentNode<
+	{
+		createBoardArticle: Pick<
+			BoardArticle,
+			'_id' | 'articleTitle' | 'articleCategory' | 'articleContent' | 'articleImages' | 'articleStatus' | 'createdAt'
+		>;
+	},
+	{ input: BoardArticleInput }
+> = gql`
+	mutation CreateBoardArticle($input: BoardArticleInput!) {
+		createBoardArticle(input: $input) {
+			_id
+			articleTitle
+			articleCategory
+			articleContent
+			articleImages
+			articleStatus
+			createdAt
+		}
+	}
+`;
+
+export const UPLOAD_ARTICLE_IMAGE: TypedDocumentNode<{ imageUploader: string }, { file: File }> = gql`
+	mutation UploadArticleImage($file: Upload!) {
+		imageUploader(file: $file, target: "article")
 	}
 `;
 

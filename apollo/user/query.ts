@@ -755,7 +755,10 @@ export type CommunityArticlesInput = Omit<
 	'direction' | 'search'
 > & {
 	direction?: keyof typeof Direction;
-	search?: Pick<NonNullable<import('@/libs/types/article/board-article.input').BoardArticlesInquiry['search']>, 'text'>;
+	search?: Pick<
+		NonNullable<import('@/libs/types/article/board-article.input').BoardArticlesInquiry['search']>,
+		'text' | 'articleCategory'
+	>;
 };
 export const GET_COMMUNITY_ARTICLES: TypedDocumentNode<
 	{
@@ -788,6 +791,46 @@ export const GET_COMMUNITY_ARTICLES: TypedDocumentNode<
 			}
 			metaCounter {
 				total
+			}
+		}
+	}
+`;
+
+export type CommunityArticleDetail = Pick<
+	import('@/libs/types/article/board-article').BoardArticle,
+	| '_id'
+	| 'articleTitle'
+	| 'articleContent'
+	| 'articleImages'
+	| 'articleCategory'
+	| 'articleViewCount'
+	| 'articleLikeCount'
+	| 'articleCommentCount'
+	| 'createdAt'
+> & {
+	memberData?: Pick<Member, '_id' | 'memberNick' | 'memberFullName' | 'memberImage' | 'memberType'> | null;
+};
+export const GET_COMMUNITY_ARTICLE_DETAIL: TypedDocumentNode<
+	{ getBoardArticle: CommunityArticleDetail | null },
+	{ articleId: string }
+> = gql`
+	query GetCommunityArticleDetail($articleId: String!) {
+		getBoardArticle(articleId: $articleId) {
+			_id
+			articleTitle
+			articleContent
+			articleImages
+			articleCategory
+			articleViewCount
+			articleLikeCount
+			articleCommentCount
+			createdAt
+			memberData {
+				_id
+				memberNick
+				memberFullName
+				memberImage
+				memberType
 			}
 		}
 	}

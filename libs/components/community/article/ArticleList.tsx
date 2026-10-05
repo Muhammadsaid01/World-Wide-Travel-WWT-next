@@ -1,5 +1,6 @@
 import { Alert, Button, Skeleton, Typography } from '@mui/material';
 import type { QueryResult } from '@apollo/client';
+import Link from 'next/link';
 import type { CommunityArticleItem, CommunityArticlesInput } from '@/apollo/user/query';
 import ArticleCard from './ArticleCard';
 
@@ -8,11 +9,9 @@ type ArticleResult = { getBoardArticles: { list: CommunityArticleItem[]; metaCou
 export default function ArticleList({
 	query,
 	filtered,
-	onViewAll,
 }: {
 	query: Pick<QueryResult<ArticleResult, { input: CommunityArticlesInput }>, 'data' | 'loading' | 'error' | 'refetch'>;
 	filtered: boolean;
-	onViewAll: () => void;
 }) {
 	const articles = query.data?.getBoardArticles.list ?? [];
 	return (
@@ -24,7 +23,7 @@ export default function ArticleList({
 						Latest Travel Stories
 					</Typography>
 				</div>
-				<Button className="community-view-all" onClick={onViewAll}>
+				<Button className="community-view-all" component={Link} href="/community/stories">
 					View All Articles →
 				</Button>
 			</header>
@@ -50,7 +49,7 @@ export default function ArticleList({
 			) : (
 				<div className="community-story-grid">
 					{articles.map((article) => (
-						<ArticleCard key={article._id} article={article} />
+						<ArticleCard key={article._id} article={article} href={`/community/stories/${article._id}`} />
 					))}
 				</div>
 			)}

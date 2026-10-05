@@ -138,7 +138,6 @@ export default function CommunityHome() {
 					<ArticleList
 						query={articleQuery}
 						filtered={Boolean(search)}
-						onViewAll={() => showOnly('stories', 'community-stories')}
 					/>
 				)}
 				{showMates && (
@@ -157,7 +156,7 @@ export default function CommunityHome() {
 						</Typography>
 					</div>
 					<div className="community-cta-actions">
-						<Button component={Link} href={user ? '/mypage/articles' : '/account/login'} variant="contained">
+						<Button component={Link} href={user ? '/community/stories/create' : '/account/login'} variant="contained">
 							SHARE A STORY
 						</Button>
 						<Button component={Link} href={user ? '/mypage/travel-mates' : '/account/login'} variant="outlined">

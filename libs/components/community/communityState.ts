@@ -30,3 +30,10 @@ export function escapeTravelMateSearch(value: string): string {
 export function memberName(member?: { memberFullName?: string | null; memberNick: string } | null): string {
 	return member?.memberFullName?.trim() || member?.memberNick || 'WWT traveler';
 }
+
+export function memberRole(member?: { memberType?: string | null } | null): string {
+	if (!member) return 'Author unavailable';
+	if (member.memberType === 'AGENT') return 'Travel Agent';
+	if (member.memberType === 'ADMIN') return 'Administrator';
+	return 'Traveler';
+}
