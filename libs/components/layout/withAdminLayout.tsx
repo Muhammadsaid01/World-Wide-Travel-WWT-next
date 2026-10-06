@@ -14,6 +14,7 @@ import { type ComponentType, type ReactNode, useEffect, useState } from 'react';
 
 const adminRoutes = [
 	{ label: 'Dashboard', href: '/admin' },
+	{ label: 'Members', href: '/admin/members' },
 	{ label: 'Agent Requests', href: '/admin/agent-requests' },
 ] as const;
 

@@ -34,6 +34,24 @@ export type AdminArticlesInput = Omit<AllBoardArticlesInquiry, 'direction'> & {
 	direction?: GraphQLDirection;
 };
 
+export type AdminMemberRow = Pick<
+	Member,
+	| '_id'
+	| 'memberType'
+	| 'memberStatus'
+	| 'memberAuthType'
+	| 'memberNick'
+	| 'memberFullName'
+	| 'memberPhone'
+	| 'memberEmail'
+	| 'memberImage'
+	| 'memberCountry'
+	| 'memberCity'
+	| 'memberLanguage'
+	| 'memberOnline'
+	| 'createdAt'
+>;
+
 export type AdminRecentBooking = Pick<
 	Booking,
 	'_id' | 'bookingCode' | 'contactName' | 'peopleCount' | 'bookingStatus' | 'finalPrice' | 'currency' | 'createdAt'
@@ -74,6 +92,40 @@ export const GET_ADMIN_MEMBER_COUNT: TypedDocumentNode<
 > = gql`
 	query GetAdminMemberCount($input: MembersInquiry!) {
 		getAllMembersByAdmin(input: $input) {
+			metaCounter {
+				total
+			}
+		}
+	}
+`;
+
+export const GET_ADMIN_MEMBERS: TypedDocumentNode<
+	{
+		getAllMembersByAdmin: {
+			list: AdminMemberRow[];
+			metaCounter?: MetaCounter[] | null;
+		};
+	},
+	{ input: AdminMembersInput }
+> = gql`
+	query GetAdminMembers($input: MembersInquiry!) {
+		getAllMembersByAdmin(input: $input) {
+			list {
+				_id
+				memberType
+				memberStatus
+				memberAuthType
+				memberNick
+				memberFullName
+				memberPhone
+				memberEmail
+				memberImage
+				memberCountry
+				memberCity
+				memberLanguage
+				memberOnline
+				createdAt
+			}
 			metaCounter {
 				total
 			}

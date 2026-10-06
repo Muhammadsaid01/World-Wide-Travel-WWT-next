@@ -452,6 +452,246 @@
 	font-weight: 750;
 	letter-spacing: 0.7px;
 	text-transform: uppercase;
+
+	&.is-unavailable {
+		color: #9a3838;
+	}
+}
+
+.admin-members-page {
+	max-width: 1380px;
+	margin: 0 auto;
+}
+
+.admin-members-toolbar {
+	display: grid;
+	grid-template-columns: minmax(280px, 1fr) 150px 150px 150px;
+	gap: 14px;
+	margin: 28px 0 20px;
+
+	.MuiOutlinedInput-root {
+		background: #fff;
+	}
+}
+
+.admin-members-feedback {
+	display: grid;
+	gap: 10px;
+	margin-bottom: 20px;
+
+	&:empty {
+		display: none;
+	}
+}
+
+.admin-members-results {
+	scroll-margin-top: 24px;
+}
+
+.admin-members-table {
+	min-width: 0;
+	border: 1px solid #dfe4e9;
+	border-radius: 12px;
+	background: #fff;
+	box-shadow: 0 4px 18px rgba(11, 45, 79, 0.04);
+	overflow: hidden;
+}
+
+.admin-members-table-header,
+.admin-member-row {
+	display: grid;
+	grid-template-columns: minmax(220px, 1.35fr) minmax(180px, 1fr) 90px 105px 110px 118px;
+	gap: 16px;
+	align-items: center;
+}
+
+.admin-members-table-header {
+	padding: 13px 20px;
+	border-bottom: 1px solid #dfe4e9;
+	background: #f5f7f9;
+	color: #68727d;
+	font-size: 10px;
+	font-weight: 800;
+	letter-spacing: 0.8px;
+	text-transform: uppercase;
+}
+
+.admin-member-row {
+	min-width: 0;
+	padding: 17px 20px;
+	border-bottom: 1px solid #e9edf1;
+
+	&:last-child {
+		border-bottom: 0;
+	}
+}
+
+.admin-member-identity {
+	display: flex;
+	min-width: 0;
+	align-items: center;
+	gap: 12px;
+
+	.MuiAvatar-root {
+		width: 44px;
+		height: 44px;
+		flex: 0 0 44px;
+		background: #dfe9f1;
+		color: #28587f;
+		font-size: 16px;
+		font-weight: 750;
+	}
+
+	> div {
+		display: grid;
+		min-width: 0;
+		gap: 2px;
+	}
+
+	strong,
+	span,
+	small {
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	strong {
+		font-size: 13px;
+	}
+
+	span {
+		color: #5f6b77;
+		font-size: 11px;
+	}
+
+	small {
+		color: #929aa3;
+		font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+		font-size: 9px;
+	}
+}
+
+.admin-member-cell {
+	display: grid;
+	min-width: 0;
+	justify-items: start;
+	gap: 3px;
+
+	strong,
+	span {
+		max-width: 100%;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	strong {
+		font-size: 11px;
+		font-weight: 650;
+	}
+
+	span {
+		color: #7a838d;
+		font-size: 10px;
+	}
+}
+
+.admin-member-role,
+.admin-member-status {
+	height: 26px;
+	font-size: 10px;
+	font-weight: 750;
+
+	&.is-user {
+		background: #edf3f8;
+		color: #28587f;
+	}
+
+	&.is-agent {
+		background: #eeeafd;
+		color: #5d4698;
+	}
+
+	&.is-admin {
+		background: #142f4c;
+		color: #fff;
+	}
+
+	&.is-active {
+		background: #e8f5ed;
+		color: #236548;
+	}
+
+	&.is-blocked {
+		background: #fff3d9;
+		color: #855715;
+	}
+
+	&.is-deleted {
+		background: #fbeaea;
+		color: #9a3838;
+	}
+}
+
+.admin-member-action {
+	display: flex;
+	justify-content: flex-start;
+
+	.MuiButton-root {
+		min-width: 105px;
+		min-height: 36px;
+		padding: 5px 10px;
+		font-size: 10px;
+		font-weight: 750;
+		text-transform: none;
+	}
+
+	> span {
+		color: #8b949e;
+		font-size: 10px;
+	}
+}
+
+.admin-members-skeleton {
+	display: grid;
+	gap: 10px;
+}
+
+.admin-members-empty {
+	padding: 72px 24px;
+	border: 1px dashed #cfd6dd;
+	border-radius: 12px;
+	background: #fff;
+	text-align: center;
+
+	h2 {
+		margin-bottom: 8px;
+		font-size: 22px;
+		font-weight: 700;
+	}
+
+	p {
+		margin-bottom: 20px;
+		color: #6b7280;
+	}
+}
+
+.admin-members-pagination {
+	display: flex;
+	justify-content: center;
+	margin-top: 34px;
+}
+
+.admin-member-status-dialog .MuiDialogContent-root {
+	p {
+		color: #56616d;
+		line-height: 1.65;
+	}
+
+	.MuiAlert-root {
+		margin-top: 18px;
+	}
 }
 
 .admin-request-toolbar {
@@ -655,6 +895,84 @@
 	.admin-request-list {
 		grid-template-columns: minmax(0, 1fr);
 	}
+
+	.admin-members-toolbar {
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+
+		> .MuiTextField-root:first-child {
+			grid-column: 1 / -1;
+		}
+	}
+
+	.admin-members-table-header,
+	.admin-member-row {
+		grid-template-columns: minmax(200px, 1.35fr) minmax(150px, 1fr) 78px 92px 102px 106px;
+		gap: 11px;
+		padding-right: 16px;
+		padding-left: 16px;
+	}
+}
+
+@media (max-width: 1320px) {
+	.admin-members-table {
+		border: 0;
+		background: transparent;
+		box-shadow: none;
+		overflow: visible;
+	}
+
+	.admin-members-table-header {
+		display: none;
+	}
+
+	.admin-members-list {
+		display: grid;
+		gap: 14px;
+	}
+
+	.admin-member-row {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 16px 20px;
+		padding: 20px;
+		border: 1px solid #dfe4e9;
+		border-radius: 12px;
+		background: #fff;
+		box-shadow: 0 4px 18px rgba(11, 45, 79, 0.04);
+
+		&:last-child {
+			border-bottom: 1px solid #dfe4e9;
+		}
+	}
+
+	.admin-member-identity {
+		grid-column: 1 / -1;
+		padding-bottom: 14px;
+		border-bottom: 1px solid #edf0f3;
+	}
+
+	.admin-member-cell,
+	.admin-member-action {
+		align-content: start;
+		justify-content: start;
+
+		&::before {
+			content: attr(data-label);
+			margin-bottom: 4px;
+			color: #89929c;
+			font-size: 9px;
+			font-weight: 800;
+			letter-spacing: 0.8px;
+			text-transform: uppercase;
+		}
+	}
+
+	.admin-member-action {
+		display: grid;
+
+		.MuiButton-root {
+			min-height: 40px;
+		}
+	}
 }
 
 @media (max-width: 900px) {
@@ -765,6 +1083,14 @@
 		text-align: left;
 	}
 
+	.admin-members-toolbar {
+		grid-template-columns: minmax(0, 1fr);
+
+		> .MuiTextField-root:first-child {
+			grid-column: auto;
+		}
+	}
+
 	.admin-request-toolbar {
 		grid-template-columns: minmax(0, 1fr);
 
@@ -803,5 +1129,31 @@
 			width: 100%;
 			margin: 0;
 		}
+	}
+
+	.admin-member-status-dialog .MuiDialogActions-root {
+		align-items: stretch;
+		flex-direction: column-reverse;
+		padding: 12px 24px 22px;
+
+		.MuiButton-root {
+			width: 100%;
+			margin: 0;
+		}
+	}
+}
+
+@media (max-width: 520px) {
+	.admin-member-row {
+		grid-template-columns: minmax(0, 1fr);
+		padding: 18px 16px;
+	}
+
+	.admin-member-identity {
+		grid-column: auto;
+	}
+
+	.admin-member-action .MuiButton-root {
+		width: 100%;
 	}
 }
