@@ -1,6 +1,7 @@
 import { currentUserVar } from '@/apollo/store';
 import { logout } from '@/libs/auth';
 import { packageImageUrl } from '@/libs/components/package/PackageImage';
+import { MemberType } from '@/libs/enums/member.enum';
 import { useReactiveVar } from '@apollo/client';
 import CloseIcon from '@mui/icons-material/Close';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
@@ -181,6 +182,19 @@ export default function Navbar() {
 				slotProps={{ list: { 'aria-labelledby': accountAnchor?.id } }}
 			>
 				<MenuItem component={Link} href="/mypage" selected={router.pathname === '/mypage'} onClick={() => { setAccountAnchor(null); setMenuOpen(false); }}>My Profile</MenuItem>
+				{currentUser?.memberType === MemberType.ADMIN && (
+					<MenuItem
+						component={Link}
+						href="/admin"
+						selected={router.pathname === '/admin'}
+						onClick={() => {
+							setAccountAnchor(null);
+							setMenuOpen(false);
+						}}
+					>
+						Admin Dashboard
+					</MenuItem>
+				)}
 				<MenuItem onClick={handleLogout}>Logout</MenuItem>
 			</Menu>
 		</header>
