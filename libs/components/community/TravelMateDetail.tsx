@@ -8,11 +8,16 @@ import {
 	Breadcrumbs,
 	Button,
 	Chip,
+	Dialog,
+	DialogActions,
+	DialogContent,
+	DialogTitle,
 	LinearProgress,
 	Pagination,
 	Paper,
 	Skeleton,
 	Stack,
+	TextField,
 	Typography,
 } from '@mui/material';
 import ArrowBack from '@mui/icons-material/ArrowBack';
@@ -21,6 +26,8 @@ import CalendarMonthOutlined from '@mui/icons-material/CalendarMonthOutlined';
 import PlaceOutlined from '@mui/icons-material/PlaceOutlined';
 import PeopleAltOutlined from '@mui/icons-material/PeopleAltOutlined';
 import InfoOutlined from '@mui/icons-material/InfoOutlined';
+import FlightTakeoffOutlined from '@mui/icons-material/FlightTakeoffOutlined';
+import VisibilityOutlined from '@mui/icons-material/VisibilityOutlined';
 import { currentUserVar } from '@/apollo/store';
 import {
 	GET_TRAVEL_MATE_DETAIL,
@@ -31,7 +38,7 @@ import {
 	type TravelMateMember,
 	type TravelMateJoinItem,
 } from '@/apollo/user/query';
-import { JOIN_TRAVEL_MATE } from '@/apollo/user/mutation';
+import { JOIN_TRAVEL_MATE, LEAVE_TRAVEL_MATE } from '@/apollo/user/mutation';
 import { TravelMatePostStatus, TravelMateJoinStatus } from '@/libs/enums/community.enum';
 import { packageImageUrl } from '../package/PackageImage';
 import { formatScheduleDate } from '../package/PackageSchedules';
@@ -104,11 +111,11 @@ export default function TravelMateDetail({ id, ready }: { id: string; ready: boo
 			<Breadcrumbs separator="/" className="travel-mate-breadcrumb">
 				<Link href="/">Home</Link>
 				<Link href="/community">Community</Link>
-				<span>Travel Mate</span>
+				<Link href="/community/travel-mate">Travel Mate</Link>
 				<span aria-current="page">{post?.matePostTitle || 'Post'}</span>
 			</Breadcrumbs>
-			<Button component={Link} href="/community" startIcon={<ArrowBack />} className="travel-mate-back">
-				Back to Community
+			<Button component={Link} href="/community/travel-mate" startIcon={<ArrowBack />} className="travel-mate-back">
+				Back to Travel Mates
 			</Button>
 			{!ready || loading ? (
 				<div className="travel-mate-columns" aria-label="Loading travel mate">
@@ -130,8 +137,8 @@ export default function TravelMateDetail({ id, ready }: { id: string; ready: boo
 						Travel mate unavailable
 					</Typography>
 					<Typography>This post could not be found or is no longer publicly available.</Typography>
-					<Button component={Link} href="/community">
-						Back to Community
+					<Button component={Link} href="/community/travel-mate">
+						Back to Travel Mates
 					</Button>
 				</Paper>
 			) : error ? (
@@ -179,6 +186,13 @@ export default function TravelMateDetail({ id, ready }: { id: string; ready: boo
 								<div className="travel-mate-facts">
 									{[
 										{ label: 'Travel Date', value: formatScheduleDate(post.travelDate), Icon: CalendarMonthOutlined },
+										...(post.departureCity || post.departureCountry
+											? [{
+												label: 'Departure',
+												value: [post.departureCity, post.departureCountry].filter(Boolean).join(', '),
+												Icon: FlightTakeoffOutlined,
+											}]
+											: []),
 										{
 											label: 'Destination',
 											value: [post.destinationCity, post.destinationCountry].filter(Boolean).join(', '),
@@ -186,6 +200,9 @@ export default function TravelMateDetail({ id, ready }: { id: string; ready: boo
 										},
 										{ label: 'Max Group Size', value: `${post.maxMembers} travelers`, Icon: PeopleAltOutlined },
 										{ label: 'Status', value: statusLabel(post), Icon: InfoOutlined },
+										...(typeof post.matePostViewCount === 'number'
+											? [{ label: 'Views', value: post.matePostViewCount.toLocaleString('en-US'), Icon: VisibilityOutlined }]
+											: []),
 									].map(({ label, value, Icon }) => (
 										<Paper key={label} elevation={0}>
 											<Icon color="primary" />
@@ -309,10 +326,15 @@ function JoinPanel({ post, userId, refresh }: { post: Post; userId?: string; ref
 		fetchPolicy: 'no-cache',
 		notifyOnNetworkStatusChange: true,
 	});
-	const [join, { loading: submitting }] = useMutation(JOIN_TRAVEL_MATE);
+	const [join] = useMutation(JOIN_TRAVEL_MATE);
+	const [leave] = useMutation(LEAVE_TRAVEL_MATE);
 	const inFlight = useRef(false);
 	const [returned, setReturned] = useState<TravelMateJoinItem>();
 	const [failure, setFailure] = useState('');
+	const [joinOpen, setJoinOpen] = useState(false);
+	const [leaveOpen, setLeaveOpen] = useState(false);
+	const [message, setMessage] = useState('');
+	const [busy, setBusy] = useState(false);
 	const request = data?.getMyJoinedTravelMates.list[0] ?? returned;
 	const remaining = Math.max(post.maxMembers - post.currentMembers, 0);
 	const percent = post.maxMembers > 0 ? Math.max(0, Math.min((post.currentMembers / post.maxMembers) * 100, 100)) : 0;
@@ -329,15 +351,47 @@ function JoinPanel({ post, userId, refresh }: { post: Post; userId?: string; ref
 	async function submit() {
 		if (!eligible || inFlight.current) return;
 		inFlight.current = true;
+		setBusy(true);
 		setFailure('');
 		try {
-			const result = await join({ variables: { input: { travelMatePostId: post._id } } });
-			if (result.data) setReturned(result.data.joinTravelMate);
+			const result = await join({
+				variables: {
+					input: {
+						travelMatePostId: post._id,
+						message: message.trim() || undefined,
+					},
+				},
+			});
+			if (!result.data?.joinTravelMate) throw new Error('The request did not return a result.');
+			setReturned(result.data.joinTravelMate);
+			setJoinOpen(false);
 		} catch (e) {
 			setFailure(e instanceof Error ? e.message : 'Unable to send join request.');
 		} finally {
 			await Promise.allSettled([refetch(), refresh()]);
 			inFlight.current = false;
+			setBusy(false);
+		}
+	}
+	async function removeRequest() {
+		if (!request || inFlight.current) return;
+		inFlight.current = true;
+		setBusy(true);
+		setFailure('');
+		try {
+			await leave({
+				variables: { joinId: request._id },
+				refetchQueries: ['GetTravelMateParticipants'],
+			});
+			setReturned(undefined);
+			setLeaveOpen(false);
+			setMessage('');
+			await Promise.all([refetch(), refresh()]);
+		} catch (e) {
+			setFailure(e instanceof Error ? e.message : 'Unable to update your trip membership.');
+		} finally {
+			inFlight.current = false;
+			setBusy(false);
 		}
 	}
 	const label = owner
@@ -371,12 +425,10 @@ function JoinPanel({ post, userId, refresh }: { post: Post; userId?: string; ref
 				<Button
 					variant="contained"
 					fullWidth
-					disabled={!eligible || submitting}
-					onClick={() => {
-						void submit();
-					}}
+					disabled={!eligible || busy}
+					onClick={() => setJoinOpen(true)}
 				>
-					{submitting ? 'Sending request…' : label}
+					{label}
 				</Button>
 			)}
 			{owner && (
@@ -385,9 +437,22 @@ function JoinPanel({ post, userId, refresh }: { post: Post; userId?: string; ref
 				</Button>
 			)}
 			{request?.joinStatus === TravelMateJoinStatus.PENDING && (
-				<Typography role="status" variant="body2">
-					Your request is awaiting the creator&apos;s approval.
-				</Typography>
+				<>
+					<Typography role="status" variant="body2">
+						Your request is awaiting the creator&apos;s approval.
+					</Typography>
+					<Button variant="outlined" color="error" fullWidth disabled={busy} onClick={() => setLeaveOpen(true)}>
+						Cancel Request
+					</Button>
+				</>
+			)}
+			{request?.joinStatus === TravelMateJoinStatus.APPROVED && (
+				<>
+					<Typography role="status" variant="body2">You are an approved traveler on this trip.</Typography>
+					<Button variant="outlined" color="error" fullWidth disabled={busy} onClick={() => setLeaveOpen(true)}>
+						Leave Trip
+					</Button>
+				</>
 			)}
 			{request && [TravelMateJoinStatus.REJECTED, TravelMateJoinStatus.CANCELLED].includes(request.joinStatus) && (
 				<Typography variant="body2">An existing request cannot be submitted again.</Typography>
@@ -414,6 +479,72 @@ function JoinPanel({ post, userId, refresh }: { post: Post; userId?: string; ref
 				</Alert>
 			)}
 			{failure && <Alert severity="error">{failure}</Alert>}
+			<Dialog
+				open={joinOpen}
+				onClose={() => {
+					if (!busy) setJoinOpen(false);
+				}}
+				fullWidth
+				maxWidth="sm"
+				aria-labelledby="request-travel-mate-title"
+			>
+				<DialogTitle id="request-travel-mate-title">Request to Join</DialogTitle>
+				<DialogContent className="travel-mate-request-dialog">
+					<Typography color="text.secondary">
+						Send a short note to the creator. Your request remains pending until they approve it.
+					</Typography>
+					<TextField
+						label="Message (optional)"
+						placeholder="Introduce yourself and share why this trip interests you."
+						multiline
+						minRows={5}
+						fullWidth
+						value={message}
+						onChange={(event) => setMessage(event.target.value)}
+						error={message.trim().length === 1}
+						helperText={message.trim().length === 1 ? 'Use at least 2 characters or leave the message empty.' : `${message.length}/500`}
+						slotProps={{ htmlInput: { maxLength: 500 } }}
+					/>
+					{failure && <Alert severity="error">{failure}</Alert>}
+				</DialogContent>
+				<DialogActions>
+					<Button disabled={busy} onClick={() => setJoinOpen(false)}>Cancel</Button>
+					<Button
+						variant="contained"
+						disabled={busy || message.trim().length === 1}
+						onClick={() => void submit()}
+					>
+						{busy ? 'Sending…' : 'Send Request'}
+					</Button>
+				</DialogActions>
+			</Dialog>
+			<Dialog
+				open={leaveOpen}
+				onClose={() => {
+					if (!busy) setLeaveOpen(false);
+				}}
+				fullWidth
+				maxWidth="xs"
+				aria-labelledby="leave-travel-mate-title"
+			>
+				<DialogTitle id="leave-travel-mate-title">
+					{request?.joinStatus === TravelMateJoinStatus.APPROVED ? 'Leave this trip?' : 'Cancel this request?'}
+				</DialogTitle>
+				<DialogContent>
+					<Typography>
+						{request?.joinStatus === TravelMateJoinStatus.APPROVED
+							? 'Your approved place will be released for another traveler.'
+							: 'Your pending request will be removed.'}
+					</Typography>
+					{failure && <Alert severity="error">{failure}</Alert>}
+				</DialogContent>
+				<DialogActions>
+					<Button disabled={busy} onClick={() => setLeaveOpen(false)}>Keep It</Button>
+					<Button color="error" variant="contained" disabled={busy} onClick={() => void removeRequest()}>
+						{busy ? 'Updating…' : request?.joinStatus === TravelMateJoinStatus.APPROVED ? 'Leave Trip' : 'Cancel Request'}
+					</Button>
+				</DialogActions>
+			</Dialog>
 		</Paper>
 	);
 }

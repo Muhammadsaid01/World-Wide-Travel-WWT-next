@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 import { useMutation, useQuery, useReactiveVar } from '@apollo/client';
 import {
 	Alert,
@@ -46,6 +47,9 @@ export default function JoinRequests() {
 	return <IncomingRequests key={user?._id ?? 'guest'} userId={user?._id} />;
 }
 function IncomingRequests({ userId }: { userId?: string }) {
+	const router = useRouter();
+	const requestedPostId = typeof router.query.postId === 'string' ? router.query.postId : '';
+	const postId = /^[a-f\d]{24}$/i.test(requestedPostId) ? requestedPostId : undefined;
 	const [page, setPage] = useState(1);
 	const [status, setStatus] = useState<TravelMateJoinStatus>();
 	const [oldest, setOldest] = useState(false);
@@ -61,7 +65,7 @@ function IncomingRequests({ userId }: { userId?: string }) {
 				limit: LIMIT,
 				sort: 'createdAt',
 				direction: oldest ? 'ASC' : 'DESC',
-				search: { joinStatus: status },
+				search: { joinStatus: status, travelMatePostId: postId },
 			},
 		},
 		skip: !userId,
@@ -139,6 +143,15 @@ function IncomingRequests({ userId }: { userId?: string }) {
 						</Alert>
 					) : (
 						<>
+							{postId && (
+								<Alert
+									severity="info"
+									className="join-requests-feedback"
+									action={<Button onClick={() => void router.replace('/mypage/join-requests')}>Show All Trips</Button>}
+								>
+									Showing requests for the selected travel mate post.
+								</Alert>
+							)}
 							<div className="join-requests-toolbar">
 								<div className="my-bookings-tabs" role="group" aria-label="Request status">
 									{tabs.map((tab) => (

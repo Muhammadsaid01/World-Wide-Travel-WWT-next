@@ -697,7 +697,10 @@ export const GET_MY_TRAVEL_MATE_JOIN: TypedDocumentNode<
 	}
 `;
 export type CommunityTravelMateItem = MyTravelMateItem &
-	Pick<import('@/libs/types/travel-mate/travel-mate-post').TravelMatePost, 'matePostContent' | 'createdAt'> & {
+	Pick<
+		import('@/libs/types/travel-mate/travel-mate-post').TravelMatePost,
+		'matePostContent' | 'matePostViewCount' | 'createdAt'
+	> & {
 		memberData?: Pick<Member, '_id' | 'memberNick' | 'memberFullName' | 'memberImage' | 'memberType'> | null;
 	};
 export const GET_MORE_TRAVEL_MATES: TypedDocumentNode<
@@ -722,6 +725,7 @@ export const GET_MORE_TRAVEL_MATES: TypedDocumentNode<
 				currentMembers
 				maxMembers
 				matePostContent
+				matePostViewCount
 				createdAt
 				memberData {
 					_id

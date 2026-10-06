@@ -1,4 +1,5 @@
 import { Alert, Button, Skeleton, Typography } from '@mui/material';
+import Link from 'next/link';
 import type { QueryResult } from '@apollo/client';
 import type { CommunityTravelMateItem, MyTravelMatesInput } from '@/apollo/user/query';
 import TravelMateCard from './TravelMateCard';
@@ -8,11 +9,9 @@ type MateResult = { getTravelMatePosts: { list: CommunityTravelMateItem[]; metaC
 export default function TravelMateList({
 	query,
 	filtered,
-	onViewAll,
 }: {
 	query: Pick<QueryResult<MateResult, { input: MyTravelMatesInput }>, 'data' | 'loading' | 'error' | 'refetch'>;
 	filtered: boolean;
-	onViewAll: () => void;
 }) {
 	const posts = query.data?.getTravelMatePosts.list ?? [];
 	return (
@@ -24,7 +23,7 @@ export default function TravelMateList({
 						Find a Travel Mate
 					</Typography>
 				</div>
-				<Button className="community-view-all" onClick={onViewAll}>
+				<Button component={Link} href="/community/travel-mate" className="community-view-all">
 					View All →
 				</Button>
 			</header>

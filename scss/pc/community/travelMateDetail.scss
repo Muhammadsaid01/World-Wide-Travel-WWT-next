@@ -42,7 +42,7 @@
 	}
 	.travel-mate-facts {
 		display: grid;
-		grid-template-columns: repeat(4, minmax(0, 1fr));
+		grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
 		gap: 12px;
 		margin: 32px 0 48px;
 		> .MuiPaper-root {

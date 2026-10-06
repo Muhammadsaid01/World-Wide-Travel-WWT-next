@@ -55,13 +55,6 @@ export default function CommunityHome() {
 		event.preventDefault();
 		setSearch(draft.trim());
 	};
-	const showOnly = (nextTab: Exclude<CommunityTab, 'all'>, sectionId: string) => {
-		setTab(nextTab);
-		requestAnimationFrame(() =>
-			document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth', block: 'start' }),
-		);
-	};
-
 	return (
 		<div className="community-page">
 			<section className="community-hero">
@@ -144,7 +137,6 @@ export default function CommunityHome() {
 					<TravelMateList
 						query={mateQuery}
 						filtered={Boolean(search)}
-						onViewAll={() => showOnly('mates', 'community-mates')}
 					/>
 				)}
 
@@ -159,7 +151,7 @@ export default function CommunityHome() {
 						<Button component={Link} href={user ? '/community/stories/create' : '/account/login'} variant="contained">
 							SHARE A STORY
 						</Button>
-						<Button component={Link} href={user ? '/mypage/travel-mates' : '/account/login'} variant="outlined">
+						<Button component={Link} href={user ? '/mypage/travel-mates/create' : '/account/login'} variant="outlined">
 							FIND TRAVEL MATE
 						</Button>
 					</div>

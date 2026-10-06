@@ -29,6 +29,8 @@ import Add from '@mui/icons-material/Add';
 import Search from '@mui/icons-material/Search';
 import CalendarMonthOutlined from '@mui/icons-material/CalendarMonthOutlined';
 import PeopleAltOutlined from '@mui/icons-material/PeopleAltOutlined';
+import EditOutlined from '@mui/icons-material/EditOutlined';
+import GroupOutlined from '@mui/icons-material/GroupOutlined';
 import ProfileSidebar from './ProfileSidebar';
 import { formatScheduleDate } from '../package/PackageSchedules';
 
@@ -108,15 +110,9 @@ function TravelMateList({ userId }: { userId?: string }) {
 								Manage the trips you&apos;ve created and find travelers to join your adventures.
 							</Typography>
 						</div>
-						<div>
-							{/* Connect when a real travel-mate creation route exists. */}
-							<Button disabled variant="contained" startIcon={<Add />}>
-								Create Travel Mate
-							</Button>
-							<Typography variant="caption" color="text.secondary">
-								Creation page coming soon
-							</Typography>
-						</div>
+						<Button component={Link} href="/mypage/travel-mates/create" variant="contained" startIcon={<Add />}>
+							Create Travel Mate
+						</Button>
 					</header>
 					{!userId ? (
 						<Alert
@@ -247,8 +243,8 @@ function TravelMateList({ userId }: { userId?: string }) {
 										)}
 									</Paper>
 								) : (
-									result.list.map((post) => {
-										const progress =
+								result.list.map((post) => {
+									const progress =
 											post.maxMembers > 0
 												? Math.max(0, Math.min((post.currentMembers / post.maxMembers) * 100, 100))
 												: 0;
@@ -261,7 +257,11 @@ function TravelMateList({ userId }: { userId?: string }) {
 											>
 												<div className="my-travel-mate-info">
 													<div className="my-travel-mate-meta">
-														<span className="my-travel-mate-status">{labels[post.matePostStatus]}</span>
+														<span className="my-travel-mate-status">
+															{post.matePostStatus === TravelMatePostStatus.ACTIVE && post.currentMembers >= post.maxMembers
+																? 'Full'
+																: labels[post.matePostStatus]}
+														</span>
 														<span>{[post.destinationCity, post.destinationCountry].filter(Boolean).join(', ')}</span>
 													</div>
 													<Typography component="h2">{post.matePostTitle}</Typography>
@@ -284,11 +284,27 @@ function TravelMateList({ userId }: { userId?: string }) {
 												</div>
 												{post.memberId === userId && (
 													<div className="my-travel-mate-actions">
-														{post.matePostStatus === TravelMatePostStatus.ACTIVE && (
-															<Button component={Link} href={`/community/travel-mate/${post._id}`} variant="outlined">
-																View Details
-															</Button>
-														)}
+												{post.matePostStatus === TravelMatePostStatus.ACTIVE && (
+													<Button component={Link} href={`/community/travel-mate/${post._id}`} variant="outlined">
+														View Details
+													</Button>
+												)}
+												{post.matePostStatus === TravelMatePostStatus.ACTIVE && (
+													<Button
+														component={Link}
+														href={`/mypage/travel-mates/${post._id}/edit`}
+														startIcon={<EditOutlined />}
+													>
+														Edit
+													</Button>
+												)}
+												<Button
+													component={Link}
+													href={`/mypage/join-requests?postId=${post._id}`}
+													startIcon={<GroupOutlined />}
+												>
+													Requests
+												</Button>
 														<IconButton
 															aria-label={`More actions for ${post.matePostTitle}`}
 															aria-haspopup="menu"

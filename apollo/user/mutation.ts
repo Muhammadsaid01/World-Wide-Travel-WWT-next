@@ -230,6 +230,28 @@ export const DELETE_TRAVEL_MATE_POST: TypedDocumentNode<
  }
 `;
 
+export const CREATE_TRAVEL_MATE_POST: TypedDocumentNode<
+	{ createTravelMatePost: Pick<import('@/libs/types/travel-mate/travel-mate-post').TravelMatePost, '_id'> },
+	{ input: import('@/libs/types/travel-mate/travel-mate-post.input').TravelMatePostInput }
+> = gql`
+	mutation CreateTravelMatePost($input: TravelMatePostInput!) {
+		createTravelMatePost(input: $input) {
+			_id
+		}
+	}
+`;
+
+export const UPDATE_TRAVEL_MATE_POST: TypedDocumentNode<
+	{ updateTravelMatePost: Pick<import('@/libs/types/travel-mate/travel-mate-post').TravelMatePost, '_id'> },
+	{ input: import('@/libs/types/travel-mate/travel-mate-post.update').TravelMatePostUpdate }
+> = gql`
+	mutation UpdateTravelMatePost($input: TravelMatePostUpdate!) {
+		updateTravelMatePost(input: $input) {
+			_id
+		}
+	}
+`;
+
 export const JOIN_TRAVEL_MATE: TypedDocumentNode<
 	{ joinTravelMate: import('./query').TravelMateJoinItem },
 	{ input: import('@/libs/types/travel-mate/travel-mate-join.input').TravelMateJoinInput }
@@ -263,6 +285,20 @@ export const REJECT_TRAVEL_MATE_JOIN: TypedDocumentNode<
 > = gql`
 	mutation RejectTravelMateJoin($joinId: String!) {
 		rejectTravelMateJoin(joinId: $joinId) {
+			_id
+			memberId
+			travelMatePostId
+			joinStatus
+		}
+	}
+`;
+
+export const LEAVE_TRAVEL_MATE: TypedDocumentNode<
+	{ leaveTravelMate: import('./query').TravelMateJoinItem },
+	{ joinId: string }
+> = gql`
+	mutation LeaveTravelMate($joinId: String!) {
+		leaveTravelMate(joinId: $joinId) {
 			_id
 			memberId
 			travelMatePostId

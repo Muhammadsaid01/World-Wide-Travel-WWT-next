@@ -182,7 +182,10 @@
 	.my-travel-mate-actions {
 		align-self: stretch;
 		display: flex;
+		align-content: flex-start;
 		align-items: flex-start;
+		flex-wrap: wrap;
+		gap: 6px;
 		border-left: 1px solid var(--wwt-divider);
 		padding-left: 24px;
 	}

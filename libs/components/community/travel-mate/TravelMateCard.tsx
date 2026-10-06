@@ -4,6 +4,7 @@ import ArrowForward from '@mui/icons-material/ArrowForward';
 import CalendarMonthOutlined from '@mui/icons-material/CalendarMonthOutlined';
 import FlagOutlined from '@mui/icons-material/FlagOutlined';
 import PeopleAltOutlined from '@mui/icons-material/PeopleAltOutlined';
+import VisibilityOutlined from '@mui/icons-material/VisibilityOutlined';
 import type { CommunityTravelMateItem } from '@/apollo/user/query';
 import { packageImageUrl } from '@/libs/components/package/PackageImage';
 import { formatScheduleDate } from '@/libs/components/package/PackageSchedules';
@@ -41,6 +42,11 @@ export default function TravelMateCard({ post }: { post: CommunityTravelMateItem
 				value={progress}
 				aria-label={`${post.currentMembers} of ${post.maxMembers} travelers joined`}
 			/>
+			{typeof post.matePostViewCount === 'number' && (
+				<div className="community-mate-views">
+					<VisibilityOutlined /> {post.matePostViewCount.toLocaleString('en-US')} views
+				</div>
+			)}
 			<footer>
 				<div className="community-author">
 					<Avatar src={packageImageUrl(post.memberData?.memberImage)} alt={author}>
