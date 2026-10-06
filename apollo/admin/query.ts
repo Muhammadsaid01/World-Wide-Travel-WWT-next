@@ -52,6 +52,34 @@ export type AdminMemberRow = Pick<
 	| 'createdAt'
 >;
 
+export type AdminAgentRow = Pick<
+	Agent,
+	| '_id'
+	| 'memberId'
+	| 'companyName'
+	| 'businessNumber'
+	| 'licenseNumber'
+	| 'officeAddress'
+	| 'companyPhone'
+	| 'companyEmail'
+	| 'agentDesc'
+	| 'agentStatus'
+	| 'verificationStatus'
+	| 'agentApprovedAt'
+	| 'createdAt'
+> & {
+	memberData?:
+		| Pick<
+				Member,
+				| 'memberNick'
+				| 'memberFullName'
+				| 'memberImage'
+				| 'memberCountry'
+				| 'memberCity'
+			>
+		| null;
+};
+
 export type AdminRecentBooking = Pick<
 	Booking,
 	'_id' | 'bookingCode' | 'contactName' | 'peopleCount' | 'bookingStatus' | 'finalPrice' | 'currency' | 'createdAt'
@@ -139,6 +167,46 @@ export const GET_ADMIN_AGENT_COUNT: TypedDocumentNode<
 > = gql`
 	query GetAdminAgentCount($input: AgentsInquiry!) {
 		getAllAgentsByAdmin(input: $input) {
+			metaCounter {
+				total
+			}
+		}
+	}
+`;
+
+export const GET_ADMIN_AGENTS: TypedDocumentNode<
+	{
+		getAllAgentsByAdmin: {
+			list: AdminAgentRow[];
+			metaCounter?: MetaCounter[] | null;
+		};
+	},
+	{ input: AdminAgentsInput }
+> = gql`
+	query GetAdminAgents($input: AgentsInquiry!) {
+		getAllAgentsByAdmin(input: $input) {
+			list {
+				_id
+				memberId
+				companyName
+				businessNumber
+				licenseNumber
+				officeAddress
+				companyPhone
+				companyEmail
+				agentDesc
+				agentStatus
+				verificationStatus
+				agentApprovedAt
+				createdAt
+				memberData {
+					memberNick
+					memberFullName
+					memberImage
+					memberCountry
+					memberCity
+				}
+			}
 			metaCounter {
 				total
 			}

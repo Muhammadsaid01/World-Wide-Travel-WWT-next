@@ -694,6 +694,141 @@
 	}
 }
 
+.admin-agents-page {
+	max-width: 1380px;
+	margin: 0 auto;
+}
+
+.admin-agents-toolbar {
+	display: grid;
+	grid-template-columns: minmax(280px, 1fr) 180px 160px;
+	gap: 14px;
+	margin: 28px 0 20px;
+
+	.MuiOutlinedInput-root {
+		background: #fff;
+	}
+}
+
+.admin-agents-table-header,
+.admin-agent-management-row {
+	display: grid;
+	grid-template-columns: minmax(170px, 1.1fr) minmax(220px, 1.5fr) 82px 100px 105px 185px;
+	gap: 12px;
+	align-items: center;
+}
+
+.admin-agents-table-header {
+	padding: 13px 20px;
+	border-bottom: 1px solid #dfe4e9;
+	background: #f5f7f9;
+	color: #68727d;
+	font-size: 10px;
+	font-weight: 800;
+	letter-spacing: 0.8px;
+	text-transform: uppercase;
+}
+
+.admin-agent-management-row {
+	min-width: 0;
+	padding: 18px 20px;
+	border-bottom: 1px solid #e9edf1;
+
+	&:last-child {
+		border-bottom: 0;
+	}
+}
+
+.admin-agent-company {
+	display: grid;
+	min-width: 0;
+	gap: 3px;
+
+	strong,
+	span,
+	p {
+		max-width: 100%;
+		overflow-wrap: anywhere;
+	}
+
+	strong {
+		font-size: 13px;
+	}
+
+	span {
+		color: #707a85;
+		font-size: 10px;
+		line-height: 1.45;
+	}
+
+	p {
+		display: -webkit-box;
+		margin-top: 4px;
+		color: #4e5b67;
+		font-size: 10px;
+		line-height: 1.45;
+		-webkit-box-orient: vertical;
+		-webkit-line-clamp: 2;
+		overflow: hidden;
+	}
+}
+
+.admin-agent-management-status,
+.admin-agent-verification {
+	height: 26px;
+	font-size: 10px;
+	font-weight: 750;
+
+	&.is-active,
+	&.is-approved {
+		background: #e8f5ed;
+		color: #236548;
+	}
+
+	&.is-suspended {
+		background: #fff3d9;
+		color: #855715;
+	}
+
+	&.is-deleted,
+	&.is-revoked {
+		background: #fbeaea;
+		color: #9a3838;
+	}
+}
+
+.admin-agent-actions {
+	display: grid;
+	min-width: 0;
+	gap: 5px;
+
+	.MuiButton-root {
+		min-height: 34px;
+		justify-content: flex-start;
+		padding: 4px 9px;
+		font-size: 10px;
+		font-weight: 750;
+		line-height: 1.25;
+		text-transform: none;
+	}
+
+	> span {
+		color: #8b949e;
+		font-size: 10px;
+	}
+}
+
+.admin-agent-change-dialog .MuiDialogContent-root {
+	p {
+		color: #56616d;
+		line-height: 1.65;
+	}
+
+	.MuiAlert-root {
+		margin-top: 18px;
+	}
+}
+
 .admin-request-toolbar {
 	display: grid;
 	grid-template-columns: minmax(280px, 1fr) 180px 170px;
@@ -975,6 +1110,67 @@
 	}
 }
 
+@media (max-width: 1400px) {
+	.admin-agents-table {
+		border: 0;
+		background: transparent;
+		box-shadow: none;
+		overflow: visible;
+	}
+
+	.admin-agents-table .admin-agents-table-header {
+		display: none;
+	}
+
+	.admin-agents-table .admin-members-list {
+		display: grid;
+		gap: 14px;
+	}
+
+	.admin-agent-management-row {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 16px 20px;
+		padding: 20px;
+		border: 1px solid #dfe4e9;
+		border-radius: 12px;
+		background: #fff;
+		box-shadow: 0 4px 18px rgba(11, 45, 79, 0.04);
+
+		&:last-child {
+			border-bottom: 1px solid #dfe4e9;
+		}
+	}
+
+	.admin-agent-management-row .admin-member-identity {
+		grid-column: 1 / -1;
+		padding-bottom: 14px;
+		border-bottom: 1px solid #edf0f3;
+	}
+
+	.admin-agent-company,
+	.admin-agent-management-row .admin-member-cell,
+	.admin-agent-actions {
+		align-content: start;
+		justify-content: start;
+
+		&::before {
+			content: attr(data-label);
+			margin-bottom: 4px;
+			color: #89929c;
+			font-size: 9px;
+			font-weight: 800;
+			letter-spacing: 0.8px;
+			text-transform: uppercase;
+		}
+	}
+
+	.admin-agent-actions {
+		.MuiButton-root {
+			min-height: 40px;
+		}
+	}
+}
+
 @media (max-width: 900px) {
 	.admin-shell {
 		display: block;
@@ -1091,6 +1287,10 @@
 		}
 	}
 
+	.admin-agents-toolbar {
+		grid-template-columns: minmax(0, 1fr);
+	}
+
 	.admin-request-toolbar {
 		grid-template-columns: minmax(0, 1fr);
 
@@ -1141,6 +1341,17 @@
 			margin: 0;
 		}
 	}
+
+	.admin-agent-change-dialog .MuiDialogActions-root {
+		align-items: stretch;
+		flex-direction: column-reverse;
+		padding: 12px 24px 22px;
+
+		.MuiButton-root {
+			width: 100%;
+			margin: 0;
+		}
+	}
 }
 
 @media (max-width: 520px) {
@@ -1154,6 +1365,19 @@
 	}
 
 	.admin-member-action .MuiButton-root {
+		width: 100%;
+	}
+
+	.admin-agent-management-row {
+		grid-template-columns: minmax(0, 1fr);
+		padding: 18px 16px;
+	}
+
+	.admin-agent-management-row .admin-member-identity {
+		grid-column: auto;
+	}
+
+	.admin-agent-actions .MuiButton-root {
 		width: 100%;
 	}
 }
