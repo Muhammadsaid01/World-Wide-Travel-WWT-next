@@ -10,6 +10,7 @@ import type { Member } from '@/libs/types/member/member';
 import type { MembersInquiry } from '@/libs/types/member/member.input';
 import type { TravelPackage } from '@/libs/types/package/travel-package';
 import type { AllTravelPackagesInquiry } from '@/libs/types/package/travel-package.input';
+import type { PackageSchedule } from '@/libs/types/package/package-schedule';
 
 type GraphQLDirection = keyof typeof Direction;
 type MetaCounter = { total?: number | null };
@@ -85,6 +86,39 @@ export type AdminRecentBooking = Pick<
 	'_id' | 'bookingCode' | 'contactName' | 'peopleCount' | 'bookingStatus' | 'finalPrice' | 'currency' | 'createdAt'
 > & {
 	packageData?: Pick<TravelPackage, '_id' | 'packageTitle'> | null;
+};
+
+export type AdminBookingRow = Pick<
+	Booking,
+	| '_id'
+	| 'bookingCode'
+	| 'memberId'
+	| 'packageId'
+	| 'scheduleId'
+	| 'agentId'
+	| 'bookingStatus'
+	| 'adultCount'
+	| 'childCount'
+	| 'infantCount'
+	| 'peopleCount'
+	| 'totalPrice'
+	| 'discountAmount'
+	| 'finalPrice'
+	| 'currency'
+	| 'contactName'
+	| 'contactPhone'
+	| 'contactEmail'
+	| 'specialRequest'
+	| 'cancelledAt'
+	| 'createdAt'
+	| 'updatedAt'
+> & {
+	packageData?: Pick<
+		TravelPackage,
+		'_id' | 'packageTitle' | 'destinationCountry' | 'destinationCity'
+	> | null;
+	scheduleData?: Pick<PackageSchedule, '_id' | 'startDate' | 'endDate' | 'scheduleStatus'> | null;
+	agentData?: Pick<Agent, '_id' | 'companyName'> | null;
 };
 
 export type AdminRecentPackage = Pick<
@@ -267,6 +301,64 @@ export const GET_ADMIN_PACKAGES: TypedDocumentNode<
 				agentData {
 					_id
 					memberId
+					companyName
+				}
+			}
+			metaCounter {
+				total
+			}
+		}
+	}
+`;
+
+export const GET_ADMIN_BOOKINGS: TypedDocumentNode<
+	{
+		getAllBookingsByAdmin: {
+			list: AdminBookingRow[];
+			metaCounter?: MetaCounter[] | null;
+		};
+	},
+	{ input: AdminBookingsInput }
+> = gql`
+	query GetAdminBookings($input: BookingsInquiry!) {
+		getAllBookingsByAdmin(input: $input) {
+			list {
+				_id
+				bookingCode
+				memberId
+				packageId
+				scheduleId
+				agentId
+				bookingStatus
+				adultCount
+				childCount
+				infantCount
+				peopleCount
+				totalPrice
+				discountAmount
+				finalPrice
+				currency
+				contactName
+				contactPhone
+				contactEmail
+				specialRequest
+				cancelledAt
+				createdAt
+				updatedAt
+				packageData {
+					_id
+					packageTitle
+					destinationCountry
+					destinationCity
+				}
+				scheduleData {
+					_id
+					startDate
+					endDate
+					scheduleStatus
+				}
+				agentData {
+					_id
 					companyName
 				}
 			}

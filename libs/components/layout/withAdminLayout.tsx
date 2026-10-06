@@ -18,6 +18,7 @@ const adminRoutes = [
 	{ label: 'Agents', href: '/admin/agents' },
 	{ label: 'Agent Requests', href: '/admin/agent-requests' },
 	{ label: 'Packages', href: '/admin/packages' },
+	{ label: 'Bookings', href: '/admin/bookings' },
 ] as const;
 
 function AdminNavigation({ onNavigate }: { onNavigate?: () => void }) {
