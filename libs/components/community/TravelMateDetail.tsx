@@ -258,6 +258,7 @@ function Participants({ post }: { post: Post }) {
 		variables: {
 			input: { page, limit: 6, sort: 'createdAt', direction: 'ASC', search: { travelMatePostId: post._id } },
 		},
+		fetchPolicy: 'network-only',
 	});
 	const result = data?.getTravelMateParticipants;
 	const total = result?.metaCounter?.[0]?.total ?? 0;

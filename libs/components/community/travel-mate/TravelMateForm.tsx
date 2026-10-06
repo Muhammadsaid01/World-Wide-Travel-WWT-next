@@ -48,7 +48,7 @@ function createDraft(initialValues?: TravelMateFormValues): Draft {
 	};
 }
 
-function validate(draft: Draft): Errors {
+function validate(draft: Draft, minimumCapacity: number): Errors {
 	const errors: Errors = {};
 	const title = draft.matePostTitle.trim();
 	const content = draft.matePostContent.trim();
@@ -59,7 +59,12 @@ function validate(draft: Draft): Errors {
 	if (!draft.destinationCountry.trim()) errors.destinationCountry = 'Enter the destination country.';
 	if (!draft.destinationCity.trim()) errors.destinationCity = 'Enter the destination city.';
 	if (!draft.travelDate) errors.travelDate = 'Choose a travel date.';
-	if (!Number.isInteger(maximum) || maximum < 2) errors.maxMembers = 'The group must allow at least 2 travelers.';
+	if (!Number.isInteger(maximum) || maximum < minimumCapacity) {
+		errors.maxMembers =
+			minimumCapacity > 2
+				? `The group already has ${minimumCapacity} travelers.`
+				: 'The group must allow at least 2 travelers.';
+	}
 	if (!content) errors.matePostContent = 'Tell travelers about the trip.';
 	else if (content.length < 10 || content.length > 5000)
 		errors.matePostContent = 'Use between 10 and 5,000 characters.';
@@ -70,6 +75,7 @@ function validate(draft: Draft): Errors {
 export default function TravelMateForm({
 	mode,
 	initialValues,
+	minimumCapacity = 2,
 	submitting,
 	submitError,
 	onSubmit,
@@ -77,6 +83,7 @@ export default function TravelMateForm({
 }: {
 	mode: 'create' | 'edit';
 	initialValues?: TravelMateFormValues;
+	minimumCapacity?: number;
 	submitting: boolean;
 	submitError?: string;
 	onSubmit: (values: TravelMateFormValues) => void;
@@ -97,7 +104,7 @@ export default function TravelMateForm({
 
 	function submit(event: React.FormEvent<HTMLFormElement>) {
 		event.preventDefault();
-		const nextErrors = validate(draft);
+		const nextErrors = validate(draft, minimumCapacity);
 		setErrors(nextErrors);
 		if (Object.keys(nextErrors).length) return;
 
@@ -191,9 +198,14 @@ export default function TravelMateForm({
 								value={draft.maxMembers}
 								onChange={(event) => update('maxMembers', event.target.value)}
 								error={Boolean(errors.maxMembers)}
-								helperText={errors.maxMembers || 'The creator is included in this number.'}
+								helperText={
+									errors.maxMembers ||
+									(minimumCapacity > 2
+										? `At least ${minimumCapacity} travelers are already approved, including you.`
+										: 'The creator is included in this number.')
+								}
 								slotProps={{
-									htmlInput: { min: 2, step: 1 },
+									htmlInput: { min: minimumCapacity, step: 1 },
 									input: { startAdornment: <InputAdornment position="start"><PeopleAltOutlined /></InputAdornment> },
 								}}
 							/>

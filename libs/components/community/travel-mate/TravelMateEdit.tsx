@@ -29,7 +29,16 @@ export default function TravelMateEdit({ id, memberId }: { id: string; memberId:
 		lock.current = true;
 		setSubmitError('');
 		try {
-			await updatePost({ variables: { input: { _id: post._id, ...values } } });
+			await updatePost({
+				variables: {
+					input: {
+						_id: post._id,
+						...values,
+						departureCountry: values.departureCountry ?? '',
+						departureCity: values.departureCity ?? '',
+					},
+				},
+			});
 			await router.push(`/community/travel-mate/${post._id}`);
 		} catch (failure) {
 			setSubmitError(failure instanceof Error ? failure.message : 'The travel mate post could not be updated.');
@@ -72,6 +81,7 @@ export default function TravelMateEdit({ id, memberId }: { id: string; memberId:
 				) : post ? (
 					<TravelMateForm
 						mode="edit"
+						minimumCapacity={Math.max(2, post.currentMembers)}
 						initialValues={{
 							departureCountry: post.departureCountry,
 							departureCity: post.departureCity,
