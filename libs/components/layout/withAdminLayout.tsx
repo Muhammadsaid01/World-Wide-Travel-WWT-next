@@ -1,17 +1,21 @@
-import { type ComponentType, type ReactNode, useEffect, useState } from 'react';
-import Link from 'next/link';
-import { useRouter } from 'next/router';
-import { useReactiveVar } from '@apollo/client';
-import { Button, IconButton, Skeleton, Typography } from '@mui/material';
-import AdminPanelSettingsOutlined from '@mui/icons-material/AdminPanelSettingsOutlined';
-import CloseOutlined from '@mui/icons-material/CloseOutlined';
-import LogoutOutlined from '@mui/icons-material/LogoutOutlined';
-import MenuOutlined from '@mui/icons-material/MenuOutlined';
 import { currentUserVar } from '@/apollo/store';
 import { logout, restoreUserFromToken } from '@/libs/auth';
 import { MemberType } from '@/libs/enums/member.enum';
+import { useReactiveVar } from '@apollo/client';
+import AdminPanelSettingsOutlined from '@mui/icons-material/AdminPanelSettingsOutlined';
+import ArrowBackOutlined from '@mui/icons-material/ArrowBackOutlined';
+import CloseOutlined from '@mui/icons-material/CloseOutlined';
+import LogoutOutlined from '@mui/icons-material/LogoutOutlined';
+import MenuOutlined from '@mui/icons-material/MenuOutlined';
+import { Button, IconButton, Skeleton, Typography } from '@mui/material';
+import Link from 'next/link';
+import { useRouter } from 'next/router';
+import { type ComponentType, type ReactNode, useEffect, useState } from 'react';
 
-const adminRoutes = [{ label: 'Agent Requests', href: '/admin/agent-requests' }] as const;
+const adminRoutes = [
+	{ label: 'Dashboard', href: '/admin' },
+	{ label: 'Agent Requests', href: '/admin/agent-requests' },
+] as const;
 
 function AdminNavigation({ onNavigate }: { onNavigate?: () => void }) {
 	const router = useRouter();
@@ -38,7 +42,10 @@ function AdminNavigation({ onNavigate }: { onNavigate?: () => void }) {
 			<nav aria-label="Admin navigation">
 				<Typography component="h2">Management</Typography>
 				{adminRoutes.map((route) => {
-					const active = router.pathname === route.href || router.pathname.startsWith(`${route.href}/`);
+					const active =
+						route.href === '/admin'
+							? router.pathname === route.href
+							: router.pathname === route.href || router.pathname.startsWith(`${route.href}/`);
 					return (
 						<Button
 							key={route.href}
@@ -57,7 +64,16 @@ function AdminNavigation({ onNavigate }: { onNavigate?: () => void }) {
 			<div className="admin-account">
 				<span>Signed in as</span>
 				<strong>{user?.memberFullName || user?.memberNick || 'Administrator'}</strong>
-				<Button startIcon={<LogoutOutlined />} onClick={signOut}>
+				<Button
+					component={Link}
+					href="/"
+					startIcon={<ArrowBackOutlined />}
+					className="admin-back-to-website"
+					onClick={onNavigate}
+				>
+					Back to Website
+				</Button>
+				<Button startIcon={<LogoutOutlined />} className="admin-sign-out" onClick={signOut}>
 					Sign Out
 				</Button>
 			</div>
