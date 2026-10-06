@@ -1,5 +1,7 @@
 import type { Direction } from '@/libs/enums/common.enum';
 import type { Agent } from '@/libs/types/agent/agent';
+import type { AgentRequest } from '@/libs/types/agent-request/agent-request';
+import type { AgentRequestsInquiry } from '@/libs/types/agent-request/agent-request.input';
 import type { Booking, BookingHandoff } from '@/libs/types/booking/booking';
 import type { BookingsInquiry } from '@/libs/types/booking/booking.input';
 import type { CouponValidation } from '@/libs/types/booking/coupon';
@@ -1389,6 +1391,59 @@ export const GET_AGENT_BOOKINGS: TypedDocumentNode<
 					_id
 					packageTitle
 				}
+			}
+			metaCounter {
+				total
+			}
+		}
+	}
+`;
+
+export const GET_MY_AGENT_REQUEST: TypedDocumentNode<
+	{ getMyAgentRequest: AgentRequest | null },
+	Record<string, never>
+> = gql`
+	query GetMyAgentRequest {
+		getMyAgentRequest {
+			_id
+			memberId
+			companyName
+			businessNumber
+			licenseNumber
+			agentDescription
+			requestStatus
+			rejectReason
+			reviewedBy
+			reviewedAt
+			createdAt
+			updatedAt
+		}
+	}
+`;
+
+export type AdminAgentRequestsInput = Omit<AgentRequestsInquiry, 'direction'> & {
+	direction?: keyof typeof Direction;
+};
+
+export const GET_ALL_AGENT_REQUESTS_BY_ADMIN: TypedDocumentNode<
+	{ getAllAgentRequestsByAdmin: { list: AgentRequest[]; metaCounter?: { total: number }[] | null } },
+	{ input: AdminAgentRequestsInput }
+> = gql`
+	query GetAllAgentRequestsByAdmin($input: AgentRequestsInquiry!) {
+		getAllAgentRequestsByAdmin(input: $input) {
+			list {
+				_id
+				memberId
+				companyName
+				businessNumber
+				licenseNumber
+				agentDescription
+				requestStatus
+				rejectReason
+				reviewedBy
+				reviewedAt
+				createdAt
+				updatedAt
 			}
 			metaCounter {
 				total

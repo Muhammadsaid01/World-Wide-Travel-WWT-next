@@ -6,6 +6,11 @@ import type { BoardArticle } from '@/libs/types/article/board-article';
 import type { BoardArticleInput } from '@/libs/types/article/board-article.input';
 import type { CommentEntity } from '@/libs/types/article/comment';
 import type { CommentInput } from '@/libs/types/article/comment.input';
+import type { AgentRequest } from '@/libs/types/agent-request/agent-request';
+import type {
+	AgentRequestInput,
+	AgentRequestRejectInput,
+} from '@/libs/types/agent-request/agent-request.input';
 import { gql, type TypedDocumentNode } from '@apollo/client';
 
 export const LOGIN = gql`
@@ -56,6 +61,69 @@ export const SIGN_UP = gql`
 			accessToken
 		}
 	}
+`;
+
+export const CREATE_AGENT_REQUEST: TypedDocumentNode<
+	{ createAgentRequest: AgentRequest },
+	{ input: AgentRequestInput }
+> = gql`
+	mutation CreateAgentRequest($input: AgentRequestInput!) {
+		createAgentRequest(input: $input) {
+			_id
+			memberId
+			companyName
+			businessNumber
+			licenseNumber
+			agentDescription
+			requestStatus
+			rejectReason
+			reviewedBy
+			reviewedAt
+			createdAt
+			updatedAt
+		}
+	}
+`;
+
+const ADMIN_AGENT_REQUEST_FIELDS = gql`
+	fragment AdminAgentRequestFields on AgentRequest {
+		_id
+		memberId
+		companyName
+		businessNumber
+		licenseNumber
+		agentDescription
+		requestStatus
+		rejectReason
+		reviewedBy
+		reviewedAt
+		createdAt
+		updatedAt
+	}
+`;
+
+export const APPROVE_AGENT_REQUEST_BY_ADMIN: TypedDocumentNode<
+	{ approveAgentRequestByAdmin: AgentRequest },
+	{ agentRequestId: string }
+> = gql`
+	mutation ApproveAgentRequestByAdmin($agentRequestId: String!) {
+		approveAgentRequestByAdmin(agentRequestId: $agentRequestId) {
+			...AdminAgentRequestFields
+		}
+	}
+	${ADMIN_AGENT_REQUEST_FIELDS}
+`;
+
+export const REJECT_AGENT_REQUEST_BY_ADMIN: TypedDocumentNode<
+	{ rejectAgentRequestByAdmin: AgentRequest },
+	{ agentRequestId: string; input: AgentRequestRejectInput }
+> = gql`
+	mutation RejectAgentRequestByAdmin($agentRequestId: String!, $input: AgentRequestRejectInput!) {
+		rejectAgentRequestByAdmin(agentRequestId: $agentRequestId, input: $input) {
+			...AdminAgentRequestFields
+		}
+	}
+	${ADMIN_AGENT_REQUEST_FIELDS}
 `;
 
 export const CREATE_BOOKING: TypedDocumentNode<{ createBooking: BookingHandoff }, { input: BookingInput }> = gql`
