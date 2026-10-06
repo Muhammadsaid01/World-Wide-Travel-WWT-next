@@ -818,6 +818,196 @@
 	}
 }
 
+.admin-packages-page {
+	max-width: 1380px;
+	margin: 0 auto;
+}
+
+.admin-packages-toolbar {
+	display: grid;
+	grid-template-columns: 180px 150px;
+	justify-content: end;
+	gap: 14px;
+	margin: 28px 0 20px;
+
+	.MuiOutlinedInput-root {
+		background: #fff;
+	}
+}
+
+.admin-packages-table-header,
+.admin-package-row {
+	display: grid;
+	grid-template-columns: minmax(250px, 1.5fr) minmax(125px, 0.85fr) 82px minmax(115px, 0.7fr) minmax(
+			125px,
+			0.8fr
+		) 120px 102px;
+	gap: 12px;
+	align-items: center;
+}
+
+.admin-packages-table-header {
+	padding: 13px 20px;
+	border-bottom: 1px solid #dfe4e9;
+	background: #f5f7f9;
+	color: #68727d;
+	font-size: 10px;
+	font-weight: 800;
+	letter-spacing: 0.8px;
+	text-transform: uppercase;
+}
+
+.admin-package-row {
+	min-width: 0;
+	padding: 16px 20px;
+	border-bottom: 1px solid #e9edf1;
+
+	&:last-child {
+		border-bottom: 0;
+	}
+}
+
+.admin-package-summary {
+	display: flex;
+	min-width: 0;
+	align-items: center;
+	gap: 12px;
+
+	> div:last-child {
+		display: grid;
+		min-width: 0;
+		gap: 3px;
+	}
+
+	strong,
+	span,
+	small {
+		max-width: 100%;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	strong {
+		font-size: 13px;
+	}
+
+	span {
+		color: #61707e;
+		font-size: 10px;
+		font-weight: 650;
+	}
+
+	small {
+		color: #89929c;
+		font-size: 9px;
+	}
+}
+
+.admin-package-image {
+	position: relative;
+	width: 72px;
+	height: 54px;
+	flex: 0 0 72px;
+	border-radius: 8px;
+	background: #edf2f6;
+	overflow: hidden;
+
+	img {
+		object-fit: cover;
+	}
+
+	.detail-image-fallback {
+		display: grid;
+		height: 100%;
+		place-items: center;
+		padding: 5px;
+		color: #788590;
+		font-size: 8px;
+		text-align: center;
+	}
+}
+
+.admin-package-cell {
+	display: grid;
+	min-width: 0;
+	justify-items: start;
+	gap: 3px;
+
+	strong,
+	span {
+		max-width: 100%;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	strong {
+		font-size: 11px;
+		font-weight: 650;
+	}
+
+	span {
+		color: #7a838d;
+		font-size: 9px;
+	}
+}
+
+.admin-package-status {
+	height: 26px;
+	font-size: 10px;
+	font-weight: 750;
+
+	&.is-active {
+		background: #e8f5ed;
+		color: #236548;
+	}
+
+	&.is-hidden {
+		background: #edf1f5;
+		color: #56616d;
+	}
+
+	&.is-sold {
+		background: #e9effb;
+		color: #345d91;
+	}
+
+	&.is-expired {
+		background: #fff3d9;
+		color: #855715;
+	}
+
+	&.is-deleted {
+		background: #fbeaea;
+		color: #9a3838;
+	}
+}
+
+.admin-package-action {
+	display: flex;
+	min-width: 0;
+	justify-content: flex-start;
+
+	.MuiButton-root {
+		min-height: 36px;
+		padding: 5px 9px;
+		font-size: 9px;
+		font-weight: 750;
+		white-space: nowrap;
+		text-transform: none;
+	}
+
+	.MuiSvgIcon-root {
+		font-size: 14px;
+	}
+
+	> span {
+		color: #8b949e;
+		font-size: 10px;
+	}
+}
+
 .admin-agent-change-dialog .MuiDialogContent-root {
 	p {
 		color: #56616d;
@@ -1171,6 +1361,64 @@
 	}
 }
 
+@media (max-width: 1500px) {
+	.admin-packages-table {
+		border: 0;
+		background: transparent;
+		box-shadow: none;
+		overflow: visible;
+	}
+
+	.admin-packages-table .admin-packages-table-header {
+		display: none;
+	}
+
+	.admin-packages-table .admin-members-list {
+		display: grid;
+		gap: 14px;
+	}
+
+	.admin-package-row {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 16px 20px;
+		padding: 20px;
+		border: 1px solid #dfe4e9;
+		border-radius: 12px;
+		background: #fff;
+		box-shadow: 0 4px 18px rgba(11, 45, 79, 0.04);
+
+		&:last-child {
+			border-bottom: 1px solid #dfe4e9;
+		}
+	}
+
+	.admin-package-summary {
+		grid-column: 1 / -1;
+		padding-bottom: 14px;
+		border-bottom: 1px solid #edf0f3;
+	}
+
+	.admin-package-cell,
+	.admin-package-action {
+		align-content: start;
+		justify-content: start;
+
+		&::before {
+			content: attr(data-label);
+			margin-bottom: 4px;
+			color: #89929c;
+			font-size: 9px;
+			font-weight: 800;
+			letter-spacing: 0.8px;
+			text-transform: uppercase;
+		}
+	}
+
+	.admin-package-action .MuiButton-root {
+		min-height: 40px;
+	}
+}
+
 @media (max-width: 900px) {
 	.admin-shell {
 		display: block;
@@ -1291,6 +1539,11 @@
 		grid-template-columns: minmax(0, 1fr);
 	}
 
+	.admin-packages-toolbar {
+		grid-template-columns: minmax(0, 1fr);
+		justify-content: stretch;
+	}
+
 	.admin-request-toolbar {
 		grid-template-columns: minmax(0, 1fr);
 
@@ -1378,6 +1631,19 @@
 	}
 
 	.admin-agent-actions .MuiButton-root {
+		width: 100%;
+	}
+
+	.admin-package-row {
+		grid-template-columns: minmax(0, 1fr);
+		padding: 18px 16px;
+	}
+
+	.admin-package-summary {
+		grid-column: auto;
+	}
+
+	.admin-package-action .MuiButton-root {
 		width: 100%;
 	}
 }

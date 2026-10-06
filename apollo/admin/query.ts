@@ -101,6 +101,28 @@ export type AdminRecentPackage = Pick<
 	agentData?: Pick<Agent, 'companyName'> | null;
 };
 
+export type AdminPackageRow = Pick<
+	TravelPackage,
+	| '_id'
+	| 'agentId'
+	| 'packageTitle'
+	| 'packageShortDesc'
+	| 'packageType'
+	| 'packageCategory'
+	| 'destinationCountry'
+	| 'destinationCity'
+	| 'packageDays'
+	| 'packageNights'
+	| 'packagePrice'
+	| 'currency'
+	| 'packageStatus'
+	| 'packageImages'
+	| 'createdAt'
+	| 'updatedAt'
+> & {
+	agentData?: Pick<Agent, '_id' | 'memberId' | 'companyName'> | null;
+};
+
 export type AdminRecentArticle = Pick<
 	BoardArticle,
 	| '_id'
@@ -205,6 +227,47 @@ export const GET_ADMIN_AGENTS: TypedDocumentNode<
 					memberImage
 					memberCountry
 					memberCity
+				}
+			}
+			metaCounter {
+				total
+			}
+		}
+	}
+`;
+
+export const GET_ADMIN_PACKAGES: TypedDocumentNode<
+	{
+		getAllTravelPackagesByAdmin: {
+			list: AdminPackageRow[];
+			metaCounter?: MetaCounter[] | null;
+		};
+	},
+	{ input: AdminPackagesInput }
+> = gql`
+	query GetAdminPackages($input: AllTravelPackagesInquiry!) {
+		getAllTravelPackagesByAdmin(input: $input) {
+			list {
+				_id
+				agentId
+				packageTitle
+				packageShortDesc
+				packageType
+				packageCategory
+				destinationCountry
+				destinationCity
+				packageDays
+				packageNights
+				packagePrice
+				currency
+				packageStatus
+				packageImages
+				createdAt
+				updatedAt
+				agentData {
+					_id
+					memberId
+					companyName
 				}
 			}
 			metaCounter {
