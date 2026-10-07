@@ -2434,3 +2434,411 @@
 		width: 100%;
 	}
 }
+
+.admin-coupons-page {
+	max-width: 1380px;
+	margin: 0 auto;
+}
+
+.admin-coupons-header-actions {
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	gap: 12px;
+	flex-wrap: wrap;
+
+	.MuiButton-root {
+		min-height: 40px;
+		border-radius: 8px;
+		text-transform: none;
+	}
+}
+
+.admin-coupons-toolbar {
+	display: grid;
+	grid-template-columns: minmax(260px, 1fr) 145px 155px 145px;
+	gap: 14px;
+	margin: 28px 0 20px;
+
+	.MuiOutlinedInput-root {
+		background: #fff;
+	}
+}
+
+.admin-coupons-table-header,
+.admin-coupon-row {
+	display: grid;
+	grid-template-columns: minmax(180px, 1.25fr) 110px 88px 125px 150px 105px 125px 145px;
+	gap: 12px;
+	align-items: center;
+}
+
+.admin-coupons-table-header {
+	padding: 13px 20px;
+	border-bottom: 1px solid #dfe4e9;
+	background: #f5f7f9;
+	color: #68727d;
+	font-size: 10px;
+	font-weight: 800;
+	letter-spacing: 0.8px;
+	text-transform: uppercase;
+}
+
+.admin-coupon-row {
+	min-width: 0;
+	padding: 16px 20px;
+	border-bottom: 1px solid #e9edf1;
+
+	&:last-child {
+		border-bottom: 0;
+	}
+}
+
+.admin-coupon-summary,
+.admin-coupon-cell {
+	display: grid;
+	min-width: 0;
+	justify-items: start;
+	gap: 3px;
+
+	strong,
+	span,
+	small {
+		max-width: 100%;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	strong {
+		font-size: 11px;
+		font-weight: 700;
+	}
+
+	span {
+		color: #6e7984;
+		font-size: 9px;
+	}
+
+	small {
+		color: #929ba4;
+		font-size: 9px;
+	}
+}
+
+.admin-coupon-summary strong {
+	color: #173a5e;
+	font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+	font-size: 13px;
+	letter-spacing: 0.4px;
+}
+
+.admin-coupon-status-cell {
+	gap: 5px;
+}
+
+.admin-coupon-status,
+.admin-coupon-date-expired {
+	height: 25px;
+	font-size: 9px;
+	font-weight: 750;
+
+	&.is-active {
+		background: #e8f5ed;
+		color: #236548;
+	}
+
+	&.is-disabled {
+		background: #edf0f3;
+		color: #59636d;
+	}
+
+	&.is-expired,
+	&.admin-coupon-date-expired {
+		background: #fff0e2;
+		color: #96521e;
+	}
+}
+
+.admin-coupon-actions {
+	display: grid;
+	min-width: 0;
+	gap: 3px;
+
+	.MuiButton-root {
+		min-height: 30px;
+		justify-content: flex-start;
+		padding: 3px 7px;
+		font-size: 9px;
+		font-weight: 750;
+		line-height: 1.2;
+		text-transform: none;
+	}
+}
+
+.admin-coupon-dialog {
+	.MuiDialogContent-root {
+		padding-top: 12px;
+
+		> .MuiAlert-root {
+			margin-top: 18px;
+		}
+
+		> p {
+			color: #56616d;
+			line-height: 1.65;
+		}
+	}
+}
+
+.admin-coupon-form {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 18px;
+	padding-top: 8px;
+}
+
+.admin-coupon-form-wide,
+.admin-coupon-form-note {
+	grid-column: 1 / -1;
+}
+
+.admin-coupon-form-note.MuiTypography-root {
+	color: #7a838d;
+	font-size: 11px;
+	line-height: 1.5;
+}
+
+.admin-coupon-usage-dialog {
+	.MuiDialogTitle-root {
+		display: grid;
+		gap: 3px;
+
+		span {
+			color: #66717e;
+			font-size: 12px;
+			font-weight: 500;
+		}
+	}
+
+	.MuiAlert-root {
+		margin-bottom: 14px;
+	}
+}
+
+.admin-coupon-usage-skeleton {
+	display: grid;
+	gap: 10px;
+}
+
+.admin-coupon-usage-list {
+	border: 1px solid #dfe4e9;
+	border-radius: 10px;
+	overflow: hidden;
+}
+
+.admin-coupon-usage-header,
+.admin-coupon-usage-row {
+	display: grid;
+	grid-template-columns: minmax(150px, 1fr) minmax(150px, 1fr) 100px 120px;
+	gap: 14px;
+	align-items: center;
+}
+
+.admin-coupon-usage-header {
+	padding: 11px 16px;
+	background: #f5f7f9;
+	color: #68727d;
+	font-size: 9px;
+	font-weight: 800;
+	letter-spacing: 0.7px;
+	text-transform: uppercase;
+}
+
+.admin-coupon-usage-row {
+	padding: 14px 16px;
+	border-top: 1px solid #e9edf1;
+
+	> div {
+		display: grid;
+		min-width: 0;
+		gap: 3px;
+
+		strong,
+		span {
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+		}
+
+		strong {
+			font-size: 11px;
+		}
+
+		span {
+			color: #7a838d;
+			font-size: 9px;
+		}
+	}
+}
+
+.admin-coupon-usage-empty {
+	padding: 52px 20px;
+	border: 1px dashed #cfd6dd;
+	border-radius: 10px;
+	text-align: center;
+
+	h3 {
+		margin-bottom: 7px;
+		font-size: 18px;
+	}
+
+	p {
+		color: #6b7280;
+	}
+}
+
+.admin-coupon-usage-pagination,
+.admin-coupon-usage-close {
+	display: flex;
+	justify-content: center;
+	margin-top: 20px;
+}
+
+.admin-coupon-usage-close {
+	justify-content: flex-end;
+}
+
+@media (max-width: 1540px) {
+	.admin-coupons-table {
+		border: 0;
+		background: transparent;
+		box-shadow: none;
+		overflow: visible;
+	}
+
+	.admin-coupons-table .admin-coupons-table-header {
+		display: none;
+	}
+
+	.admin-coupons-table .admin-members-list {
+		display: grid;
+		gap: 14px;
+	}
+
+	.admin-coupon-row {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 16px 20px;
+		padding: 20px;
+		border: 1px solid #dfe4e9;
+		border-radius: 12px;
+		background: #fff;
+		box-shadow: 0 4px 18px rgba(11, 45, 79, 0.04);
+
+		&:last-child {
+			border-bottom: 1px solid #dfe4e9;
+		}
+	}
+
+	.admin-coupon-summary {
+		grid-column: 1 / -1;
+		padding-bottom: 14px;
+		border-bottom: 1px solid #edf0f3;
+	}
+
+	.admin-coupon-cell,
+	.admin-coupon-actions {
+		align-content: start;
+		justify-content: start;
+
+		&::before {
+			content: attr(data-label);
+			margin-bottom: 4px;
+			color: #89929c;
+			font-size: 9px;
+			font-weight: 800;
+			letter-spacing: 0.8px;
+			text-transform: uppercase;
+		}
+	}
+
+	.admin-coupon-actions .MuiButton-root {
+		min-height: 38px;
+	}
+}
+
+@media (max-width: 760px) {
+	.admin-coupons-toolbar {
+		grid-template-columns: minmax(0, 1fr);
+	}
+
+	.admin-coupons-header-actions {
+		width: 100%;
+		justify-content: space-between;
+	}
+
+	.admin-coupon-form {
+		grid-template-columns: minmax(0, 1fr);
+	}
+
+	.admin-coupon-form-wide,
+	.admin-coupon-form-note {
+		grid-column: auto;
+	}
+
+	.admin-coupon-dialog .MuiDialogActions-root {
+		align-items: stretch;
+		flex-direction: column-reverse;
+		padding: 12px 24px 22px;
+
+		.MuiButton-root {
+			width: 100%;
+			margin: 0;
+		}
+	}
+
+	.admin-coupon-usage-header {
+		display: none;
+	}
+
+	.admin-coupon-usage-list {
+		display: grid;
+		gap: 12px;
+		border: 0;
+		overflow: visible;
+	}
+
+	.admin-coupon-usage-row {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 14px;
+		padding: 16px;
+		border: 1px solid #dfe4e9;
+		border-radius: 10px;
+
+		> div::before {
+			content: attr(data-label);
+			margin-bottom: 2px;
+			color: #89929c;
+			font-size: 8px;
+			font-weight: 800;
+			letter-spacing: 0.7px;
+			text-transform: uppercase;
+		}
+	}
+}
+
+@media (max-width: 520px) {
+	.admin-coupon-row,
+	.admin-coupon-usage-row {
+		grid-template-columns: minmax(0, 1fr);
+		padding: 18px 16px;
+	}
+
+	.admin-coupon-summary {
+		grid-column: auto;
+	}
+
+	.admin-coupon-actions .MuiButton-root {
+		width: 100%;
+	}
+}

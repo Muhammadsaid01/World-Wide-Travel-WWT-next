@@ -3,6 +3,9 @@ import type { Agent } from '@/libs/types/agent/agent';
 import type { UpdateAgentByAdmin } from '@/libs/types/agent/agent.update';
 import type { BoardArticle } from '@/libs/types/article/board-article';
 import type { BoardArticleUpdate } from '@/libs/types/article/board-article.update';
+import type { Coupon } from '@/libs/types/booking/coupon';
+import type { CouponInput } from '@/libs/types/booking/coupon.input';
+import type { CouponUpdate } from '@/libs/types/booking/coupon.update';
 import type { Member } from '@/libs/types/member/member';
 import type { MemberUpdateByAdmin } from '@/libs/types/member/member.update';
 import type { TravelPackage } from '@/libs/types/package/travel-package';
@@ -143,6 +146,66 @@ export const DELETE_NOTICE: TypedDocumentNode<
 		deleteNotice(noticeId: $noticeId) {
 			_id
 			noticeTitle
+		}
+	}
+`;
+
+type AdminCouponCreateResult = Pick<
+	Coupon,
+	'_id' | 'couponCode' | 'couponTitle' | 'couponType' | 'couponValue' | 'couponStatus' | 'createdAt'
+>;
+
+type AdminCouponUpdateResult = Pick<
+	Coupon,
+	'_id' | 'couponCode' | 'couponTitle' | 'couponType' | 'couponValue' | 'couponStatus' | 'updatedAt'
+>;
+
+type AdminCouponDeleteResult = Pick<Coupon, '_id' | 'couponCode' | 'couponTitle' | 'couponStatus'>;
+
+export const CREATE_COUPON: TypedDocumentNode<
+	{ createCoupon: AdminCouponCreateResult },
+	{ input: CouponInput }
+> = gql`
+	mutation CreateCoupon($input: CouponInput!) {
+		createCoupon(input: $input) {
+			_id
+			couponCode
+			couponTitle
+			couponType
+			couponValue
+			couponStatus
+			createdAt
+		}
+	}
+`;
+
+export const UPDATE_COUPON: TypedDocumentNode<
+	{ updateCoupon: AdminCouponUpdateResult },
+	{ input: CouponUpdate }
+> = gql`
+	mutation UpdateCoupon($input: CouponUpdate!) {
+		updateCoupon(input: $input) {
+			_id
+			couponCode
+			couponTitle
+			couponType
+			couponValue
+			couponStatus
+			updatedAt
+		}
+	}
+`;
+
+export const DELETE_COUPON: TypedDocumentNode<
+	{ deleteCoupon: AdminCouponDeleteResult },
+	{ couponId: string }
+> = gql`
+	mutation DeleteCoupon($couponId: String!) {
+		deleteCoupon(couponId: $couponId) {
+			_id
+			couponCode
+			couponTitle
+			couponStatus
 		}
 	}
 `;

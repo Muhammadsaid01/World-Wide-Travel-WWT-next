@@ -21,6 +21,7 @@ const adminRoutes = [
 	{ label: 'Bookings', href: '/admin/bookings' },
 	{ label: 'Community', href: '/admin/community' },
 	{ label: 'Notices', href: '/admin/notices' },
+	{ label: 'Coupons', href: '/admin/coupons' },
 ] as const;
 
 function AdminNavigation({ onNavigate }: { onNavigate?: () => void }) {

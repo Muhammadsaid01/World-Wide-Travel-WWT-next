@@ -6,6 +6,10 @@ import type { BoardArticle } from '@/libs/types/article/board-article';
 import type { AllBoardArticlesInquiry } from '@/libs/types/article/board-article.input';
 import type { Booking } from '@/libs/types/booking/booking';
 import type { BookingsInquiry } from '@/libs/types/booking/booking.input';
+import type { Coupon } from '@/libs/types/booking/coupon';
+import type { CouponInquiry } from '@/libs/types/booking/coupon.input';
+import type { CouponUsage } from '@/libs/types/booking/coupon-usage';
+import type { CouponUsageInquiry } from '@/libs/types/booking/coupon-usage.input';
 import type { Member } from '@/libs/types/member/member';
 import type { MembersInquiry } from '@/libs/types/member/member.input';
 import type { TravelPackage } from '@/libs/types/package/travel-package';
@@ -41,7 +45,25 @@ export type AdminNoticesInput = Omit<NoticesInquiry, 'direction'> & {
 	direction?: GraphQLDirection;
 };
 
+export type AdminCouponsInput = Omit<CouponInquiry, 'direction'> & {
+	direction?: GraphQLDirection;
+};
+
+export type AdminCouponUsagesInput = Omit<CouponUsageInquiry, 'direction'> & {
+	direction?: GraphQLDirection;
+};
+
 export type AdminNoticeRow = Notice;
+
+export type AdminCouponRow = Coupon;
+
+export type AdminCouponUsageRow = Pick<
+	CouponUsage,
+	'_id' | 'couponId' | 'memberId' | 'bookingId' | 'discountAmount' | 'usedAt' | 'createdAt'
+> & {
+	memberData?: Pick<Member, '_id' | 'memberNick' | 'memberFullName' | 'memberEmail'> | null;
+	bookingData?: Pick<Booking, '_id' | 'bookingCode' | 'contactName' | 'bookingStatus'> | null;
+};
 
 export type AdminMemberRow = Pick<
 	Member,
@@ -398,6 +420,81 @@ export const GET_ADMIN_NOTICES: TypedDocumentNode<
 				expireAt
 				createdAt
 				updatedAt
+			}
+			metaCounter {
+				total
+			}
+		}
+	}
+`;
+
+export const GET_ADMIN_COUPONS: TypedDocumentNode<
+	{
+		getAllCoupons: {
+			list: AdminCouponRow[];
+			metaCounter?: MetaCounter[] | null;
+		};
+	},
+	{ input: AdminCouponsInput }
+> = gql`
+	query GetAdminCoupons($input: CouponInquiry!) {
+		getAllCoupons(input: $input) {
+			list {
+				_id
+				couponCode
+				couponTitle
+				couponDesc
+				couponType
+				couponValue
+				minAmount
+				maxDiscount
+				usageLimit
+				usedCount
+				perUserLimit
+				validFrom
+				validUntil
+				couponStatus
+				createdAt
+				updatedAt
+			}
+			metaCounter {
+				total
+			}
+		}
+	}
+`;
+
+export const GET_ADMIN_COUPON_USAGES: TypedDocumentNode<
+	{
+		getCouponUsages: {
+			list: AdminCouponUsageRow[];
+			metaCounter?: MetaCounter[] | null;
+		};
+	},
+	{ couponId: string; input: AdminCouponUsagesInput }
+> = gql`
+	query GetAdminCouponUsages($couponId: String!, $input: CouponUsageInquiry!) {
+		getCouponUsages(couponId: $couponId, input: $input) {
+			list {
+				_id
+				couponId
+				memberId
+				bookingId
+				discountAmount
+				usedAt
+				createdAt
+				memberData {
+					_id
+					memberNick
+					memberFullName
+					memberEmail
+				}
+				bookingData {
+					_id
+					bookingCode
+					contactName
+					bookingStatus
+				}
 			}
 			metaCounter {
 				total
