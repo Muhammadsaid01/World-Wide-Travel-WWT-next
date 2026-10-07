@@ -1,8 +1,26 @@
 import { type ChangeEvent, useMemo, useRef, useState } from 'react';
-import { useQuery } from '@apollo/client';
+import { useMutation, useQuery } from '@apollo/client';
 import OpenInNewOutlined from '@mui/icons-material/OpenInNewOutlined';
-import { Alert, Button, Chip, MenuItem, Pagination, Paper, Skeleton, TextField, Typography } from '@mui/material';
+import {
+	Alert,
+	Button,
+	Chip,
+	Dialog,
+	DialogActions,
+	DialogContent,
+	DialogTitle,
+	MenuItem,
+	Pagination,
+	Paper,
+	Skeleton,
+	TextField,
+	Typography,
+} from '@mui/material';
 import Link from 'next/link';
+import {
+	DELETE_TRAVEL_PACKAGE_BY_ADMIN,
+	UPDATE_TRAVEL_PACKAGE_BY_ADMIN,
+} from '@/apollo/admin/mutation';
 import {
 	GET_ADMIN_PACKAGES,
 	type AdminPackageRow,
@@ -13,6 +31,9 @@ import PackageImage from '../package/PackageImage';
 import { formatScheduleDate } from '../package/PackageSchedules';
 
 const PAGE_SIZE = 10;
+
+type PackageAction = 'SOLD' | 'DELETED' | 'HARD_DELETE';
+type SelectedAction = { item: AdminPackageRow; action: PackageAction };
 
 const statusOptions: Array<{ value: PackageStatus | 'ALL'; label: string }> = [
 	{ value: 'ALL', label: 'All statuses' },
@@ -43,12 +64,21 @@ function formatPrice(value: number, currency: string) {
 	}
 }
 
-function PackageRow({ item }: { item: AdminPackageRow }) {
+function PackageRow({
+	item,
+	busy,
+	onAction,
+}: {
+	item: AdminPackageRow;
+	busy: boolean;
+	onAction: (item: AdminPackageRow, action: PackageAction) => void;
+}) {
 	const destination = [item.destinationCity, item.destinationCountry].filter(Boolean).join(', ');
 	const duration = `${item.packageDays} day${item.packageDays === 1 ? '' : 's'} · ${item.packageNights} night${
 		item.packageNights === 1 ? '' : 's'
 	}`;
 	const companyName = item.agentData?.companyName?.trim() || 'Agent unavailable';
+	const active = item.packageStatus === PackageStatus.ACTIVE;
 
 	return (
 		<article className="admin-package-row">
@@ -92,20 +122,32 @@ function PackageRow({ item }: { item: AdminPackageRow }) {
 				<span>Created {formatScheduleDate(item.createdAt)}</span>
 			</div>
 
-			<div className="admin-package-action" data-label="Action">
-				{item.packageStatus === PackageStatus.ACTIVE ? (
+			<div className="admin-package-action admin-package-actions" data-label="Actions">
+				{active ? (
 					<Button
 						component={Link}
 						href={`/package/${item._id}`}
 						variant="outlined"
 						size="small"
 						endIcon={<OpenInNewOutlined />}
+						disabled={busy}
 					>
 						View public
 					</Button>
-				) : (
-					<Typography component="span">Not public</Typography>
-				)}
+				) : null}
+				{active ? (
+					<>
+						<Button size="small" disabled={busy} onClick={() => onAction(item, 'SOLD')}>
+							Mark sold
+						</Button>
+						<Button color="error" size="small" disabled={busy} onClick={() => onAction(item, 'DELETED')}>
+							Mark deleted
+						</Button>
+					</>
+				) : null}
+				<Button color="error" size="small" disabled={busy} onClick={() => onAction(item, 'HARD_DELETE')}>
+					Delete permanently
+				</Button>
 			</div>
 		</article>
 	);
@@ -121,11 +163,39 @@ function PackageSkeleton() {
 	);
 }
 
+function actionCopy(selected: SelectedAction | null) {
+	if (!selected) return { title: '', description: '', confirm: '' };
+	if (selected.action === 'SOLD') {
+		return {
+			title: 'Mark package as sold?',
+			description: `“${selected.item.packageTitle}” will move from Active to Sold. This lifecycle change cannot be reversed from Admin.`,
+			confirm: 'Mark as Sold',
+		};
+	}
+	if (selected.action === 'DELETED') {
+		return {
+			title: 'Mark package as deleted?',
+			description: `“${selected.item.packageTitle}” will move from Active to Deleted. The package record will remain in the system.`,
+			confirm: 'Mark as Deleted',
+		};
+	}
+	return {
+		title: 'Permanently delete package?',
+		description: `“${selected.item.packageTitle}” and its schedules, itinerary, includes, excludes, tags, and policy will be permanently removed. This is different from marking a package Deleted and cannot be undone.`,
+		confirm: 'Delete Permanently',
+	};
+}
+
 export default function AdminPackages() {
+	const actionLock = useRef(false);
 	const resultsRef = useRef<HTMLDivElement>(null);
 	const [page, setPage] = useState(1);
 	const [packageStatus, setPackageStatus] = useState<PackageStatus | 'ALL'>('ALL');
 	const [sort, setSort] = useState<'newest' | 'oldest'>('newest');
+	const [selectedAction, setSelectedAction] = useState<SelectedAction | null>(null);
+	const [busyId, setBusyId] = useState('');
+	const [actionError, setActionError] = useState('');
+	const [notice, setNotice] = useState('');
 
 	const variables = useMemo<{ input: AdminPackagesInput }>(
 		() => ({
@@ -147,11 +217,14 @@ export default function AdminPackages() {
 		fetchPolicy: 'no-cache',
 		notifyOnNetworkStatusChange: true,
 	});
+	const [updatePackage] = useMutation(UPDATE_TRAVEL_PACKAGE_BY_ADMIN);
+	const [deletePackage] = useMutation(DELETE_TRAVEL_PACKAGE_BY_ADMIN);
 
 	const packages = data?.getAllTravelPackagesByAdmin.list ?? [];
 	const total = data?.getAllTravelPackagesByAdmin.metaCounter?.[0]?.total ?? 0;
 	const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));
 	const filtered = packageStatus !== 'ALL';
+	const copy = actionCopy(selectedAction);
 
 	function changePage(_: ChangeEvent<unknown>, nextPage: number) {
 		setPage(nextPage);
@@ -164,6 +237,55 @@ export default function AdminPackages() {
 		setPage(1);
 	}
 
+	async function synchronize() {
+		try {
+			const refreshed = await refetch();
+			const freshTotal = refreshed.data.getAllTravelPackagesByAdmin.metaCounter?.[0]?.total ?? 0;
+			const lastPage = Math.max(1, Math.ceil(freshTotal / PAGE_SIZE));
+			if (page > lastPage) setPage(lastPage);
+		} catch {
+			setActionError('The package was changed, but the list could not be refreshed. Retry to synchronize it.');
+		}
+	}
+
+	async function confirmAction() {
+		if (!selectedAction || actionLock.current) return;
+		if (selectedAction.action !== 'HARD_DELETE' && selectedAction.item.packageStatus !== PackageStatus.ACTIVE) {
+			setActionError('Only Active packages can change lifecycle status.');
+			return;
+		}
+
+		actionLock.current = true;
+		setBusyId(selectedAction.item._id);
+		setActionError('');
+		setNotice('');
+		try {
+			if (selectedAction.action === 'HARD_DELETE') {
+				const response = await deletePackage({ variables: { input: { _id: selectedAction.item._id } } });
+				if (!response.data?.deleteTravelPackageByAdmin) {
+					throw new Error('The server did not confirm the permanent deletion.');
+				}
+				setNotice(`${selectedAction.item.packageTitle} was permanently deleted.`);
+			} else {
+				const nextStatus = selectedAction.action === 'SOLD' ? PackageStatus.SOLD : PackageStatus.DELETED;
+				const response = await updatePackage({
+					variables: { input: { _id: selectedAction.item._id, packageStatus: nextStatus } },
+				});
+				if (!response.data?.updateTravelPackageByAdmin) {
+					throw new Error('The server did not confirm the package status change.');
+				}
+				setNotice(`${selectedAction.item.packageTitle} was marked ${enumLabel(nextStatus).toLowerCase()}.`);
+			}
+			setSelectedAction(null);
+			await synchronize();
+		} catch (failure) {
+			setActionError(failure instanceof Error ? failure.message : 'The package action could not be completed.');
+		} finally {
+			actionLock.current = false;
+			setBusyId('');
+		}
+	}
+
 	return (
 		<div className="admin-packages-page">
 			<header className="admin-page-header">
@@ -172,8 +294,8 @@ export default function AdminPackages() {
 					<Typography component="h1">Packages</Typography>
 					<Typography>Review package ownership, status, pricing, and destination information.</Typography>
 				</div>
-				<span className={`admin-total-count${error ? ' is-unavailable' : ''}`}>
-					{error ? 'Total unavailable' : loading && !data ? 'Loading total' : `${total} total`}
+				<span className={`admin-total-count${error && !data ? ' is-unavailable' : ''}`}>
+					{error && !data ? 'Total unavailable' : loading && !data ? 'Loading total' : `${total} total`}
 				</span>
 			</header>
 
@@ -209,18 +331,25 @@ export default function AdminPackages() {
 				</TextField>
 			</div>
 
-			<div ref={resultsRef} className="admin-members-results">
+			<div className="admin-members-feedback">
+				{notice ? <Alert severity="success">{notice}</Alert> : null}
+				{actionError && !selectedAction ? (
+					<Alert severity="error" action={<Button onClick={() => void refetch()}>Refresh list</Button>}>
+						{actionError}
+					</Alert>
+				) : null}
+				{error && data ? (
+					<Alert severity="warning" action={<Button onClick={() => void refetch()}>Retry</Button>}>
+						The latest package data could not be refreshed.
+					</Alert>
+				) : null}
+			</div>
+
+			<div ref={resultsRef} className="admin-members-results" aria-busy={loading}>
 				{loading && !data ? (
 					<PackageSkeleton />
-				) : error ? (
-					<Alert
-						severity="error"
-						action={
-							<Button color="inherit" size="small" onClick={() => void refetch()}>
-								Retry
-							</Button>
-						}
-					>
+				) : error && !data ? (
+					<Alert severity="error" action={<Button onClick={() => void refetch()}>Retry</Button>}>
 						Packages could not be loaded. Your filters have been preserved.
 					</Alert>
 				) : packages.length === 0 ? (
@@ -246,11 +375,19 @@ export default function AdminPackages() {
 							<span>Price & duration</span>
 							<span>Agent</span>
 							<span>Dates</span>
-							<span>Action</span>
+							<span>Actions</span>
 						</div>
 						<div className="admin-members-list">
 							{packages.map((item) => (
-								<PackageRow key={item._id} item={item} />
+								<PackageRow
+									key={item._id}
+									item={item}
+									busy={Boolean(busyId)}
+									onAction={(selectedItem, action) => {
+										setActionError('');
+										setSelectedAction({ item: selectedItem, action });
+									}}
+								/>
 							))}
 						</div>
 					</Paper>
@@ -262,6 +399,35 @@ export default function AdminPackages() {
 					<Pagination count={pageCount} page={Math.min(page, pageCount)} onChange={changePage} color="primary" />
 				</div>
 			) : null}
+
+			<Dialog
+				className="admin-request-dialog"
+				open={Boolean(selectedAction)}
+				onClose={() => {
+					if (!busyId) setSelectedAction(null);
+				}}
+				fullWidth
+				maxWidth="sm"
+			>
+				<DialogTitle>{copy.title}</DialogTitle>
+				<DialogContent>
+					<Typography>{copy.description}</Typography>
+					{actionError ? <Alert severity="error">{actionError}</Alert> : null}
+				</DialogContent>
+				<DialogActions>
+					<Button disabled={Boolean(busyId)} onClick={() => setSelectedAction(null)}>
+						Cancel
+					</Button>
+					<Button
+						variant="contained"
+						color={selectedAction?.action === 'SOLD' ? 'primary' : 'error'}
+						disabled={Boolean(busyId)}
+						onClick={() => void confirmAction()}
+					>
+						{busyId ? 'Working...' : copy.confirm}
+					</Button>
+				</DialogActions>
+			</Dialog>
 		</div>
 	);
 }

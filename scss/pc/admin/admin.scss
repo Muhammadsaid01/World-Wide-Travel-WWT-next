@@ -840,7 +840,7 @@
 	display: grid;
 	grid-template-columns:
 		minmax(250px, 1.5fr) minmax(125px, 0.85fr) 82px minmax(115px, 0.7fr) minmax(125px, 0.8fr)
-		120px 102px;
+		120px 150px;
 	gap: 12px;
 	align-items: center;
 }
@@ -1007,6 +1007,202 @@
 	}
 }
 
+.admin-package-actions {
+	display: grid;
+	gap: 3px;
+
+	.MuiButton-root {
+		justify-content: flex-start;
+	}
+}
+
+.admin-community-page {
+	max-width: 1380px;
+	margin: 0 auto;
+}
+
+.admin-community-toolbar {
+	display: grid;
+	grid-template-columns: 180px 190px 150px;
+	justify-content: end;
+	gap: 14px;
+	margin: 28px 0 20px;
+
+	.MuiOutlinedInput-root {
+		background: #fff;
+	}
+}
+
+.admin-community-table-header,
+.admin-article-row {
+	display: grid;
+	grid-template-columns: minmax(270px, 1.55fr) minmax(155px, 0.85fr) 105px 90px minmax(125px, 0.75fr) 126px 112px;
+	gap: 12px;
+	align-items: center;
+}
+
+.admin-community-table-header {
+	padding: 13px 20px;
+	border-bottom: 1px solid #dfe4e9;
+	background: #f5f7f9;
+	color: #68727d;
+	font-size: 10px;
+	font-weight: 800;
+	letter-spacing: 0.8px;
+	text-transform: uppercase;
+}
+
+.admin-article-row {
+	min-width: 0;
+	padding: 16px 20px;
+	border-bottom: 1px solid #e9edf1;
+
+	&:last-child {
+		border-bottom: 0;
+	}
+}
+
+.admin-article-summary {
+	display: grid;
+	min-width: 0;
+	gap: 4px;
+
+	strong,
+	p,
+	small {
+		max-width: 100%;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	strong {
+		font-size: 13px;
+	}
+
+	p {
+		color: #65717c;
+		font-size: 10px;
+	}
+
+	small {
+		color: #929ba4;
+		font-size: 9px;
+	}
+}
+
+.admin-article-author {
+	display: flex;
+	min-width: 0;
+	align-items: center;
+	gap: 9px;
+
+	.MuiAvatar-root {
+		width: 34px;
+		height: 34px;
+		flex: 0 0 34px;
+		background: #dce7f0;
+		color: #31597c;
+		font-size: 12px;
+	}
+
+	> div {
+		display: grid;
+		min-width: 0;
+		gap: 2px;
+	}
+
+	strong,
+	span {
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	strong {
+		font-size: 11px;
+	}
+
+	span {
+		color: #7a838d;
+		font-size: 9px;
+	}
+}
+
+.admin-article-cell {
+	display: grid;
+	min-width: 0;
+	justify-items: start;
+	gap: 3px;
+
+	strong,
+	span {
+		max-width: 100%;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	strong {
+		font-size: 10px;
+		font-weight: 700;
+	}
+
+	span {
+		color: #7a838d;
+		font-size: 9px;
+	}
+}
+
+.admin-article-status {
+	height: 26px;
+	font-size: 10px;
+	font-weight: 750;
+
+	&.is-active {
+		background: #e8f5ed;
+		color: #236548;
+	}
+
+	&.is-draft,
+	&.is-hidden {
+		background: #edf1f5;
+		color: #56616d;
+	}
+
+	&.is-blocked,
+	&.is-deleted {
+		background: #fbeaea;
+		color: #9a3838;
+	}
+}
+
+.admin-article-action {
+	display: flex;
+	min-width: 0;
+	justify-content: flex-start;
+
+	.MuiButton-root {
+		min-height: 36px;
+		padding: 5px 9px;
+		font-size: 9px;
+		font-weight: 750;
+		white-space: nowrap;
+		text-transform: none;
+	}
+
+	> span {
+		color: #8b949e;
+		font-size: 10px;
+	}
+}
+
+.admin-community-dialog .MuiDialogContent-root {
+	display: grid;
+	gap: 18px;
+	padding-top: 8px;
+}
+
 .admin-bookings-page {
 	max-width: 1380px;
 	margin: 0 auto;
@@ -1026,10 +1222,9 @@
 .admin-bookings-table-header,
 .admin-booking-row {
 	display: grid;
-	grid-template-columns: minmax(145px, 0.95fr) minmax(170px, 1.1fr) minmax(145px, 0.9fr) 88px minmax(
-			150px,
-			1fr
-		) 105px 112px 94px;
+	grid-template-columns:
+		minmax(145px, 0.95fr) minmax(170px, 1.1fr) minmax(145px, 0.9fr) 88px minmax(150px, 1fr)
+		105px 112px 94px;
 	gap: 12px;
 	align-items: center;
 }
@@ -1605,6 +1800,71 @@
 		min-height: 40px;
 	}
 
+	.admin-community-table {
+		border: 0;
+		background: transparent;
+		box-shadow: none;
+		overflow: visible;
+	}
+
+	.admin-community-table .admin-community-table-header {
+		display: none;
+	}
+
+	.admin-community-table .admin-members-list {
+		display: grid;
+		gap: 14px;
+	}
+
+	.admin-article-row {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 16px 20px;
+		padding: 20px;
+		border: 1px solid #dfe4e9;
+		border-radius: 12px;
+		background: #fff;
+		box-shadow: 0 4px 18px rgba(11, 45, 79, 0.04);
+
+		&:last-child {
+			border-bottom: 1px solid #dfe4e9;
+		}
+	}
+
+	.admin-article-summary {
+		grid-column: 1 / -1;
+		padding-bottom: 14px;
+		border-bottom: 1px solid #edf0f3;
+	}
+
+	.admin-article-author,
+	.admin-article-cell,
+	.admin-article-action {
+		align-content: start;
+		justify-content: start;
+
+		&::before {
+			content: attr(data-label);
+			margin-bottom: 4px;
+			color: #89929c;
+			font-size: 9px;
+			font-weight: 800;
+			letter-spacing: 0.8px;
+			text-transform: uppercase;
+		}
+	}
+
+	.admin-article-author {
+		flex-wrap: wrap;
+
+		&::before {
+			flex-basis: 100%;
+		}
+	}
+
+	.admin-article-action .MuiButton-root {
+		min-height: 40px;
+	}
+
 	.admin-bookings-table {
 		border: 0;
 		background: transparent;
@@ -1788,6 +2048,11 @@
 		justify-content: stretch;
 	}
 
+	.admin-community-toolbar {
+		grid-template-columns: minmax(0, 1fr);
+		justify-content: stretch;
+	}
+
 	.admin-bookings-toolbar {
 		grid-template-columns: minmax(0, 1fr);
 	}
@@ -1892,6 +2157,19 @@
 	}
 
 	.admin-package-action .MuiButton-root {
+		width: 100%;
+	}
+
+	.admin-article-row {
+		grid-template-columns: minmax(0, 1fr);
+		padding: 18px 16px;
+	}
+
+	.admin-article-summary {
+		grid-column: auto;
+	}
+
+	.admin-article-action .MuiButton-root {
 		width: 100%;
 	}
 

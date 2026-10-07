@@ -170,6 +170,24 @@ export type AdminRecentArticle = Pick<
 	memberData?: Pick<Member, '_id' | 'memberNick' | 'memberFullName'> | null;
 };
 
+export type AdminArticleRow = Pick<
+	BoardArticle,
+	| '_id'
+	| 'memberId'
+	| 'articleTitle'
+	| 'articleContent'
+	| 'articleCategory'
+	| 'articleStatus'
+	| 'articleViewCount'
+	| 'articleLikeCount'
+	| 'articleCommentCount'
+	| 'articleDeletedAt'
+	| 'createdAt'
+	| 'updatedAt'
+> & {
+	memberData?: Pick<Member, '_id' | 'memberNick' | 'memberFullName' | 'memberImage' | 'memberType'> | null;
+};
+
 export const GET_ADMIN_MEMBER_COUNT: TypedDocumentNode<
 	{ getAllMembersByAdmin: { metaCounter?: MetaCounter[] | null } },
 	{ input: AdminMembersInput }
@@ -302,6 +320,45 @@ export const GET_ADMIN_PACKAGES: TypedDocumentNode<
 					_id
 					memberId
 					companyName
+				}
+			}
+			metaCounter {
+				total
+			}
+		}
+	}
+`;
+
+export const GET_ADMIN_ARTICLES: TypedDocumentNode<
+	{
+		getAllBoardArticlesByAdmin: {
+			list: AdminArticleRow[];
+			metaCounter?: MetaCounter[] | null;
+		};
+	},
+	{ input: AdminArticlesInput }
+> = gql`
+	query GetAdminArticles($input: AllBoardArticlesInquiry!) {
+		getAllBoardArticlesByAdmin(input: $input) {
+			list {
+				_id
+				memberId
+				articleTitle
+				articleContent
+				articleCategory
+				articleStatus
+				articleViewCount
+				articleLikeCount
+				articleCommentCount
+				articleDeletedAt
+				createdAt
+				updatedAt
+				memberData {
+					_id
+					memberNick
+					memberFullName
+					memberImage
+					memberType
 				}
 			}
 			metaCounter {
