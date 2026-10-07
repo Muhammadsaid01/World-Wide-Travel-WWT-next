@@ -32,6 +32,10 @@
 	margin: 0 auto;
 	padding-inline: 24px;
 }
+:where(.wwt-home) .home-main-container {
+	width: min(calc(100% - 48px), 1240px);
+	padding-inline: 0;
+}
 
 // Hero
 :where(.wwt-home) .home-hero {
@@ -299,6 +303,9 @@
 :where(.wwt-home) .home-category-section {
 	margin-top: 92px;
 }
+:where(.wwt-home) .home-offers-section {
+	margin-top: 42px;
+}
 :where(.wwt-home) .home-section-heading {
 	display: flex;
 	align-items: flex-end;
@@ -367,7 +374,7 @@
 
 // Country marquee
 :where(.wwt-home) .home-flags {
-	margin-top: 58px;
+	margin-top: 34px;
 	overflow: hidden;
 	border-block: 1px solid #edf0f2;
 	background: #f7f9fc;
@@ -383,27 +390,23 @@
 :where(.wwt-home) .home-flags-sequence {
 	display: flex;
 	flex-shrink: 0;
-	gap: 26px;
-	padding: 20px 26px 18px 0;
+	gap: 18px;
+	padding: 14px 18px 14px 0;
 }
 :where(.wwt-home) .home-flag {
-	width: 94px;
+	width: 96px;
 	display: flex;
-	flex-direction: column;
+	flex: 0 0 96px;
 	align-items: center;
-	gap: 8px;
-	color: #405366;
-	font-size: 10px;
-	line-height: 1.2;
-	text-align: center;
+	justify-content: center;
 }
 :where(.wwt-home) .home-flag img {
-	width: 50px;
-	height: 36px;
+	width: 60px;
+	height: auto;
 	flex: 0 0 auto;
-	object-fit: cover;
-	border-radius: 50%;
-	box-shadow: 0 2px 8px rgba(8, 34, 60, 0.18);
+	object-fit: contain;
+	border-radius: 3px;
+	box-shadow: 0 3px 10px rgba(8, 34, 60, 0.16);
 }
 
 // Shared homepage grids
@@ -416,6 +419,11 @@
 	display: grid;
 	grid-template-columns: repeat(3, minmax(0, 1fr));
 	gap: 22px;
+}
+:where(.wwt-home) .home-destinations-grid {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 20px;
 }
 :where(.wwt-home) .home-empty-state {
 	padding: 30px;
@@ -960,6 +968,9 @@
 	:where(.wwt-home) .home-grid-four {
 		grid-template-columns: repeat(2, minmax(0, 1fr));
 	}
+	:where(.wwt-home) .home-destinations-grid {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
 	:where(.wwt-home) .home-categories {
 		overflow-x: auto;
 		grid-template-columns: repeat(8, 94px);
@@ -978,6 +989,10 @@
 @media (max-width: 767px) {
 	:where(.wwt-home) .home-container {
 		padding-inline: 16px;
+	}
+	:where(.wwt-home) .home-main-container {
+		width: calc(100% - 32px);
+		padding-inline: 0;
 	}
 	:where(.wwt-home) .home-hero {
 		height: 760px;
@@ -1059,6 +1074,9 @@
 	:where(.wwt-home) .home-section {
 		margin-top: 62px;
 	}
+	:where(.wwt-home) .home-offers-section {
+		margin-top: 36px;
+	}
 	:where(.wwt-home) .home-section-heading {
 		align-items: flex-start;
 		flex-direction: column;
@@ -1073,14 +1091,23 @@
 		padding-inline: 16px;
 	}
 	:where(.wwt-home) .home-flags {
-		margin-top: 44px;
+		margin-top: 32px;
 	}
 	:where(.wwt-home) .home-flags-sequence {
-		gap: 18px;
+		gap: 12px;
+		padding: 12px 12px 12px 0;
+	}
+	:where(.wwt-home) .home-flag {
+		width: 88px;
+		flex-basis: 88px;
+	}
+	:where(.wwt-home) .home-flag img {
+		width: 54px;
 	}
 	:where(.wwt-home) .home-offers,
 	:where(.wwt-home) .home-grid-four,
-	:where(.wwt-home) .home-grid-three {
+	:where(.wwt-home) .home-grid-three,
+	:where(.wwt-home) .home-destinations-grid {
 		grid-template-columns: 1fr;
 	}
 	:where(.wwt-home) .home-offers article {

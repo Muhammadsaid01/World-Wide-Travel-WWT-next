@@ -43,15 +43,15 @@ export default function PopularDestinations() {
 			const key = `${normalizedPlace(item.destinationCity)}|${normalizedPlace(item.destinationCountry)}`;
 			return list.findIndex((candidate) => `${normalizedPlace(candidate.destinationCity)}|${normalizedPlace(candidate.destinationCountry)}` === key) === index;
 		})
-		.slice(0, 4);
+			.slice(0, 3);
 	return (
 		<section className="home-section" aria-labelledby="home-destinations-title">
 			<div className="home-section-heading"><div><span className="home-section-kicker">Ideas for your next escape</span>
 				<h2 id="home-destinations-title">Popular Destinations</h2></div><Link href="/package">Explore all packages →</Link></div>
-			{query.loading ? <div className="home-grid-four">{Array.from({ length: 4 }, (_, index) => <Skeleton key={index} variant="rounded" height={320} />)}</div>
+			{query.loading ? <div className="home-destinations-grid">{Array.from({ length: 3 }, (_, index) => <Skeleton key={index} variant="rounded" height={320} />)}</div>
 				: query.error ? <Alert severity="info" action={<Button onClick={() => void query.refetch()}>Retry</Button>}>Destinations could not be loaded.</Alert>
 				: destinations.length === 0 ? <div className="home-empty-state">No destinations are available yet.</div>
-				: <div className="home-grid-four">{destinations.map((item) => (
+				: <div className="home-destinations-grid">{destinations.map((item) => (
 					<Link className="home-destination" key={item._id} href={{ pathname: '/package', query: { country: item.destinationCountry } }}>
 						<DestinationImage city={item.destinationCity} image={item.packageImages.find((image) => image.trim())} />
 						<div><h3>{item.destinationCity}</h3><p>{item.destinationCountry}</p></div>

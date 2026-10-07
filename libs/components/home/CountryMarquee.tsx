@@ -18,8 +18,7 @@ function CountrySequence({ hidden = false }: { hidden?: boolean }) {
 		<div className="home-flags-sequence" aria-hidden={hidden || undefined}>
 			{countries.map(([code, name]) => (
 				<div className="home-flag" key={code} title={name}>
-					<Image src={`/images/flags/${code}.svg`} alt={hidden ? '' : `${name} flag`} width={42} height={30} />
-					<span>{name}</span>
+					<Image src={`/images/flags/${code}.svg`} alt={hidden ? '' : `${name} flag`} width={60} height={45} />
 				</div>
 			))}
 		</div>

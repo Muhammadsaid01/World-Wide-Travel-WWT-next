@@ -26,7 +26,7 @@ function Home() {
 				<TravelInspiration />
 			</div>
 			<CountryMarquee />
-			<div className="home-container">
+			<div className="home-container home-main-container">
 				<CouponSection />
 				<PopularDestinations />
 				<PopularPackages />
