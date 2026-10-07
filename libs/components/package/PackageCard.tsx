@@ -5,6 +5,7 @@ import ArrowForward from '@mui/icons-material/ArrowForward';
 import Favorite from '@mui/icons-material/Favorite';
 import FavoriteBorder from '@mui/icons-material/FavoriteBorder';
 import PlaceOutlined from '@mui/icons-material/PlaceOutlined';
+import LandscapeOutlined from '@mui/icons-material/LandscapeOutlined';
 import Star from '@mui/icons-material/Star';
 import { IconButton } from '@mui/material';
 import Image from 'next/image';
@@ -52,29 +53,31 @@ export default function PackageCard({
             onError={() => setFailedImage(image)}
           />
         ) : (
-          <div className="packages-image-placeholder">Image unavailable</div>
+          <div className="packages-image-placeholder" aria-label="Package image unavailable"><LandscapeOutlined /></div>
         )}
 
-        <IconButton
-          className="home-favorite"
-          disabled={favoriteAction?.disabled ?? false}
-          onClick={(event) => {
-            event.preventDefault();
-            event.stopPropagation();
-            favoriteAction?.onToggle();
-          }}
-          aria-label={
-            isSaved
-              ? `Remove ${item.packageTitle} from saved packages`
-              : `Save ${item.packageTitle}`
-          }
-        >
-          {isSaved ? (
-            <Favorite fontSize="small" color="error" />
-          ) : (
-            <FavoriteBorder fontSize="small" />
-          )}
-        </IconButton>
+        {favoriteAction && (
+          <IconButton
+            className="home-favorite"
+            disabled={favoriteAction.disabled ?? false}
+            onClick={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+              favoriteAction.onToggle();
+            }}
+            aria-label={
+              isSaved
+                ? `Remove ${item.packageTitle} from saved packages`
+                : `Save ${item.packageTitle}`
+            }
+          >
+            {isSaved ? (
+              <Favorite fontSize="small" color="error" />
+            ) : (
+              <FavoriteBorder fontSize="small" />
+            )}
+          </IconButton>
+        )}
       </div>
 
       <div className="home-card-body">

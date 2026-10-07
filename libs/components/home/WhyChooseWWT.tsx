@@ -1,7 +1,7 @@
 import VerifiedUserOutlined from '@mui/icons-material/VerifiedUserOutlined';
 import LockOutlined from '@mui/icons-material/LockOutlined';
 import PublicOutlined from '@mui/icons-material/PublicOutlined';
-import SupportAgent from '@mui/icons-material/SupportAgent';
+import GroupsOutlined from '@mui/icons-material/GroupsOutlined';
 export default function WhyChooseWWT() {
 	return (
 		<section className="home-section home-benefits">
@@ -23,7 +23,7 @@ export default function WhyChooseWWT() {
 						text: 'Discover carefully curated journeys and authentic moments.',
 						Icon: PublicOutlined,
 					},
-					{ title: '24/7 Support', text: 'A helping hand whenever you need it, wherever you go.', Icon: SupportAgent },
+					{ title: 'Traveler Community', text: 'Share travel stories and connect with people planning their next journey.', Icon: GroupsOutlined },
 				].map(({ title, text, Icon }) => (
 					<article key={title}>
 						<Icon />

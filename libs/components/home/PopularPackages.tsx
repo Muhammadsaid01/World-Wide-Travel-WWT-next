@@ -1,92 +1,20 @@
-import Image from 'next/image';
+import { GET_TRAVEL_PACKAGES } from '@/apollo/user/query';
+import PackageCard from '@/libs/components/package/PackageCard';
+import { useQuery } from '@apollo/client';
+import { Alert, Button, Skeleton } from '@mui/material';
 import Link from 'next/link';
-import { IconButton } from '@mui/material';
-import FavoriteBorder from '@mui/icons-material/FavoriteBorder';
-import Star from '@mui/icons-material/Star';
-import PlaceOutlined from '@mui/icons-material/PlaceOutlined';
-import AccessTime from '@mui/icons-material/AccessTime';
+
 export default function PopularPackages() {
-	const packages = [
-		{
-			title: 'Discover the Heart of Seoul',
-			location: 'Seoul, South Korea',
-			image: '/images/home/seoul.svg',
-			rating: '4.9',
-			duration: '5 days / 4 nights',
-			price: '$590',
-		},
-		{
-			title: 'Tokyo Culture & City Escape',
-			location: 'Tokyo, Japan',
-			image: '/images/home/tokyo.svg',
-			rating: '4.8',
-			duration: '6 days / 5 nights',
-			price: '$890',
-		},
-		{
-			title: 'Paris Highlights & Hidden Gems',
-			location: 'Paris, France',
-			image: '/images/home/paris.svg',
-			rating: '4.9',
-			duration: '5 days / 4 nights',
-			price: '$1,190',
-		},
-		{
-			title: 'Dubai City & Desert Adventure',
-			location: 'Dubai, UAE',
-			image: '/images/home/dubai.svg',
-			rating: '4.7',
-			duration: '4 days / 3 nights',
-			price: '$750',
-		},
-	];
+	const query = useQuery(GET_TRAVEL_PACKAGES, { variables: { input: { page: 1, limit: 4, sort: 'packageRating', direction: 'DESC' } } });
+	const packages = query.data?.getTravelPackages.list ?? [];
 	return (
-		<section className="home-section home-packages">
-			<div className="home-section-heading">
-				<div>
-					<h2>Popular Travel Packages</h2>
-				</div>
-				<Link href="/package">View all packages →</Link>
-			</div>
-			<div className="home-grid-four">
-				{packages.map((item) => (
-					<article className="home-card" key={item.title}>
-						<div className="home-card-image">
-							<Image
-								src={item.image}
-								alt={`${item.location} illustration placeholder`}
-								fill
-								sizes="(max-width: 600px) 100vw, (max-width: 1100px) 50vw, (max-width: 1280px) 25vw, 290px"
-							/>
-							<IconButton className="home-favorite" disabled aria-label={`Save ${item.title} (coming soon)`}>
-								<FavoriteBorder fontSize="small" />
-							</IconButton>
-						</div>
-						<div className="home-card-body">
-							<p className="home-location">
-								<PlaceOutlined />
-								{item.location}
-							</p>
-							<h3>{item.title}</h3>
-							<p className="home-rating">
-								<Star />
-								{item.rating}
-								<span>(Sample rating)</span>
-							</p>
-							<p className="home-duration">
-								<AccessTime />
-								{item.duration}
-							</p>
-							<div className="home-price">
-								<span>
-									From <strong>{item.price}</strong>
-								</span>
-								<small>/ person</small>
-							</div>
-						</div>
-					</article>
-				))}
-			</div>
+		<section className="home-section home-packages" aria-labelledby="home-packages-title">
+			<div className="home-section-heading"><div><span className="home-section-kicker">Curated journeys</span><h2 id="home-packages-title">Featured Travel Packages</h2></div>
+				<Link href="/package">View all packages →</Link></div>
+			{query.loading ? <div className="home-grid-four">{Array.from({ length: 4 }, (_, index) => <Skeleton key={index} variant="rounded" height={410} />)}</div>
+				: query.error ? <Alert severity="info" action={<Button onClick={() => void query.refetch()}>Retry</Button>}>Packages could not be loaded.</Alert>
+				: packages.length === 0 ? <div className="home-empty-state">No active packages are available yet.</div>
+				: <div className="home-grid-four">{packages.map((item) => <PackageCard key={item._id} item={item} />)}</div>}
 		</section>
 	);
 }

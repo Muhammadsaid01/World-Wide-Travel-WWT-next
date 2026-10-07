@@ -4,8 +4,8 @@ import type { AgentRequest } from '@/libs/types/agent-request/agent-request';
 import type { AgentRequestsInquiry } from '@/libs/types/agent-request/agent-request.input';
 import type { Booking, BookingHandoff } from '@/libs/types/booking/booking';
 import type { BookingsInquiry } from '@/libs/types/booking/booking.input';
-import type { CouponValidation } from '@/libs/types/booking/coupon';
-import type { ValidateCouponInput } from '@/libs/types/booking/coupon.input';
+import type { CouponValidation, PublicCoupon } from '@/libs/types/booking/coupon';
+import type { CouponInquiry, ValidateCouponInput } from '@/libs/types/booking/coupon.input';
 import type { MeLiked } from '@/libs/types/community/like';
 import type { CommentEntity } from '@/libs/types/article/comment';
 import type { Payment } from '@/libs/types/booking/payment';
@@ -39,6 +39,33 @@ export type NoticeQueryInput = Omit<NoticesInquiry, 'direction'> & {
 
 export type NotificationItem = Notification;
 export type NoticeItem = Notice;
+
+export type PublicCouponsInput = Omit<CouponInquiry, 'direction'> & {
+	direction?: GraphQLDirection;
+};
+
+export const GET_PUBLIC_COUPONS: TypedDocumentNode<
+	{ getPublicCoupons: { list: PublicCoupon[]; metaCounter?: { total?: number | null }[] | null } },
+	{ input: PublicCouponsInput }
+> = gql`
+	query GetPublicCoupons($input: CouponInquiry!) {
+		getPublicCoupons(input: $input) {
+			list {
+				couponCode
+				couponTitle
+				couponDesc
+				couponType
+				couponValue
+				minAmount
+				maxDiscount
+				validUntil
+			}
+			metaCounter {
+				total
+			}
+		}
+	}
+`;
 
 const NOTIFICATION_FIELDS = gql`
 	fragment NotificationFields on Notification {

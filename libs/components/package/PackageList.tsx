@@ -11,7 +11,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import TuneIcon from '@mui/icons-material/Tune';
 import { Alert, Button, Chip, MenuItem, Pagination, Skeleton, TextField } from '@mui/material';
 import { useRouter } from 'next/router';
-import { useEffect, useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
 
 import { TOGGLE_SAVED_PACKAGE } from '@/apollo/user/mutation';
 import PackageCard from './PackageCard';
@@ -39,6 +39,7 @@ export default function PackageList() {
 	const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 	const user = useReactiveVar(currentUserVar);
 	const router = useRouter();
+	const initialQueryApplied = useRef(false);
 
 	const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
 	const [favoriteBusyId, setFavoriteBusyId] = useState<string | null>(null);
@@ -57,6 +58,33 @@ export default function PackageList() {
 		skip: !user,
 		fetchPolicy: 'no-cache',
 	});
+	useEffect(() => {
+		if (!router.isReady || initialQueryApplied.current) return;
+		const timeout = window.setTimeout(() => {
+			initialQueryApplied.current = true;
+			const rawText = Array.isArray(router.query.text) ? router.query.text[0] : router.query.text;
+			const rawCountry = Array.isArray(router.query.country) ? router.query.country[0] : router.query.country;
+			const rawCategory = Array.isArray(router.query.category) ? router.query.category[0] : router.query.category;
+			const queryCategory = Object.values(PackageCategory).includes(rawCategory as PackageCategory)
+				? (rawCategory as PackageCategory)
+				: undefined;
+			setText(rawText ?? '');
+			setCountry(rawCountry ?? '');
+			setCategory(queryCategory ?? '');
+			if (rawText || rawCountry || queryCategory) {
+				setInput((previous) => ({
+					...previous,
+					page: 1,
+					search: {
+						text: rawText?.trim() || undefined,
+						destinationCountry: rawCountry?.trim() || undefined,
+						packageCategory: queryCategory,
+					},
+				}));
+			}
+		}, 0);
+		return () => window.clearTimeout(timeout);
+	}, [router.isReady, router.query.category, router.query.country, router.query.text]);
 		useEffect(() => {
   if (!user) {
     // eslint-disable-next-line react-hooks/set-state-in-effect
