@@ -21,7 +21,106 @@ import type { PackageSchedule } from '@/libs/types/package/package-schedule';
 import type { PackageTag } from '@/libs/types/package/package-tag';
 import type { TravelPackage } from '@/libs/types/package/travel-package';
 import type { TravelPackagesInquiry } from '@/libs/types/package/travel-package.input';
+import type { Notice } from '@/libs/types/system/notice';
+import type { NoticesInquiry } from '@/libs/types/system/notice.input';
+import type { Notification } from '@/libs/types/system/notification';
+import type { NotificationsInquiry } from '@/libs/types/system/notification.input';
 import { gql, type TypedDocumentNode } from '@apollo/client';
+
+type GraphQLDirection = keyof typeof Direction;
+
+export type NotificationQueryInput = Omit<NotificationsInquiry, 'direction'> & {
+	direction?: GraphQLDirection;
+};
+
+export type NoticeQueryInput = Omit<NoticesInquiry, 'direction'> & {
+	direction?: GraphQLDirection;
+};
+
+export type NotificationItem = Notification;
+export type NoticeItem = Notice;
+
+const NOTIFICATION_FIELDS = gql`
+	fragment NotificationFields on Notification {
+		_id
+		receiverId
+		senderId
+		notificationType
+		notificationTitle
+		notificationMessage
+		referenceType
+		referenceId
+		isRead
+		readAt
+		createdAt
+		updatedAt
+	}
+`;
+
+export const GET_MY_NOTIFICATIONS: TypedDocumentNode<
+	{
+		getMyNotifications: {
+			list: NotificationItem[];
+			metaCounter?: { total?: number | null }[] | null;
+		};
+	},
+	{ input: NotificationQueryInput }
+> = gql`
+	query GetMyNotifications($input: NotificationsInquiry!) {
+		getMyNotifications(input: $input) {
+			list {
+				...NotificationFields
+			}
+			metaCounter {
+				total
+			}
+		}
+	}
+	${NOTIFICATION_FIELDS}
+`;
+
+export const GET_UNREAD_NOTIFICATION_COUNT: TypedDocumentNode<
+	{ getMyNotifications: { metaCounter?: { total?: number | null }[] | null } },
+	{ input: NotificationQueryInput }
+> = gql`
+	query GetUnreadNotificationCount($input: NotificationsInquiry!) {
+		getMyNotifications(input: $input) {
+			metaCounter {
+				total
+			}
+		}
+	}
+`;
+
+export const GET_NOTICES: TypedDocumentNode<
+	{
+		getNotices: {
+			list: NoticeItem[];
+			metaCounter?: { total?: number | null }[] | null;
+		};
+	},
+	{ input: NoticeQueryInput }
+> = gql`
+	query GetNotices($input: NoticesInquiry!) {
+		getNotices(input: $input) {
+			list {
+				_id
+				adminId
+				noticeTitle
+				noticeContent
+				noticeImages
+				noticeViewCount
+				noticePinned
+				expireAt
+				createdAt
+				updatedAt
+			}
+			metaCounter {
+				total
+			}
+		}
+	}
+`;
 
 export type PackageListItem = Pick<
 	TravelPackage,

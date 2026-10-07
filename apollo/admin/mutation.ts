@@ -10,6 +10,8 @@ import type {
 	DeleteTravelPackageInput,
 	TravelPackageUpdate,
 } from '@/libs/types/package/travel-package.update';
+import type { Notice } from '@/libs/types/system/notice';
+import type { NoticeInput } from '@/libs/types/system/notice.input';
 
 export type AdminMemberUpdateResult = Pick<
 	Member,
@@ -112,6 +114,35 @@ export const UPDATE_BOARD_ARTICLE_BY_ADMIN: TypedDocumentNode<
 			articleTitle
 			articleStatus
 			updatedAt
+		}
+	}
+`;
+
+export const CREATE_NOTICE: TypedDocumentNode<{ createNotice: Notice }, { input: NoticeInput }> = gql`
+	mutation CreateNotice($input: NoticeInput!) {
+		createNotice(input: $input) {
+			_id
+			adminId
+			noticeTitle
+			noticeContent
+			noticeImages
+			noticeViewCount
+			noticePinned
+			expireAt
+			createdAt
+			updatedAt
+		}
+	}
+`;
+
+export const DELETE_NOTICE: TypedDocumentNode<
+	{ deleteNotice: Pick<Notice, '_id' | 'noticeTitle'> },
+	{ noticeId: string }
+> = gql`
+	mutation DeleteNotice($noticeId: String!) {
+		deleteNotice(noticeId: $noticeId) {
+			_id
+			noticeTitle
 		}
 	}
 `;

@@ -128,6 +128,255 @@
 	white-space: nowrap;
 }
 
+.wwt-notification-panel.MuiPaper-root {
+	width: 390px;
+	max-width: calc(100vw - 24px);
+	max-height: min(570px, calc(100vh - 92px));
+	margin-top: 8px;
+	border: 1px solid var(--wwt-divider);
+	border-radius: 14px;
+	box-shadow: 0 18px 48px rgba(8, 34, 58, 0.18);
+	overflow: hidden;
+}
+
+.wwt-notification-tabs {
+	min-height: 48px;
+	border-bottom: 1px solid var(--wwt-divider);
+
+	.MuiTab-root {
+		min-height: 48px;
+		color: var(--wwt-muted);
+		font-size: 13px;
+		font-weight: 700;
+		letter-spacing: 0.2px;
+		text-transform: none;
+	}
+
+	.Mui-selected {
+		color: var(--wwt-primary);
+	}
+}
+
+.wwt-notification-panel-content {
+	max-height: min(520px, calc(100vh - 142px));
+	overflow-y: auto;
+	overscroll-behavior: contain;
+}
+
+.wwt-notification-tab,
+.wwt-notice-tab,
+.wwt-notice-detail {
+	padding: 18px;
+}
+
+.wwt-notification-tab-heading {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 14px;
+	margin-bottom: 14px;
+
+	h3 {
+		font-size: 16px;
+		font-weight: 750;
+		line-height: 1.35;
+	}
+
+	p {
+		margin-top: 2px;
+		color: var(--wwt-muted);
+		font-size: 11px;
+	}
+
+	.MuiButton-root {
+		flex-shrink: 0;
+		padding: 3px 4px;
+		font-size: 10px;
+		font-weight: 700;
+		text-transform: none;
+	}
+}
+
+.wwt-notification-skeletons {
+	display: grid;
+	gap: 9px;
+}
+
+.wwt-notification-state {
+	display: grid;
+	min-height: 210px;
+	place-items: center;
+	align-content: center;
+	gap: 12px;
+	color: var(--wwt-muted);
+	text-align: center;
+}
+
+.wwt-notification-tab > .MuiAlert-root,
+.wwt-notice-tab > .MuiAlert-root,
+.wwt-notification-list + .MuiButton-root {
+	margin-top: 12px;
+}
+
+.wwt-notification-list {
+	display: grid;
+	gap: 7px;
+}
+
+.wwt-notification-item,
+.wwt-notice-item {
+	width: 100%;
+	min-width: 0;
+	padding: 12px;
+	border: 1px solid #e7ebef;
+	border-radius: 10px;
+	background: #fff;
+	color: var(--wwt-text);
+	font: inherit;
+	text-align: left;
+	cursor: pointer;
+	transition:
+		border-color 150ms ease,
+		background 150ms ease;
+
+	&:hover,
+	&:focus-visible {
+		border-color: #b9c9d8;
+		background: #f8fafc;
+	}
+
+	&:disabled {
+		cursor: wait;
+		opacity: 0.7;
+	}
+}
+
+.wwt-notification-item {
+	display: grid;
+	grid-template-columns: 8px minmax(0, 1fr);
+	gap: 9px;
+
+	&.is-unread {
+		border-color: #c9dce9;
+		background: #f2f8fc;
+
+		.wwt-notification-dot {
+			background: var(--wwt-accent);
+		}
+	}
+}
+
+.wwt-notification-dot {
+	width: 7px;
+	height: 7px;
+	margin-top: 5px;
+	border-radius: 50%;
+	background: transparent;
+}
+
+.wwt-notification-copy,
+.wwt-notice-item {
+	display: grid;
+	min-width: 0;
+	gap: 4px;
+
+	strong {
+		font-size: 12px;
+		line-height: 1.4;
+	}
+
+	> span {
+		display: -webkit-box;
+		overflow: hidden;
+		color: #566473;
+		font-size: 11px;
+		line-height: 1.45;
+		-webkit-box-orient: vertical;
+		-webkit-line-clamp: 2;
+	}
+
+	small {
+		color: #8a949e;
+		font-size: 9px;
+	}
+}
+
+.wwt-notice-item-heading {
+	display: flex !important;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 10px;
+	color: var(--wwt-text) !important;
+
+	.MuiSvgIcon-root {
+		flex: 0 0 auto;
+		color: var(--wwt-accent);
+		font-size: 16px;
+	}
+}
+
+.wwt-notification-load-more.MuiButton-root {
+	width: 100%;
+	font-size: 11px;
+	font-weight: 700;
+	text-transform: none;
+}
+
+.wwt-notice-detail {
+	> .MuiButton-root {
+		padding-left: 0;
+		font-size: 11px;
+		font-weight: 700;
+		text-transform: none;
+	}
+}
+
+.wwt-notice-detail-heading {
+	display: grid;
+	justify-items: start;
+	gap: 8px;
+	margin: 10px 0 16px;
+
+	h3 {
+		font-size: 20px;
+		font-weight: 750;
+		line-height: 1.35;
+	}
+
+	> p {
+		color: var(--wwt-muted);
+		font-size: 10px;
+	}
+}
+
+.wwt-notice-images {
+	display: grid;
+	gap: 10px;
+	margin-bottom: 16px;
+}
+
+.wwt-notice-image {
+	position: relative;
+	min-height: 180px;
+	overflow: hidden;
+	border-radius: 10px;
+	background: #edf1f4;
+
+	img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+	}
+}
+
+.wwt-notice-detail-content.MuiTypography-root {
+	color: #43515e;
+	font-size: 12px;
+	line-height: 1.75;
+	white-space: pre-wrap;
+	overflow-wrap: anywhere;
+}
+
 .wwt-footer {
 	margin-top: 0;
 	padding-top: 64px;
@@ -262,6 +511,27 @@
 }
 
 @media (max-width: 600px) {
+	.wwt-notification-panel.MuiPaper-root {
+		width: calc(100vw - 16px);
+		max-width: calc(100vw - 16px);
+		max-height: calc(100vh - 78px);
+		margin-top: 4px;
+	}
+
+	.wwt-notification-panel-content {
+		max-height: calc(100vh - 126px);
+	}
+
+	.wwt-notification-tab,
+	.wwt-notice-tab,
+	.wwt-notice-detail {
+		padding: 14px;
+	}
+
+	.wwt-notification-tab-heading {
+		gap: 8px;
+	}
+
 	.wwt-footer {
 		padding-top: 32px;
 	}

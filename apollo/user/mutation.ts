@@ -11,7 +11,29 @@ import type {
 	AgentRequestInput,
 	AgentRequestRejectInput,
 } from '@/libs/types/agent-request/agent-request.input';
+import type { Notification } from '@/libs/types/system/notification';
+import type { ReadNotificationInput } from '@/libs/types/system/notification.input';
 import { gql, type TypedDocumentNode } from '@apollo/client';
+
+export const READ_NOTIFICATION: TypedDocumentNode<
+	{ readNotification: Notification },
+	{ input: ReadNotificationInput }
+> = gql`
+	mutation ReadNotification($input: ReadNotificationInput!) {
+		readNotification(input: $input) {
+			_id
+			isRead
+			readAt
+			updatedAt
+		}
+	}
+`;
+
+export const READ_ALL_NOTIFICATIONS: TypedDocumentNode<{ readAllNotifications: boolean }, Record<string, never>> = gql`
+	mutation ReadAllNotifications {
+		readAllNotifications
+	}
+`;
 
 export const LOGIN = gql`
 	mutation Login($input: LoginInput!) {

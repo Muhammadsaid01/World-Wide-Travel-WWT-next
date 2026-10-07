@@ -1,8 +1,11 @@
+import { GET_UNREAD_NOTIFICATION_COUNT, type NotificationQueryInput } from '@/apollo/user/query';
 import { currentUserVar } from '@/apollo/store';
 import { logout } from '@/libs/auth';
+import NotificationWidget from '@/libs/components/common/NotificationWidget/NotificationWidget';
 import { packageImageUrl } from '@/libs/components/package/PackageImage';
 import { MemberType } from '@/libs/enums/member.enum';
-import { useReactiveVar } from '@apollo/client';
+import { NotificationBadge } from '@/scss/MaterialTheme/styled';
+import { useQuery, useReactiveVar } from '@apollo/client';
 import CloseIcon from '@mui/icons-material/Close';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import FavoriteIcon from '@mui/icons-material/Favorite';
@@ -27,18 +30,58 @@ const navigation = [
 export default function Navbar() {
 	const currentUser = useReactiveVar(currentUserVar);
 	const [accountAnchor, setAccountAnchor] = useState<HTMLButtonElement | null>(null);
+	const [notificationAnchor, setNotificationAnchor] = useState<HTMLButtonElement | null>(null);
 	const [menuOpen, setMenuOpen] = useState(false);
 	const menuToggle = useRef<HTMLButtonElement>(null);
 	const router = useRouter();
+	const unreadVariables: { input: NotificationQueryInput } = {
+		input: {
+			page: 1,
+			limit: 1,
+			sort: 'createdAt',
+			direction: 'DESC',
+			search: { isRead: false },
+		},
+	};
+	const unreadQuery = useQuery(GET_UNREAD_NOTIFICATION_COUNT, {
+		variables: unreadVariables,
+		skip: !currentUser?._id,
+		fetchPolicy: 'no-cache',
+	});
+	const unreadCount = unreadQuery.data?.getMyNotifications.metaCounter?.[0]?.total ?? 0;
 
 	function handleLogout() {
 		setAccountAnchor(null);
+		setNotificationAnchor(null);
 		setMenuOpen(false);
 		try {
 			logout();
 		} finally {
 			void router.push('/');
 		}
+	}
+
+	function notificationControl(location: 'desktop' | 'mobile') {
+		const id = `wwt-notifications-${location}`;
+		const open = notificationAnchor?.id === id;
+		return (
+			<IconButton
+				id={id}
+				aria-label={currentUser ? `Notifications${unreadCount ? `, ${unreadCount} unread` : ''}` : 'Notifications and notices'}
+				aria-haspopup="dialog"
+				aria-controls={open ? 'wwt-notification-panel' : undefined}
+				aria-expanded={open}
+				onClick={(event) => {
+					setAccountAnchor(null);
+					setNotificationAnchor(event.currentTarget);
+					if (currentUser?._id) void unreadQuery.refetch();
+				}}
+			>
+				<NotificationBadge badgeContent={unreadCount} max={99} invisible={!unreadCount}>
+					<NotificationsNoneIcon />
+				</NotificationBadge>
+			</IconButton>
+		);
 	}
 
 	function accountControl(location: 'desktop' | 'mobile') {
@@ -60,7 +103,10 @@ export default function Navbar() {
 				aria-haspopup="menu"
 				aria-controls={open ? 'wwt-account-menu' : undefined}
 				aria-expanded={open}
-				onClick={(event) => setAccountAnchor(event.currentTarget)}
+				onClick={(event) => {
+					setNotificationAnchor(null);
+					setAccountAnchor(event.currentTarget);
+				}}
 				startIcon={<Avatar className="wwt-account-avatar" src={packageImageUrl(currentUser.memberImage)} />}
 				endIcon={<ExpandMoreIcon />}
 			>
@@ -125,9 +171,7 @@ export default function Navbar() {
 							<FavoriteBorderIcon />
 						)}
 					</IconButton>
-					<IconButton disabled aria-label="Notifications (coming soon)">
-						<NotificationsNoneIcon />
-					</IconButton>
+					{notificationControl('desktop')}
 					{accountControl('desktop')}
 				</div>
 				<IconButton
@@ -164,9 +208,7 @@ export default function Navbar() {
 								<FavoriteBorderIcon />
 							)}
 						</IconButton>
-						<IconButton disabled aria-label="Notifications (coming soon)">
-							<NotificationsNoneIcon />
-						</IconButton>
+						{notificationControl('mobile')}
 						{accountControl('mobile')}
 					</div>
 				</Container>
@@ -197,6 +239,14 @@ export default function Navbar() {
 				)}
 				<MenuItem onClick={handleLogout}>Logout</MenuItem>
 			</Menu>
+			<NotificationWidget
+				key={notificationAnchor?.id ?? 'closed-notifications'}
+				anchorEl={notificationAnchor}
+				authenticated={Boolean(currentUser?._id)}
+				unreadCount={unreadCount}
+				onClose={() => setNotificationAnchor(null)}
+				onUnreadChange={async () => unreadQuery.refetch()}
+			/>
 		</header>
 	);
 }

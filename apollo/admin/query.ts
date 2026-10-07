@@ -11,6 +11,8 @@ import type { MembersInquiry } from '@/libs/types/member/member.input';
 import type { TravelPackage } from '@/libs/types/package/travel-package';
 import type { AllTravelPackagesInquiry } from '@/libs/types/package/travel-package.input';
 import type { PackageSchedule } from '@/libs/types/package/package-schedule';
+import type { Notice } from '@/libs/types/system/notice';
+import type { NoticesInquiry } from '@/libs/types/system/notice.input';
 
 type GraphQLDirection = keyof typeof Direction;
 type MetaCounter = { total?: number | null };
@@ -34,6 +36,12 @@ export type AdminPackagesInput = Omit<AllTravelPackagesInquiry, 'direction'> & {
 export type AdminArticlesInput = Omit<AllBoardArticlesInquiry, 'direction'> & {
 	direction?: GraphQLDirection;
 };
+
+export type AdminNoticesInput = Omit<NoticesInquiry, 'direction'> & {
+	direction?: GraphQLDirection;
+};
+
+export type AdminNoticeRow = Notice;
 
 export type AdminMemberRow = Pick<
 	Member,
@@ -360,6 +368,36 @@ export const GET_ADMIN_ARTICLES: TypedDocumentNode<
 					memberImage
 					memberType
 				}
+			}
+			metaCounter {
+				total
+			}
+		}
+	}
+`;
+
+export const GET_ADMIN_NOTICES: TypedDocumentNode<
+	{
+		getNotices: {
+			list: AdminNoticeRow[];
+			metaCounter?: MetaCounter[] | null;
+		};
+	},
+	{ input: AdminNoticesInput }
+> = gql`
+	query GetAdminNotices($input: NoticesInquiry!) {
+		getNotices(input: $input) {
+			list {
+				_id
+				adminId
+				noticeTitle
+				noticeContent
+				noticeImages
+				noticeViewCount
+				noticePinned
+				expireAt
+				createdAt
+				updatedAt
 			}
 			metaCounter {
 				total
