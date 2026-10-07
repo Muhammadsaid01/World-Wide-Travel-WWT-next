@@ -6,6 +6,8 @@ import type { BoardArticleUpdate } from '@/libs/types/article/board-article.upda
 import type { Coupon } from '@/libs/types/booking/coupon';
 import type { CouponInput } from '@/libs/types/booking/coupon.input';
 import type { CouponUpdate } from '@/libs/types/booking/coupon.update';
+import type { Payment } from '@/libs/types/booking/payment';
+import type { UpdatePaymentStatusInput } from '@/libs/types/booking/payment.input';
 import type { Member } from '@/libs/types/member/member';
 import type { MemberUpdateByAdmin } from '@/libs/types/member/member.update';
 import type { TravelPackage } from '@/libs/types/package/travel-package';
@@ -206,6 +208,51 @@ export const DELETE_COUPON: TypedDocumentNode<
 			couponCode
 			couponTitle
 			couponStatus
+		}
+	}
+`;
+
+export type AdminPaymentMutationResult = Pick<
+	Payment,
+	| '_id'
+	| 'bookingId'
+	| 'paymentStatus'
+	| 'paymentDate'
+	| 'refundedAt'
+	| 'paymentDeletedAt'
+	| 'updatedAt'
+>;
+
+export const UPDATE_PAYMENT_STATUS: TypedDocumentNode<
+	{ updatePaymentStatus: AdminPaymentMutationResult },
+	{ input: UpdatePaymentStatusInput }
+> = gql`
+	mutation UpdatePaymentStatus($input: UpdatePaymentStatusInput!) {
+		updatePaymentStatus(input: $input) {
+			_id
+			bookingId
+			paymentStatus
+			paymentDate
+			refundedAt
+			paymentDeletedAt
+			updatedAt
+		}
+	}
+`;
+
+export const DELETE_PAYMENT_BY_ADMIN: TypedDocumentNode<
+	{ deletePaymentByAdmin: AdminPaymentMutationResult },
+	{ paymentId: string }
+> = gql`
+	mutation DeletePaymentByAdmin($paymentId: String!) {
+		deletePaymentByAdmin(paymentId: $paymentId) {
+			_id
+			bookingId
+			paymentStatus
+			paymentDate
+			refundedAt
+			paymentDeletedAt
+			updatedAt
 		}
 	}
 `;

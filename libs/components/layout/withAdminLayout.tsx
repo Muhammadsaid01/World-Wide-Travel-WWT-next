@@ -19,6 +19,7 @@ const adminRoutes = [
 	{ label: 'Agent Requests', href: '/admin/agent-requests' },
 	{ label: 'Packages', href: '/admin/packages' },
 	{ label: 'Bookings', href: '/admin/bookings' },
+	{ label: 'Payments', href: '/admin/payments' },
 	{ label: 'Community', href: '/admin/community' },
 	{ label: 'Notices', href: '/admin/notices' },
 	{ label: 'Coupons', href: '/admin/coupons' },

@@ -10,6 +10,7 @@ import type { Coupon } from '@/libs/types/booking/coupon';
 import type { CouponInquiry } from '@/libs/types/booking/coupon.input';
 import type { CouponUsage } from '@/libs/types/booking/coupon-usage';
 import type { CouponUsageInquiry } from '@/libs/types/booking/coupon-usage.input';
+import type { Payment } from '@/libs/types/booking/payment';
 import type { Member } from '@/libs/types/member/member';
 import type { MembersInquiry } from '@/libs/types/member/member.input';
 import type { TravelPackage } from '@/libs/types/package/travel-package';
@@ -64,6 +65,8 @@ export type AdminCouponUsageRow = Pick<
 	memberData?: Pick<Member, '_id' | 'memberNick' | 'memberFullName' | 'memberEmail'> | null;
 	bookingData?: Pick<Booking, '_id' | 'bookingCode' | 'contactName' | 'bookingStatus'> | null;
 };
+
+export type AdminPaymentRow = Payment;
 
 export type AdminMemberRow = Pick<
 	Member,
@@ -499,6 +502,32 @@ export const GET_ADMIN_COUPON_USAGES: TypedDocumentNode<
 			metaCounter {
 				total
 			}
+		}
+	}
+`;
+
+export const GET_ADMIN_PAYMENTS: TypedDocumentNode<
+	{ getAllPaymentsByAdmin: AdminPaymentRow[] },
+	Record<string, never>
+> = gql`
+	query GetAdminPayments {
+		getAllPaymentsByAdmin {
+			_id
+			bookingId
+			memberId
+			agentId
+			paymentMethod
+			paymentStatus
+			paymentAmount
+			currency
+			transactionId
+			paymentDate
+			refundAmount
+			refundReason
+			refundedAt
+			paymentDeletedAt
+			createdAt
+			updatedAt
 		}
 	}
 `;

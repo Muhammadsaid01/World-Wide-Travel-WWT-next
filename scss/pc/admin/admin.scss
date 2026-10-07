@@ -2842,3 +2842,271 @@
 		width: 100%;
 	}
 }
+
+.admin-payments-page {
+	max-width: 1380px;
+	margin: 0 auto;
+}
+
+.admin-payments-toolbar {
+	display: grid;
+	grid-template-columns: minmax(260px, 1fr) 150px 180px 145px;
+	gap: 14px;
+	margin: 28px 0 20px;
+
+	.MuiOutlinedInput-root {
+		background: #fff;
+	}
+}
+
+.admin-payments-table-header,
+.admin-payment-row {
+	display: grid;
+	grid-template-columns: minmax(145px, 1.15fr) minmax(150px, 1.1fr) minmax(135px, 1fr) 115px 110px 88px 130px 170px;
+	gap: 12px;
+	align-items: center;
+}
+
+.admin-payments-table-header {
+	padding: 13px 20px;
+	border-bottom: 1px solid #dfe4e9;
+	background: #f5f7f9;
+	color: #68727d;
+	font-size: 10px;
+	font-weight: 800;
+	letter-spacing: 0.8px;
+	text-transform: uppercase;
+}
+
+.admin-payment-row {
+	min-width: 0;
+	padding: 17px 20px;
+	border-bottom: 1px solid #e9edf1;
+
+	&:last-child {
+		border-bottom: 0;
+	}
+}
+
+.admin-payment-identity,
+.admin-payment-cell {
+	display: grid;
+	min-width: 0;
+	justify-items: start;
+	gap: 3px;
+
+	strong,
+	span {
+		max-width: 100%;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	strong {
+		font-size: 11px;
+		font-weight: 650;
+	}
+
+	span {
+		color: #7a838d;
+		font-size: 9px;
+	}
+}
+
+.admin-payment-identity {
+	strong {
+		color: #173b5d;
+		font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+		font-size: 10px;
+	}
+}
+
+.admin-payment-status {
+	height: 26px;
+	font-size: 10px;
+	font-weight: 750;
+
+	&.is-pending {
+		background: #fff3d9;
+		color: #855715;
+	}
+
+	&.is-paid {
+		background: #e8f5ed;
+		color: #236548;
+	}
+
+	&.is-failed,
+	&.is-cancelled {
+		background: #fbeaea;
+		color: #9a3838;
+	}
+
+	&.is-refunded {
+		background: #eeeafd;
+		color: #5d4698;
+	}
+}
+
+.admin-payment-actions {
+	display: grid;
+	min-width: 0;
+	gap: 3px;
+
+	.MuiButton-root {
+		min-height: 30px;
+		justify-content: flex-start;
+		padding: 3px 7px;
+		font-size: 9px;
+		font-weight: 750;
+		line-height: 1.2;
+		text-transform: none;
+	}
+}
+
+.admin-payment-detail-dialog {
+	.MuiDialogContent-root {
+		padding-top: 12px;
+	}
+}
+
+.admin-payment-detail-grid {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 14px;
+
+	> div {
+		min-width: 0;
+		padding: 15px;
+		border: 1px solid #e2e7eb;
+		border-radius: 9px;
+		background: #f8fafb;
+	}
+
+	span,
+	strong {
+		display: block;
+		overflow-wrap: anywhere;
+	}
+
+	span {
+		margin-bottom: 5px;
+		color: #7b8490;
+		font-size: 9px;
+		font-weight: 750;
+		letter-spacing: 0.8px;
+		text-transform: uppercase;
+	}
+
+	strong {
+		font-size: 12px;
+		line-height: 1.5;
+	}
+}
+
+.admin-payment-action-dialog .MuiDialogContent-root {
+	p {
+		color: #56616d;
+		line-height: 1.65;
+	}
+
+	.MuiAlert-root {
+		margin-top: 18px;
+	}
+}
+
+@media (max-width: 1500px) {
+	.admin-payments-table {
+		border: 0;
+		background: transparent;
+		box-shadow: none;
+		overflow: visible;
+	}
+
+	.admin-payments-table .admin-payments-table-header {
+		display: none;
+	}
+
+	.admin-payments-table .admin-members-list {
+		display: grid;
+		gap: 14px;
+	}
+
+	.admin-payment-row {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 16px 20px;
+		padding: 20px;
+		border: 1px solid #dfe4e9;
+		border-radius: 12px;
+		background: #fff;
+		box-shadow: 0 4px 18px rgba(11, 45, 79, 0.04);
+
+		&:last-child {
+			border-bottom: 1px solid #dfe4e9;
+		}
+	}
+
+	.admin-payment-identity {
+		grid-column: 1 / -1;
+		padding-bottom: 14px;
+		border-bottom: 1px solid #edf0f3;
+	}
+
+	.admin-payment-cell,
+	.admin-payment-actions {
+		align-content: start;
+		justify-content: start;
+
+		&::before {
+			content: attr(data-label);
+			margin-bottom: 4px;
+			color: #89929c;
+			font-size: 9px;
+			font-weight: 800;
+			letter-spacing: 0.8px;
+			text-transform: uppercase;
+		}
+	}
+
+	.admin-payment-actions .MuiButton-root {
+		min-height: 38px;
+	}
+}
+
+@media (max-width: 760px) {
+	.admin-payments-toolbar {
+		grid-template-columns: minmax(0, 1fr);
+	}
+
+	.admin-payment-detail-grid {
+		grid-template-columns: minmax(0, 1fr);
+	}
+
+	.admin-payment-action-dialog .MuiDialogActions-root,
+	.admin-payment-detail-dialog .MuiDialogActions-root {
+		align-items: stretch;
+		flex-direction: column-reverse;
+		padding: 12px 24px 22px;
+
+		.MuiButton-root {
+			width: 100%;
+			margin: 0;
+		}
+	}
+}
+
+@media (max-width: 520px) {
+	.admin-payment-row {
+		grid-template-columns: minmax(0, 1fr);
+		padding: 18px 16px;
+	}
+
+	.admin-payment-identity {
+		grid-column: auto;
+	}
+
+	.admin-payment-actions .MuiButton-root {
+		width: 100%;
+	}
+}
