@@ -17,6 +17,7 @@ const routes = {
 	Saved: '/mypage/saved',
 	Followers: '/mypage/followers',
 	Following: '/mypage/following',
+	Chats: '/mypage/chats',
 	'Edit Profile': '/mypage/edit-profile',
 	Settings: '/mypage/settings',
 	'Become an Agent': '/mypage/agent-request',
@@ -37,7 +38,11 @@ export default function ProfileSidebar({ active, profileCard }: { active?: Sideb
 	const groups: SidebarGroup[] = [
 		{ title: isAgent ? 'Agent Profile' : 'My Profile', items: ['Overview', 'My Bookings'] },
 		...(isAgent ? [{ title: 'Business', items: ['My Packages', 'Bookings'] } satisfies SidebarGroup] : []),
-		...sharedGroups,
+		...sharedGroups.map((group) =>
+			group.title === 'Connections' && (isAgent || isUser)
+				? { ...group, items: ['Chats', 'Followers', 'Following'] as SidebarItem[] }
+				: group,
+		),
 		...(isUser ? [{ title: 'Agent', items: ['Become an Agent'] } satisfies SidebarGroup] : []),
 	];
 	// Match nested routes too, so booking detail pages retain their sidebar highlight.

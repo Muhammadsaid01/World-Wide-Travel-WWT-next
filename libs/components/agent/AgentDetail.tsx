@@ -3,29 +3,35 @@ import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useMutation, useQuery, useReactiveVar } from '@apollo/client';
-import { Alert, Avatar, Breadcrumbs, Button, Chip, Paper, Skeleton, Snackbar, Typography } from '@mui/material';
+import { Alert, Avatar, Breadcrumbs, Button, Chip, Paper, Skeleton, Typography } from '@mui/material';
 import Verified from '@mui/icons-material/Verified';
 import EmailOutlined from '@mui/icons-material/EmailOutlined';
 import { currentUserVar } from '@/apollo/store';
 import { GET_AGENT, GET_MEMBER_FOLLOW_STATE, type AgentDetailData } from '@/apollo/user/query';
 import { CREATE_CONVERSATION, SUBSCRIBE_MEMBER, UNSUBSCRIBE_MEMBER } from '@/apollo/user/mutation';
-import { AgentVerificationStatus } from '@/libs/enums/member.enum';
+import { AgentVerificationStatus, MemberType } from '@/libs/enums/member.enum';
+import type { CustomJwtPayload } from '@/libs/types/customJwtPayload';
 import { PublicAgentPackages, PublicArticles, PublicConnections } from './AgentProfileTabs';
 import { packageImageUrl } from '../package/PackageImage';
 
-function Profile({ agent, userId }: { agent: AgentDetailData; userId?: string }) {
+function Profile({ agent, user }: { agent: AgentDetailData; user: CustomJwtPayload | null }) {
 	const router = useRouter();
+	const userId = user?._id;
 	const member = agent.memberData;
 	const name = member?.memberFullName || member?.memberNick || agent.companyName;
 	const location = [member?.memberCity, member?.memberCountry].filter(Boolean).join(', ') || agent.officeAddress;
 	const self = userId === agent.memberId;
+	const canMessage =
+		!user ||
+		user.memberType === MemberType.USER ||
+		user.memberType === MemberType.AGENT ||
+		user.memberType === MemberType.ADMIN;
 	const approved = agent.verificationStatus === AgentVerificationStatus.APPROVED;
 	const [followBusy, setFollowBusy] = useState(false);
 	const [messageBusy, setMessageBusy] = useState(false);
 	const followLock = useRef(false);
 	const messageLock = useRef(false);
 	const [actionError, setActionError] = useState('');
-	const [notice, setNotice] = useState('');
 	const follow = useQuery(GET_MEMBER_FOLLOW_STATE, {
 		variables: { memberId: agent.memberId },
 		skip: !userId || self,
@@ -60,7 +66,8 @@ function Profile({ agent, userId }: { agent: AgentDetailData; userId?: string })
 		}
 	}
 	async function message() {
-		if (!currentUserVar()?._id) {
+		const current = currentUserVar();
+		if (!current?._id) {
 			await router.push('/account/login');
 			return;
 		}
@@ -71,7 +78,7 @@ function Profile({ agent, userId }: { agent: AgentDetailData; userId?: string })
 		try {
 			const response = await createConversation({ variables: { input: { memberTwoId: agent.memberId } } });
 			if (!response.data?.createConversation._id) throw new Error('Conversation could not be created.');
-			setNotice('Conversation is ready. Messaging is not available in the frontend yet.');
+			await router.push({ pathname: '/mypage/chats', query: { conversation: response.data.createConversation._id } });
 		} catch (error) {
 			setActionError(error instanceof Error ? error.message : 'Unable to create a conversation.');
 		} finally {
@@ -183,7 +190,7 @@ function Profile({ agent, userId }: { agent: AgentDetailData; userId?: string })
 												? 'Following'
 												: 'Follow Agent'}
 								</Button>
-								<Button
+								{canMessage && <Button
 									variant="outlined"
 									startIcon={<EmailOutlined />}
 									disabled={messageBusy}
@@ -192,7 +199,7 @@ function Profile({ agent, userId }: { agent: AgentDetailData; userId?: string })
 									}}
 								>
 									{messageBusy ? 'Opening…' : 'Message'}
-								</Button>
+								</Button>}
 							</div>
 						)}
 					</Paper>
@@ -287,11 +294,6 @@ function Profile({ agent, userId }: { agent: AgentDetailData; userId?: string })
 					)}
 				</div>
 			</div>
-			<Snackbar open={Boolean(notice)} autoHideDuration={6000} onClose={() => setNotice('')}>
-				<Alert severity="success" onClose={() => setNotice('')}>
-					{notice}
-				</Alert>
-			</Snackbar>
 		</>
 	);
 }
@@ -330,7 +332,7 @@ export default function AgentDetail() {
 					Agent could not be found.
 				</Alert>
 			) : (
-				<Profile key={`${id}-${user?._id ?? 'guest'}`} agent={data.getAgent} userId={user?._id} />
+				<Profile key={`${id}-${user?._id ?? 'guest'}`} agent={data.getAgent} user={user} />
 			)}
 		</div>
 	);

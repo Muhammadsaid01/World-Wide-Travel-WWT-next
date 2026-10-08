@@ -2,6 +2,7 @@ import type { ComponentType, CSSProperties, ReactNode } from 'react';
 import { useTheme } from '@mui/material/styles';
 import Navbar from '@/libs/components/common/Navbar';
 import Footer from '@/libs/components/common/Footer';
+import ChatWidget from '@/libs/components/common/ChatWidget/ChatWidget';
 
 export function PublicLayout({ children }: { children: ReactNode }) {
   const theme = useTheme();
@@ -23,6 +24,7 @@ export function PublicLayout({ children }: { children: ReactNode }) {
         {children}
       </main>
       <Footer />
+      <ChatWidget />
     </div>
   );
 }

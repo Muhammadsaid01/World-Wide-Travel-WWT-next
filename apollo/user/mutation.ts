@@ -13,6 +13,10 @@ import type {
 } from '@/libs/types/agent-request/agent-request.input';
 import type { Notification } from '@/libs/types/system/notification';
 import type { ReadNotificationInput } from '@/libs/types/system/notification.input';
+import type { PrivateConversation } from '@/libs/types/chat/private-conversation';
+import type { PrivateConversationInput } from '@/libs/types/chat/private-conversation.input';
+import type { PrivateMessage } from '@/libs/types/chat/private-message';
+import type { PrivateMessageInput } from '@/libs/types/chat/private-message.input';
 import { gql, type TypedDocumentNode } from '@apollo/client';
 
 export const READ_NOTIFICATION: TypedDocumentNode<
@@ -435,13 +439,47 @@ export const DELETE_MEMBER: TypedDocumentNode<
 `;
 
 export const CREATE_CONVERSATION: TypedDocumentNode<
-	{ createConversation: { _id: string } },
-	{ input: { memberTwoId: string } }
+	{ createConversation: PrivateConversation },
+	{ input: PrivateConversationInput }
 > = gql`
 	mutation CreateConversation($input: PrivateConversationInput!) {
 		createConversation(input: $input) {
 			_id
+			memberOneId
+			memberTwoId
+			createdAt
+			updatedAt
 		}
+	}
+`;
+
+export const SEND_PRIVATE_MESSAGE: TypedDocumentNode<
+	{ sendMessage: PrivateMessage },
+	{ input: PrivateMessageInput }
+> = gql`
+	mutation SendPrivateMessage($input: PrivateMessageInput!) {
+		sendMessage(input: $input) {
+			_id
+			conversationId
+			senderId
+			receiverId
+			messageType
+			messageContent
+			messageImages
+			messageStatus
+			readAt
+			createdAt
+			updatedAt
+		}
+	}
+`;
+
+export const MARK_CONVERSATION_AS_READ: TypedDocumentNode<
+	{ markConversationAsRead: boolean },
+	{ conversationId: string }
+> = gql`
+	mutation MarkConversationAsRead($conversationId: String!) {
+		markConversationAsRead(conversationId: $conversationId)
 	}
 `;
 

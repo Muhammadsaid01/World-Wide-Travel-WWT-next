@@ -25,6 +25,11 @@ import type { Notice } from '@/libs/types/system/notice';
 import type { NoticesInquiry } from '@/libs/types/system/notice.input';
 import type { Notification } from '@/libs/types/system/notification';
 import type { NotificationsInquiry } from '@/libs/types/system/notification.input';
+import type { PrivateConversation, PrivateConversations } from '@/libs/types/chat/private-conversation';
+import type { PrivateConversationsInquiry } from '@/libs/types/chat/private-conversation.input';
+import type { PrivateMessages } from '@/libs/types/chat/private-message';
+import type { PrivateMessagesInquiry } from '@/libs/types/chat/private-message.input';
+import type { OpenChatMessages, OpenChatMessagesInquiry } from '@/libs/types/chat/open-chat';
 import { gql, type TypedDocumentNode } from '@apollo/client';
 
 type GraphQLDirection = keyof typeof Direction;
@@ -39,6 +44,124 @@ export type NoticeQueryInput = Omit<NoticesInquiry, 'direction'> & {
 
 export type NotificationItem = Notification;
 export type NoticeItem = Notice;
+
+export type PrivateConversationsQueryInput = Omit<PrivateConversationsInquiry, 'direction'> & {
+	direction?: GraphQLDirection;
+};
+
+export type PrivateMessagesQueryInput = Omit<PrivateMessagesInquiry, 'direction'> & {
+	direction?: GraphQLDirection;
+};
+
+export type OpenChatMessagesQueryInput = Omit<OpenChatMessagesInquiry, 'direction'> & {
+	direction?: GraphQLDirection;
+};
+
+const CHAT_MEMBER_FIELDS = gql`
+	fragment ChatMemberFields on Member {
+		_id
+		memberNick
+		memberFullName
+		memberImage
+		memberType
+	}
+`;
+
+export const GET_MY_CONVERSATIONS: TypedDocumentNode<
+	{ getMyConversations: PrivateConversations },
+	{ input: PrivateConversationsQueryInput }
+> = gql`
+	query GetMyConversations($input: PrivateConversationsInquiry!) {
+		getMyConversations(input: $input) {
+			list {
+				_id
+				memberOneId
+				memberTwoId
+				lastMessage
+				lastMessageAt
+				unreadCount
+				createdAt
+				updatedAt
+				memberOneData { ...ChatMemberFields }
+				memberTwoData { ...ChatMemberFields }
+			}
+			metaCounter { total }
+		}
+	}
+	${CHAT_MEMBER_FIELDS}
+`;
+
+export const GET_PRIVATE_CONVERSATION: TypedDocumentNode<
+	{ getConversation: PrivateConversation },
+	{ conversationId: string }
+> = gql`
+	query GetPrivateConversation($conversationId: String!) {
+		getConversation(conversationId: $conversationId) {
+			_id
+			memberOneId
+			memberTwoId
+			lastMessage
+			lastMessageAt
+			unreadCount
+			createdAt
+			updatedAt
+			memberOneData { ...ChatMemberFields }
+			memberTwoData { ...ChatMemberFields }
+		}
+	}
+	${CHAT_MEMBER_FIELDS}
+`;
+
+export const GET_PRIVATE_MESSAGES: TypedDocumentNode<
+	{ getMessages: PrivateMessages },
+	{ conversationId: string; input: PrivateMessagesQueryInput }
+> = gql`
+	query GetPrivateMessages($conversationId: String!, $input: PrivateMessagesInquiry!) {
+		getMessages(conversationId: $conversationId, input: $input) {
+			list {
+				_id
+				conversationId
+				senderId
+				receiverId
+				messageType
+				messageContent
+				messageImages
+				messageStatus
+				readAt
+				createdAt
+				updatedAt
+			}
+			metaCounter { total }
+		}
+	}
+`;
+
+export const GET_MY_UNREAD_MESSAGE_COUNT: TypedDocumentNode<
+	{ getMyUnreadMessageCount: number },
+	Record<string, never>
+> = gql`
+	query GetMyUnreadMessageCount { getMyUnreadMessageCount }
+`;
+
+export const GET_OPEN_CHAT_MESSAGES: TypedDocumentNode<
+	{ getOpenChatMessages: OpenChatMessages },
+	{ input: OpenChatMessagesQueryInput }
+> = gql`
+	query GetOpenChatMessages($input: OpenChatMessagesInquiry!) {
+		getOpenChatMessages(input: $input) {
+			list {
+				_id
+				senderId
+				messageContent
+				createdAt
+				updatedAt
+				memberData { ...ChatMemberFields }
+			}
+			metaCounter { total }
+		}
+	}
+	${CHAT_MEMBER_FIELDS}
+`;
 
 export type PublicCouponsInput = Omit<CouponInquiry, 'direction'> & {
 	direction?: GraphQLDirection;

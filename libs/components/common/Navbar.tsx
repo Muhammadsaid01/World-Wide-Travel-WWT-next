@@ -1,4 +1,4 @@
-import { GET_UNREAD_NOTIFICATION_COUNT, type NotificationQueryInput } from '@/apollo/user/query';
+import { GET_MY_UNREAD_MESSAGE_COUNT, GET_UNREAD_NOTIFICATION_COUNT, type NotificationQueryInput } from '@/apollo/user/query';
 import { currentUserVar } from '@/apollo/store';
 import { logout } from '@/libs/auth';
 import NotificationWidget from '@/libs/components/common/NotificationWidget/NotificationWidget';
@@ -34,6 +34,10 @@ export default function Navbar() {
 	const [menuOpen, setMenuOpen] = useState(false);
 	const menuToggle = useRef<HTMLButtonElement>(null);
 	const router = useRouter();
+	const canUsePrivateChat =
+		currentUser?.memberType === MemberType.USER ||
+		currentUser?.memberType === MemberType.AGENT ||
+		currentUser?.memberType === MemberType.ADMIN;
 	const unreadVariables: { input: NotificationQueryInput } = {
 		input: {
 			page: 1,
@@ -49,6 +53,12 @@ export default function Navbar() {
 		fetchPolicy: 'no-cache',
 	});
 	const unreadCount = unreadQuery.data?.getMyNotifications.metaCounter?.[0]?.total ?? 0;
+	const chatUnreadQuery = useQuery(GET_MY_UNREAD_MESSAGE_COUNT, {
+		skip: !currentUser?._id || !canUsePrivateChat,
+		fetchPolicy: 'network-only',
+		pollInterval: 30_000,
+	});
+	const chatUnreadCount = chatUnreadQuery.data?.getMyUnreadMessageCount ?? 0;
 
 	function handleLogout() {
 		setAccountAnchor(null);
@@ -224,6 +234,11 @@ export default function Navbar() {
 				slotProps={{ list: { 'aria-labelledby': accountAnchor?.id } }}
 			>
 				<MenuItem component={Link} href="/mypage" selected={router.pathname === '/mypage'} onClick={() => { setAccountAnchor(null); setMenuOpen(false); }}>My Profile</MenuItem>
+				{canUsePrivateChat && (
+					<MenuItem component={Link} href="/mypage/chats" selected={router.pathname === '/mypage/chats'} onClick={() => { setAccountAnchor(null); setMenuOpen(false); }}>
+						Chats{chatUnreadCount > 0 && <span className="wwt-chat-menu-count" aria-label={`${chatUnreadCount} unread messages`}>{Math.min(chatUnreadCount, 99)}</span>}
+					</MenuItem>
+				)}
 				{currentUser?.memberType === MemberType.ADMIN && (
 					<MenuItem
 						component={Link}
