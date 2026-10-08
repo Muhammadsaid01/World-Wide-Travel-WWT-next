@@ -68,6 +68,11 @@ export enum FaqCategory {
   PACKAGE = 'PACKAGE',
   TRAVEL_MATE = 'TRAVEL_MATE',
 }
+
+export enum FaqStatus {
+  DRAFT = 'DRAFT',
+  PUBLISHED = 'PUBLISHED',
+}
 /** Report enum */
 
 
@@ -98,4 +103,3 @@ export enum ReportStatus {
   REJECTED = 'REJECTED',
   RESOLVED = 'RESOLVED',
 }
-

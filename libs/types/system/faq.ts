@@ -1,4 +1,4 @@
-import { FaqCategory } from '../../enums/system.enum';
+import { FaqCategory, FaqStatus } from '../../enums/system.enum';
 import type { TotalCounter } from '../../types/member/member';
 
 export interface Faq {
@@ -6,6 +6,7 @@ export interface Faq {
 	adminId: string;
 
 	faqCategory: FaqCategory;
+	faqStatus: FaqStatus;
 	faqQuestion: string;
 	faqAnswer: string;
 	faqOrder: number;

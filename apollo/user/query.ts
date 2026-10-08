@@ -25,6 +25,8 @@ import type { Notice } from '@/libs/types/system/notice';
 import type { NoticesInquiry } from '@/libs/types/system/notice.input';
 import type { Notification } from '@/libs/types/system/notification';
 import type { NotificationsInquiry } from '@/libs/types/system/notification.input';
+import type { Faqs } from '@/libs/types/system/faq';
+import type { FaqsInquiry } from '@/libs/types/system/faq.input';
 import type { PrivateConversation, PrivateConversations } from '@/libs/types/chat/private-conversation';
 import type { PrivateConversationsInquiry } from '@/libs/types/chat/private-conversation.input';
 import type { PrivateMessages } from '@/libs/types/chat/private-message';
@@ -57,6 +59,10 @@ export type OpenChatMessagesQueryInput = Omit<OpenChatMessagesInquiry, 'directio
 	direction?: GraphQLDirection;
 };
 
+export type PublicFaqsInput = Omit<FaqsInquiry, 'direction'> & {
+	direction?: GraphQLDirection;
+};
+
 const CHAT_MEMBER_FIELDS = gql`
 	fragment ChatMemberFields on Member {
 		_id
@@ -82,10 +88,16 @@ export const GET_MY_CONVERSATIONS: TypedDocumentNode<
 				unreadCount
 				createdAt
 				updatedAt
-				memberOneData { ...ChatMemberFields }
-				memberTwoData { ...ChatMemberFields }
+				memberOneData {
+					...ChatMemberFields
+				}
+				memberTwoData {
+					...ChatMemberFields
+				}
 			}
-			metaCounter { total }
+			metaCounter {
+				total
+			}
 		}
 	}
 	${CHAT_MEMBER_FIELDS}
@@ -105,8 +117,12 @@ export const GET_PRIVATE_CONVERSATION: TypedDocumentNode<
 			unreadCount
 			createdAt
 			updatedAt
-			memberOneData { ...ChatMemberFields }
-			memberTwoData { ...ChatMemberFields }
+			memberOneData {
+				...ChatMemberFields
+			}
+			memberTwoData {
+				...ChatMemberFields
+			}
 		}
 	}
 	${CHAT_MEMBER_FIELDS}
@@ -131,7 +147,9 @@ export const GET_PRIVATE_MESSAGES: TypedDocumentNode<
 				createdAt
 				updatedAt
 			}
-			metaCounter { total }
+			metaCounter {
+				total
+			}
 		}
 	}
 `;
@@ -140,7 +158,9 @@ export const GET_MY_UNREAD_MESSAGE_COUNT: TypedDocumentNode<
 	{ getMyUnreadMessageCount: number },
 	Record<string, never>
 > = gql`
-	query GetMyUnreadMessageCount { getMyUnreadMessageCount }
+	query GetMyUnreadMessageCount {
+		getMyUnreadMessageCount
+	}
 `;
 
 export const GET_OPEN_CHAT_MESSAGES: TypedDocumentNode<
@@ -155,12 +175,36 @@ export const GET_OPEN_CHAT_MESSAGES: TypedDocumentNode<
 				messageContent
 				createdAt
 				updatedAt
-				memberData { ...ChatMemberFields }
+				memberData {
+					...ChatMemberFields
+				}
 			}
-			metaCounter { total }
+			metaCounter {
+				total
+			}
 		}
 	}
 	${CHAT_MEMBER_FIELDS}
+`;
+
+export const GET_PUBLIC_FAQS: TypedDocumentNode<{ getFaqs: Faqs }, { input: PublicFaqsInput }> = gql`
+	query GetPublicFaqs($input: FaqsInquiry!) {
+		getFaqs(input: $input) {
+			list {
+				_id
+				faqCategory
+				faqStatus
+				faqQuestion
+				faqAnswer
+				faqOrder
+				createdAt
+				updatedAt
+			}
+			metaCounter {
+				total
+			}
+		}
+	}
 `;
 
 export type PublicCouponsInput = Omit<CouponInquiry, 'direction'> & {
@@ -1102,7 +1146,14 @@ export const GET_COMMUNITY_ARTICLE_DETAIL: TypedDocumentNode<
 
 export type CommunityCommentItem = Pick<
 	CommentEntity,
-	'_id' | 'articleId' | 'memberId' | 'parentCommentId' | 'commentContent' | 'commentLikeCount' | 'commentStatus' | 'createdAt'
+	| '_id'
+	| 'articleId'
+	| 'memberId'
+	| 'parentCommentId'
+	| 'commentContent'
+	| 'commentLikeCount'
+	| 'commentStatus'
+	| 'createdAt'
 > & {
 	memberData?: Pick<Member, '_id' | 'memberNick' | 'memberFullName' | 'memberImage' | 'memberType'> | null;
 	meLiked?: MeLiked[] | null;

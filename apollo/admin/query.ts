@@ -18,6 +18,8 @@ import type { AllTravelPackagesInquiry } from '@/libs/types/package/travel-packa
 import type { PackageSchedule } from '@/libs/types/package/package-schedule';
 import type { Notice } from '@/libs/types/system/notice';
 import type { NoticesInquiry } from '@/libs/types/system/notice.input';
+import type { Faq, Faqs } from '@/libs/types/system/faq';
+import type { FaqsInquiry } from '@/libs/types/system/faq.input';
 
 type GraphQLDirection = keyof typeof Direction;
 type MetaCounter = { total?: number | null };
@@ -45,6 +47,12 @@ export type AdminArticlesInput = Omit<AllBoardArticlesInquiry, 'direction'> & {
 export type AdminNoticesInput = Omit<NoticesInquiry, 'direction'> & {
 	direction?: GraphQLDirection;
 };
+
+export type AdminFaqsInput = Omit<FaqsInquiry, 'direction'> & {
+	direction?: GraphQLDirection;
+};
+
+export type AdminFaqRow = Faq;
 
 export type AdminCouponsInput = Omit<CouponInquiry, 'direction'> & {
 	direction?: GraphQLDirection;
@@ -102,16 +110,7 @@ export type AdminAgentRow = Pick<
 	| 'agentApprovedAt'
 	| 'createdAt'
 > & {
-	memberData?:
-		| Pick<
-				Member,
-				| 'memberNick'
-				| 'memberFullName'
-				| 'memberImage'
-				| 'memberCountry'
-				| 'memberCity'
-			>
-		| null;
+	memberData?: Pick<Member, 'memberNick' | 'memberFullName' | 'memberImage' | 'memberCountry' | 'memberCity'> | null;
 };
 
 export type AdminRecentBooking = Pick<
@@ -146,10 +145,7 @@ export type AdminBookingRow = Pick<
 	| 'createdAt'
 	| 'updatedAt'
 > & {
-	packageData?: Pick<
-		TravelPackage,
-		'_id' | 'packageTitle' | 'destinationCountry' | 'destinationCity'
-	> | null;
+	packageData?: Pick<TravelPackage, '_id' | 'packageTitle' | 'destinationCountry' | 'destinationCity'> | null;
 	scheduleData?: Pick<PackageSchedule, '_id' | 'startDate' | 'endDate' | 'scheduleStatus'> | null;
 	agentData?: Pick<Agent, '_id' | 'companyName'> | null;
 };
@@ -681,6 +677,43 @@ export const GET_ADMIN_DASHBOARD_ARTICLES: TypedDocumentNode<
 			metaCounter {
 				total
 			}
+		}
+	}
+`;
+
+export const GET_ADMIN_FAQS: TypedDocumentNode<{ getAllFaqsByAdmin: Faqs }, { input: AdminFaqsInput }> = gql`
+	query GetAdminFaqs($input: FaqsInquiry!) {
+		getAllFaqsByAdmin(input: $input) {
+			list {
+				_id
+				adminId
+				faqCategory
+				faqStatus
+				faqQuestion
+				faqAnswer
+				faqOrder
+				createdAt
+				updatedAt
+			}
+			metaCounter {
+				total
+			}
+		}
+	}
+`;
+
+export const GET_ADMIN_FAQ: TypedDocumentNode<{ getFaqByAdmin: Faq }, { faqId: string }> = gql`
+	query GetAdminFaq($faqId: String!) {
+		getFaqByAdmin(faqId: $faqId) {
+			_id
+			adminId
+			faqCategory
+			faqStatus
+			faqQuestion
+			faqAnswer
+			faqOrder
+			createdAt
+			updatedAt
 		}
 	}
 `;

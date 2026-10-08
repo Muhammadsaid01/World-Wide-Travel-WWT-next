@@ -24,7 +24,7 @@ const navigation = [
 	{ label: 'Agents', href: '/agent' },
 	{ label: 'Community', href: '/community' },
 	{ label: 'My Profile', href: '/mypage' },
-	{ label: 'CS Center', href: null },
+	{ label: 'CS Center', href: '/faq' },
 ] as const;
 
 export default function Navbar() {

@@ -10,7 +10,7 @@ const groups = [
 		items: [{ label: 'Packages', href: '/package' }, { label: 'Agents' }, { label: 'Deals' }, { label: 'Coupons' }],
 	},
 	{ title: 'Company', items: [{ label: 'About' }, { label: 'Community', href: '/community' }, { label: 'Contact' }] },
-	{ title: 'Support', items: [{ label: 'CS Center' }, { label: 'FAQ' }, { label: 'Terms' }, { label: 'Privacy' }] },
+	{ title: 'Support', items: [{ label: 'CS Center', href: '/faq' }, { label: 'FAQ', href: '/faq' }, { label: 'Terms' }, { label: 'Privacy' }] },
 ] satisfies { title: string; items: { label: string; href?: string }[] }[];
 
 export default function Footer() {

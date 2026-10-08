@@ -1,8 +1,9 @@
 import { Direction } from '../../enums/common.enum';
-import { FaqCategory } from '../../enums/system.enum';
+import { FaqCategory, FaqStatus } from '../../enums/system.enum';
 
 export interface FaqInput {
 	faqCategory: FaqCategory;
+	faqStatus?: FaqStatus;
 	faqQuestion: string;
 	faqAnswer: string;
 	faqOrder?: number;
@@ -10,7 +11,17 @@ export interface FaqInput {
 
 interface FaqSearch {
 	faqCategory?: FaqCategory;
+	faqStatus?: FaqStatus;
 	text?: string;
+}
+
+export interface FaqUpdate {
+	_id: string;
+	faqCategory?: FaqCategory;
+	faqStatus?: FaqStatus;
+	faqQuestion?: string;
+	faqAnswer?: string;
+	faqOrder?: number;
 }
 
 export interface FaqsInquiry {
