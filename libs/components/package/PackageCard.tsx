@@ -1,16 +1,17 @@
 import type { PackageListItem } from '@/apollo/user/query';
-import { API_URL } from '@/libs/config';
 import AccessTime from '@mui/icons-material/AccessTime';
 import ArrowForward from '@mui/icons-material/ArrowForward';
 import Favorite from '@mui/icons-material/Favorite';
 import FavoriteBorder from '@mui/icons-material/FavoriteBorder';
-import PlaceOutlined from '@mui/icons-material/PlaceOutlined';
 import LandscapeOutlined from '@mui/icons-material/LandscapeOutlined';
+import PlaceOutlined from '@mui/icons-material/PlaceOutlined';
 import Star from '@mui/icons-material/Star';
 import { IconButton } from '@mui/material';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
+
+import { packageImageUrl } from './PackageImage';
 
 type FavoriteAction = {
   active: boolean;
@@ -22,36 +23,63 @@ type FavoriteAction = {
 export default function PackageCard({
   item,
   favoriteAction,
+  variant = 'default',
 }: {
   item: PackageListItem;
   favoriteAction?: FavoriteAction;
+  variant?: 'default' | 'listing';
 }) {
-  const [failedImage, setFailedImage] = useState<string | null>(null);
-
-  const path = item.packageImages.find((image) => image.trim());
-
-  const image =
-    path &&
-    (/^https?:\/\//i.test(path)
-      ? path
-      : API_URL
-        ? `${API_URL.replace(/\/$/, '')}/${path.replace(/^\//, '')}`
-        : undefined);
+  const [failedImages, setFailedImages] = useState<Set<string>>(new Set());
+  const image = item.packageImages
+    .map(packageImageUrl)
+    .find(
+      (candidate): candidate is string =>
+        typeof candidate === 'string' && !failedImages.has(candidate),
+    );
+  const fallbackImage = item.destinationCity.trim().toLowerCase() === 'seoul'
+    ? '/images/home/hero/04-east-asia/seoul.jpg'
+    : '/images/packages/pack_background.png';
 
   const isSaved = favoriteAction?.active ?? false;
+  const listing = variant === 'listing';
 
   return (
-    <article className={isSaved ? 'home-card saved-package-card' : 'home-card'}>
+    <article
+      className={`home-card${isSaved ? ' saved-package-card' : ''}${listing ? ' package-list-card' : ''}`}
+    >
+      {listing && (
+        <Link
+          className="package-card-overlay"
+          href={`/package/${item._id}`}
+          aria-label={`View ${item.packageTitle}`}
+        />
+      )}
       <div className="home-card-image">
-        {image && failedImage !== image ? (
+        {image ? (
           <Image
             src={image}
             alt={item.packageTitle}
             fill
             unoptimized
             sizes="(max-width: 600px) 100vw, (max-width: 760px) 50vw, (max-width: 1100px) 35vw, 300px"
-            onError={() => setFailedImage(image)}
+            onError={() => {
+              setFailedImages((previous) => {
+                const next = new Set(previous);
+                next.add(image);
+                return next;
+              });
+            }}
           />
+        ) : listing ? (
+          <div className="package-image-fallback" aria-label="Package image unavailable">
+            <Image
+              src={fallbackImage}
+              alt=""
+              fill
+              sizes="(max-width: 600px) 100vw, (max-width: 1100px) 50vw, 300px"
+            />
+            <span>Image unavailable</span>
+          </div>
         ) : (
           <div className="packages-image-placeholder" aria-label="Package image unavailable"><LandscapeOutlined /></div>
         )}
@@ -81,7 +109,7 @@ export default function PackageCard({
       </div>
 
       <div className="home-card-body">
-        {isSaved && (
+        {isSaved && !listing && (
           <p className="saved-package-country">{item.destinationCountry}</p>
         )}
 
@@ -104,7 +132,7 @@ export default function PackageCard({
             {item.packageReviewCount > 0 ? (
               <>
                 {item.packageRating.toFixed(1)}
-                {isSaved && ` (${item.packageReviewCount} reviews)`}
+                {(isSaved || listing) && ` (${item.packageReviewCount})`}
               </>
             ) : (
               <span>No reviews yet</span>
@@ -113,7 +141,7 @@ export default function PackageCard({
         </div>
 
         <h3 title={item.packageTitle}>
-          <Link href={`/package/${item._id}`}>{item.packageTitle}</Link>
+          {listing ? item.packageTitle : <Link href={`/package/${item._id}`}>{item.packageTitle}</Link>}
         </h3>
 
         <p className="home-duration">
@@ -129,14 +157,18 @@ export default function PackageCard({
             </strong>
           </span>
 
-          {isSaved && (
+          {listing ? (
+            <span className="package-card-arrow" aria-hidden="true">
+              <ArrowForward fontSize="small" />
+            </span>
+          ) : isSaved ? (
             <Link
               className="saved-package-view"
               href={`/package/${item._id}`}
             >
               View <ArrowForward fontSize="small" />
             </Link>
-          )}
+          ) : null}
         </div>
 
         {favoriteAction?.unavailable && (

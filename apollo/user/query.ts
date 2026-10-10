@@ -27,6 +27,8 @@ import type { Notification } from '@/libs/types/system/notification';
 import type { NotificationsInquiry } from '@/libs/types/system/notification.input';
 import type { Faqs } from '@/libs/types/system/faq';
 import type { FaqsInquiry } from '@/libs/types/system/faq.input';
+import type { ReportEntity, Reports } from '@/libs/types/system/report';
+import type { ReportsInquiry } from '@/libs/types/system/report.input';
 import type { PrivateConversation, PrivateConversations } from '@/libs/types/chat/private-conversation';
 import type { PrivateConversationsInquiry } from '@/libs/types/chat/private-conversation.input';
 import type { PrivateMessages } from '@/libs/types/chat/private-message';
@@ -60,6 +62,10 @@ export type OpenChatMessagesQueryInput = Omit<OpenChatMessagesInquiry, 'directio
 };
 
 export type PublicFaqsInput = Omit<FaqsInquiry, 'direction'> & {
+	direction?: GraphQLDirection;
+};
+
+export type ReportsQueryInput = Omit<ReportsInquiry, 'direction'> & {
 	direction?: GraphQLDirection;
 };
 
@@ -477,7 +483,7 @@ export const GET_PACKAGE_TAGS: TypedDocumentNode<
 export const GET_PACKAGE_REVIEWS: TypedDocumentNode<
 	{
 		getPackageReviews: {
-			list: (Pick<Review, '_id' | 'reviewContent' | 'reviewRating' | 'createdAt'> & {
+			list: (Pick<Review, '_id' | 'memberId' | 'reviewContent' | 'reviewRating' | 'createdAt'> & {
 				reviewTitle?: string | null;
 				memberData?: PublicMember | null;
 			})[];
@@ -490,6 +496,7 @@ export const GET_PACKAGE_REVIEWS: TypedDocumentNode<
 		getPackageReviews(packageId: $packageId, input: $input) {
 			list {
 				_id
+				memberId
 				reviewTitle
 				reviewContent
 				reviewRating
@@ -751,7 +758,14 @@ export const GET_PROFILE_ARTICLES: TypedDocumentNode<
 		getMyBoardArticles: {
 			list: Pick<
 				import('@/libs/types/article/board-article').BoardArticle,
-				'_id' | 'articleTitle' | 'articleLikeCount' | 'articleViewCount' | 'articleCommentCount'
+				| '_id'
+				| 'articleTitle'
+				| 'articleContent'
+				| 'articleImages'
+				| 'articleLikeCount'
+				| 'articleViewCount'
+				| 'articleCommentCount'
+				| 'createdAt'
 			>[];
 			metaCounter?: { total: number }[] | null;
 		};
@@ -759,13 +773,16 @@ export const GET_PROFILE_ARTICLES: TypedDocumentNode<
 	Record<string, never>
 > = gql`
 	query GetProfileArticles {
-		getMyBoardArticles(input: { page: 1, limit: 1, sort: "createdAt", direction: DESC }) {
+		getMyBoardArticles(input: { page: 1, limit: 3, sort: "createdAt", direction: DESC }) {
 			list {
 				_id
 				articleTitle
+				articleContent
+				articleImages
 				articleLikeCount
 				articleViewCount
 				articleCommentCount
+				createdAt
 			}
 			metaCounter {
 				total
@@ -1382,6 +1399,7 @@ export const GET_CONNECTION_COUNTS: TypedDocumentNode<
 export type AgentListItem = Pick<
 	Agent,
 	| '_id'
+	| 'memberId'
 	| 'companyName'
 	| 'officeAddress'
 	| 'agentDesc'
@@ -1406,6 +1424,7 @@ export const GET_AGENTS: TypedDocumentNode<
 		getAgents(input: $input) {
 			list {
 				_id
+				memberId
 				companyName
 				officeAddress
 				agentDesc
@@ -1750,4 +1769,44 @@ export const GET_ALL_AGENT_REQUESTS_BY_ADMIN: TypedDocumentNode<
 			}
 		}
 	}
+`;
+
+const REPORT_FIELDS = gql`
+	fragment ReportFields on ReportEntity {
+		_id
+		reporterId
+		targetId
+		targetType
+		reportType
+		reportDesc
+		reportStatus
+		reviewedBy
+		reviewedAt
+		adminNote
+		createdAt
+		updatedAt
+	}
+`;
+
+export const GET_MY_REPORTS: TypedDocumentNode<{ getMyReports: Reports }, { input: ReportsQueryInput }> = gql`
+	query GetMyReports($input: ReportsInquiry!) {
+		getMyReports(input: $input) {
+			list {
+				...ReportFields
+			}
+			metaCounter {
+				total
+			}
+		}
+	}
+	${REPORT_FIELDS}
+`;
+
+export const GET_REPORT: TypedDocumentNode<{ getReport: ReportEntity }, { reportId: string }> = gql`
+	query GetReport($reportId: String!) {
+		getReport(reportId: $reportId) {
+			...ReportFields
+		}
+	}
+	${REPORT_FIELDS}
 `;

@@ -111,9 +111,10 @@ export default function MyBookings() {
 			key={user?._id ?? 'guest'}
 			authenticated={Boolean(user)}
 			allowed={
-								user?.memberType === MemberType.USER ||
-								user?.memberType === MemberType.AGENT
-							}
+				user?.memberType === MemberType.USER ||
+				user?.memberType === MemberType.AGENT ||
+				user?.memberType === MemberType.ADMIN
+			}
 		/>
 	);
 }

@@ -42,6 +42,8 @@ import { JOIN_TRAVEL_MATE, LEAVE_TRAVEL_MATE } from '@/apollo/user/mutation';
 import { TravelMatePostStatus, TravelMateJoinStatus } from '@/libs/enums/community.enum';
 import { packageImageUrl } from '../package/PackageImage';
 import { formatScheduleDate } from '../package/PackageSchedules';
+import ReportForm from '../cs/ReportForm';
+import { ReportTargetType } from '@/libs/enums/system.enum';
 const statusLabels = { ACTIVE: 'Open', FULL: 'Full', CLOSED: 'Closed', DELETED: 'Deleted' };
 const joinLabels = {
 	PENDING: 'Request pending',
@@ -174,6 +176,13 @@ export default function TravelMateDetail({ id, ready }: { id: string; ready: boo
 										>
 											Share
 										</Button>
+										{user?._id !== post.memberId ? (
+											<ReportForm
+												targetId={post._id}
+												targetType={ReportTargetType.TRAVEL_MATE_POST}
+												targetLabel={post.matePostTitle}
+											/>
+										) : null}
 									</Stack>
 									{shareMessage && (
 										<Typography role="status" variant="caption">

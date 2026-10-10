@@ -20,6 +20,8 @@ import type { Notice } from '@/libs/types/system/notice';
 import type { NoticesInquiry } from '@/libs/types/system/notice.input';
 import type { Faq, Faqs } from '@/libs/types/system/faq';
 import type { FaqsInquiry } from '@/libs/types/system/faq.input';
+import type { Reports } from '@/libs/types/system/report';
+import type { ReportsInquiry } from '@/libs/types/system/report.input';
 
 type GraphQLDirection = keyof typeof Direction;
 type MetaCounter = { total?: number | null };
@@ -49,6 +51,10 @@ export type AdminNoticesInput = Omit<NoticesInquiry, 'direction'> & {
 };
 
 export type AdminFaqsInput = Omit<FaqsInquiry, 'direction'> & {
+	direction?: GraphQLDirection;
+};
+
+export type AdminReportsInput = Omit<ReportsInquiry, 'direction'> & {
 	direction?: GraphQLDirection;
 };
 
@@ -714,6 +720,30 @@ export const GET_ADMIN_FAQ: TypedDocumentNode<{ getFaqByAdmin: Faq }, { faqId: s
 			faqOrder
 			createdAt
 			updatedAt
+		}
+	}
+`;
+
+export const GET_ADMIN_REPORTS: TypedDocumentNode<{ getReports: Reports }, { input: AdminReportsInput }> = gql`
+	query GetAdminReports($input: ReportsInquiry!) {
+		getReports(input: $input) {
+			list {
+				_id
+				reporterId
+				targetId
+				targetType
+				reportType
+				reportDesc
+				reportStatus
+				reviewedBy
+				reviewedAt
+				adminNote
+				createdAt
+				updatedAt
+			}
+			metaCounter {
+				total
+			}
 		}
 	}
 `;

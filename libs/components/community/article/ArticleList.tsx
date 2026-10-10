@@ -1,4 +1,5 @@
-import { Alert, Button, Skeleton, Typography } from '@mui/material';
+import type { ReactNode } from 'react';
+import { Alert, Button, Pagination, Skeleton, Typography } from '@mui/material';
 import type { QueryResult } from '@apollo/client';
 import Link from 'next/link';
 import type { CommunityArticleItem, CommunityArticlesInput } from '@/apollo/user/query';
@@ -9,11 +10,21 @@ type ArticleResult = { getBoardArticles: { list: CommunityArticleItem[]; metaCou
 export default function ArticleList({
 	query,
 	filtered,
+	toolbar,
+	page,
+	pageSize,
+	onPageChange,
 }: {
 	query: Pick<QueryResult<ArticleResult, { input: CommunityArticlesInput }>, 'data' | 'loading' | 'error' | 'refetch'>;
 	filtered: boolean;
+	toolbar?: ReactNode;
+	page: number;
+	pageSize: number;
+	onPageChange: (page: number) => void;
 }) {
 	const articles = query.data?.getBoardArticles.list ?? [];
+	const total = query.data?.getBoardArticles.metaCounter?.[0]?.total ?? 0;
+	const pageCount = Math.ceil(total / pageSize);
 	return (
 		<section className="community-section" id="community-stories" aria-labelledby="community-stories-title">
 			<header className="community-section-heading">
@@ -27,6 +38,7 @@ export default function ArticleList({
 					View All Articles →
 				</Button>
 			</header>
+			{toolbar}
 			{query.loading ? (
 				<div className="community-story-grid" aria-label="Loading travel stories">
 					{Array.from({ length: 3 }, (_, index) => (
@@ -52,6 +64,18 @@ export default function ArticleList({
 						<ArticleCard key={article._id} article={article} href={`/community/stories/${article._id}`} />
 					))}
 				</div>
+			)}
+			{!query.loading && !query.error && pageCount > 1 && (
+				<Pagination
+					className="community-pagination"
+					count={pageCount}
+					page={page}
+					onChange={(_, nextPage) => onPageChange(nextPage)}
+					shape="circular"
+					showFirstButton={false}
+					showLastButton={false}
+					aria-label="Travel story pages"
+				/>
 			)}
 		</section>
 	);

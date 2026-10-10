@@ -13,6 +13,8 @@ import { AgentVerificationStatus, MemberType } from '@/libs/enums/member.enum';
 import type { CustomJwtPayload } from '@/libs/types/customJwtPayload';
 import { PublicAgentPackages, PublicArticles, PublicConnections } from './AgentProfileTabs';
 import { packageImageUrl } from '../package/PackageImage';
+import ReportForm from '../cs/ReportForm';
+import { ReportTargetType } from '@/libs/enums/system.enum';
 
 function Profile({ agent, user }: { agent: AgentDetailData; user: CustomJwtPayload | null }) {
 	const router = useRouter();
@@ -200,6 +202,12 @@ function Profile({ agent, user }: { agent: AgentDetailData; user: CustomJwtPaylo
 								>
 									{messageBusy ? 'Opening…' : 'Message'}
 								</Button>}
+								<ReportForm
+									targetId={agent.memberId}
+									targetType={ReportTargetType.MEMBER}
+									targetLabel={name}
+									variant="outlined"
+								/>
 							</div>
 						)}
 					</Paper>

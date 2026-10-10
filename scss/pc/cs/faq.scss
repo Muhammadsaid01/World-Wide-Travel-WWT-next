@@ -79,16 +79,17 @@
 
 .faq-category-tabs {
 	display: flex;
+	flex-wrap: wrap;
 	gap: 10px;
-	margin: -25px 0 48px;
+	margin: 28px 0 48px;
 	padding: 18px;
 	border: 1px solid #e1e7eb;
 	border-radius: 12px;
 	background: #fff;
 	box-shadow: 0 12px 34px rgba(8, 45, 80, 0.1);
-	overflow-x: auto;
 
 	.MuiButton-root {
+		flex: 0 0 auto;
 		min-width: max-content;
 		border-color: #d9e2e9;
 		border-radius: 24px;
@@ -287,7 +288,7 @@
 .admin-faq-table-head,
 .admin-faq-row {
 	display: grid;
-	grid-template-columns: minmax(260px, 1fr) 105px 100px 54px 105px minmax(250px, auto);
+	grid-template-columns: minmax(240px, 1fr) 105px 100px 54px 105px minmax(280px, auto);
 	gap: 14px;
 	align-items: center;
 }
@@ -346,12 +347,14 @@
 .admin-faq-actions {
 	display: flex;
 	justify-content: flex-end;
-	gap: 2px;
+	gap: 8px;
 
 	.MuiButton-root {
-		min-width: auto;
-		padding-inline: 7px;
-		font-size: 9px;
+		min-width: 68px;
+		min-height: 36px;
+		padding: 7px 10px;
+		border-radius: 6px;
+		font-size: 10px;
 		font-weight: 750;
 		text-transform: none;
 	}
@@ -426,6 +429,7 @@
 	}
 
 	.faq-category-tabs {
+		margin-top: 20px;
 		margin-bottom: 38px;
 	}
 
@@ -457,8 +461,13 @@
 	}
 
 	.faq-category-tabs {
-		margin-top: -23px;
+		flex-wrap: nowrap;
+		margin-top: 16px;
 		padding: 13px;
+		overflow-x: auto;
+		overscroll-behavior-inline: contain;
+		scrollbar-width: thin;
+		-webkit-overflow-scrolling: touch;
 	}
 
 	.faq-results-heading {
@@ -493,9 +502,11 @@
 	.admin-faq-actions {
 		align-items: stretch;
 		flex-direction: column;
+		gap: 8px;
 
 		.MuiButton-root {
 			justify-content: flex-start;
+			min-height: 40px;
 		}
 	}
 }

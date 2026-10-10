@@ -2,30 +2,54 @@ import { currentUserVar } from '@/apollo/store';
 import {
 	GET_CONNECTION_COUNTS,
 	GET_MY_BOOKINGS,
+	GET_MY_INCOMING_TRAVEL_MATE_JOIN_REQUESTS,
 	GET_MY_PROFILE,
 	GET_PROFILE_ARTICLES,
-	GET_PROFILE_TRAVEL_MATES,
 	type PaymentBooking,
 } from '@/apollo/user/query';
 import { BookingStatus } from '@/libs/enums/booking.enum';
+import { TravelMateJoinStatus } from '@/libs/enums/community.enum';
 import { MemberType } from '@/libs/enums/member.enum';
 import { useApolloClient, useQuery, useReactiveVar } from '@apollo/client';
+import AddOutlined from '@mui/icons-material/AddOutlined';
+import ArrowForward from '@mui/icons-material/ArrowForward';
+import ArticleOutlined from '@mui/icons-material/ArticleOutlined';
+import CalendarMonthOutlined from '@mui/icons-material/CalendarMonthOutlined';
+import CameraAltOutlined from '@mui/icons-material/CameraAltOutlined';
+import ChatBubbleOutline from '@mui/icons-material/ChatBubbleOutlined';
 import EditOutlined from '@mui/icons-material/EditOutlined';
-import { Alert, Avatar, Button, Chip, Paper, Skeleton, Stack, Typography } from '@mui/material';
+import ExploreOutlined from '@mui/icons-material/ExploreOutlined';
+import FavoriteBorder from '@mui/icons-material/FavoriteBorder';
+import GroupsOutlined from '@mui/icons-material/GroupsOutlined';
+import LocationOnOutlined from '@mui/icons-material/LocationOnOutlined';
+import LuggageOutlined from '@mui/icons-material/LuggageOutlined';
+import MenuBookOutlined from '@mui/icons-material/MenuBookOutlined';
+import PersonAddAlt1Outlined from '@mui/icons-material/PersonAddAlt1Outlined';
+import TravelExploreOutlined from '@mui/icons-material/TravelExploreOutlined';
+import VisibilityOutlined from '@mui/icons-material/VisibilityOutlined';
+import { Alert, Avatar, Button, Chip, IconButton, Paper, Skeleton, Typography } from '@mui/material';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import PackageImage, { packageImageUrl } from '../package/PackageImage';
 import { formatScheduleDate } from '../package/PackageSchedules';
-import ProfileSidebar from './ProfileSidebar';
 import AgentOverview from './AgentOverview';
+import ProfileSidebar from './ProfileSidebar';
 
-function UpcomingTrip() {
+type OverviewBookings = {
+	loading: boolean;
+	error?: string;
+	trip?: PaymentBooking;
+	total?: number;
+};
+
+function useOverviewBookings(skip: boolean) {
 	const client = useApolloClient();
-	const [state, setState] = useState<{ loading: boolean; error?: string; trip?: PaymentBooking; total?: number }>({
-		loading: true,
-	});
 	const [retry, setRetry] = useState(0);
+	const [state, setState] = useState<OverviewBookings>({ loading: true });
+
 	useEffect(() => {
+		if (skip) return;
+
 		let cancelled = false;
 		async function load() {
 			setState({ loading: true });
@@ -36,6 +60,7 @@ function UpcomingTrip() {
 				let nearest: PaymentBooking | undefined;
 				const today = new Date();
 				today.setHours(0, 0, 0, 0);
+
 				do {
 					const response = await client.query({
 						query: GET_MY_BOOKINGS,
@@ -43,14 +68,19 @@ function UpcomingTrip() {
 						fetchPolicy: 'no-cache',
 					});
 					if (cancelled) return;
+
 					const result = response.data.getMyBookings;
 					total = result.metaCounter?.[0]?.total ?? 0;
 					for (const booking of result.list) {
-						const date = booking.scheduleData ? new Date(booking.scheduleData.startDate).getTime() : NaN;
+						const start = booking.scheduleData ? new Date(booking.scheduleData.startDate).getTime() : NaN;
+						const nearestStart = nearest?.scheduleData
+							? new Date(nearest.scheduleData.startDate).getTime()
+							: Number.POSITIVE_INFINITY;
 						if (
 							[BookingStatus.PENDING, BookingStatus.CONFIRMED].includes(booking.bookingStatus) &&
-							date >= today.getTime() &&
-							(!nearest || date < new Date(nearest.scheduleData!.startDate).getTime())
+							Number.isFinite(start) &&
+							start >= today.getTime() &&
+							start < nearestStart
 						)
 							nearest = booking;
 					}
@@ -58,331 +88,335 @@ function UpcomingTrip() {
 					if (!result.list.length) break;
 					page += 1;
 				} while (scanned < total);
-				setState({ loading: false, trip: nearest, total });
+
+				if (!cancelled) setState({ loading: false, trip: nearest, total });
 			} catch {
-				if (!cancelled) setState({ loading: false, error: 'Upcoming bookings could not be loaded.' });
+				if (!cancelled) setState({ loading: false, error: 'Booking information could not be loaded.' });
 			}
 		}
+
 		void load();
 		return () => {
 			cancelled = true;
 		};
-	}, [client, retry]);
-	const trip = state.trip;
+	}, [client, retry, skip]);
+
+	return { ...state, retry: () => setRetry((value) => value + 1) };
+}
+
+function initials(name?: string) {
+	if (!name?.trim()) return '?';
+	return name
+		.trim()
+		.split(/\s+/)
+		.slice(0, 2)
+		.map((part) => part[0])
+		.join('')
+		.toUpperCase();
+}
+
+function DashboardMetric({
+	label,
+	value,
+	loading,
+	unavailable,
+	href,
+	linkLabel,
+	tone,
+	icon,
+}: {
+	label: string;
+	value?: number;
+	loading: boolean;
+	unavailable: boolean;
+	href: string;
+	linkLabel: string;
+	tone: 'blue' | 'orange' | 'green' | 'purple';
+	icon: ReactNode;
+}) {
 	return (
-		<section>
-			<div className="profile-section-title">
-				<Typography component="h2">Upcoming Trip</Typography>
-				<Button component={Link} href="/mypage/my-bookings">
-					My Bookings{state.total !== undefined ? ` (${state.total})` : ''} →
-				</Button>
+		<Paper component="article" className={`profile-metric profile-metric-${tone}`} variant="outlined">
+			<div className="profile-metric-icon" aria-hidden="true">
+				{icon}
 			</div>
-			{state.loading ? (
-				<Skeleton variant="rounded" height={230} />
-			) : state.error ? (
-				<Alert severity="error" action={<Button onClick={() => setRetry((value) => value + 1)}>Retry</Button>}>
-					{state.error}
-				</Alert>
-			) : trip ? (
-				<Paper variant="outlined" className="profile-trip">
-					<div className="profile-trip-image">
-						<PackageImage
-							path={trip.packageData?.packageImages[0]}
-							alt={trip.packageData?.packageTitle ?? 'Travel package'}
-						/>
-					</div>
-					<div className="profile-trip-info">
-						<Chip label={trip.bookingStatus} size="small" />
-						<Typography variant="body2" color="text.secondary">
-							{trip.scheduleData &&
-								`${formatScheduleDate(trip.scheduleData.startDate)} – ${formatScheduleDate(trip.scheduleData.endDate)}`}
-						</Typography>
-						<Typography component="h3">
-							{trip.packageData?.packageTitle ?? 'Package information unavailable'}
-						</Typography>
-						<Typography color="text.secondary">
-							{[trip.packageData?.destinationCity, trip.packageData?.destinationCountry].filter(Boolean).join(', ')}
-						</Typography>
-						<Typography>{trip.peopleCount} travelers</Typography>
-						<Button component={Link} href={`/mypage/my-bookings/${trip._id}`}>
-							View Booking →
-						</Button>
-					</div>
-				</Paper>
-			) : (
-				<Paper variant="outlined" className="profile-empty">
-					<Typography>No upcoming bookings.</Typography>
-					<Button component={Link} href="/package">
-						Browse Packages
-					</Button>
-				</Paper>
-			)}
-		</section>
+			<div className="profile-metric-copy">
+				<Typography component="h3">{label}</Typography>
+				{loading ? (
+					<Skeleton width={54} height={42} aria-label={`Loading ${label.toLowerCase()}`} />
+				) : (
+					<strong aria-label={unavailable ? `${label} unavailable` : undefined}>
+						{unavailable || typeof value !== 'number' ? '—' : value.toLocaleString('en-US')}
+					</strong>
+				)}
+				<Link href={href} className="profile-metric-link">
+					{linkLabel} <ArrowForward aria-hidden="true" />
+				</Link>
+			</div>
+		</Paper>
 	);
 }
+
+function RecentActivity({ articles }: { articles: ReturnType<typeof useProfileArticles> }) {
+	const result = articles.data?.getMyBoardArticles;
+	return (
+		<Paper component="section" className="profile-dashboard-card profile-recent" aria-labelledby="recent-activity-title">
+			<div className="profile-card-header">
+				<Typography component="h2" id="recent-activity-title">
+					Recent Activity
+				</Typography>
+				<Link href="/mypage/articles">View All →</Link>
+			</div>
+
+			{articles.loading ? (
+				<div className="profile-activity-skeletons" role="status" aria-label="Loading recent articles">
+					{[0, 1, 2].map((item) => (
+						<div key={item} className="profile-recent-row">
+							<Skeleton variant="rounded" className="profile-recent-image" />
+							<div>
+								<Skeleton width="65%" height={28} />
+								<Skeleton />
+								<Skeleton width="50%" />
+							</div>
+						</div>
+					))}
+				</div>
+			) : articles.error ? (
+				<Alert
+					severity="error"
+					action={
+						<Button onClick={() => void articles.refetch().catch(() => undefined)} color="inherit">
+							Retry
+						</Button>
+					}
+				>
+					Recent articles could not be loaded.
+				</Alert>
+			) : !result?.list.length ? (
+				<div className="profile-card-empty">
+					<MenuBookOutlined aria-hidden="true" />
+					<Typography component="h3">No articles yet.</Typography>
+					<Button component={Link} href="/community/stories/create" endIcon={<ArrowForward />}>
+						Create Story
+					</Button>
+				</div>
+			) : (
+				<div className="profile-recent-list">
+					{result.list.map((article) => {
+						const excerpt = article.articleContent.replace(/\s+/g, ' ').trim();
+						return (
+							<Link
+								key={article._id}
+								href={`/community/stories/${article._id}`}
+								className="profile-recent-row"
+								aria-label={`Read ${article.articleTitle}`}
+							>
+								<div className="profile-recent-image">
+									<PackageImage path={article.articleImages[0]} alt={article.articleTitle} />
+								</div>
+								<div className="profile-recent-copy">
+									<Typography component="h3">{article.articleTitle}</Typography>
+									{excerpt && <Typography className="profile-recent-excerpt">{excerpt}</Typography>}
+									<div className="profile-recent-meta">
+										<span title="Likes"><FavoriteBorder aria-hidden="true" /> {article.articleLikeCount}</span>
+										<span title="Comments"><ChatBubbleOutline aria-hidden="true" /> {article.articleCommentCount}</span>
+										<span title="Views"><VisibilityOutlined aria-hidden="true" /> {article.articleViewCount}</span>
+										<time dateTime={article.createdAt}>{formatScheduleDate(article.createdAt)}</time>
+									</div>
+								</div>
+							</Link>
+						);
+					})}
+				</div>
+			)}
+		</Paper>
+	);
+}
+
+function UpcomingTrips({ bookings }: { bookings: ReturnType<typeof useOverviewBookings> }) {
+	const trip = bookings.trip;
+	const destination = [trip?.packageData?.destinationCity, trip?.packageData?.destinationCountry].filter(Boolean).join(', ');
+
+	return (
+		<Paper component="section" className="profile-dashboard-card profile-upcoming" aria-labelledby="upcoming-trips-title">
+			<div className="profile-card-header">
+				<Typography component="h2" id="upcoming-trips-title">Upcoming Trips</Typography>
+				<Link href="/mypage/my-bookings">View All →</Link>
+			</div>
+
+			{bookings.loading ? (
+				<Skeleton variant="rounded" height={230} aria-label="Loading upcoming trips" />
+			) : bookings.error ? (
+				<Alert severity="error" action={<Button onClick={bookings.retry}>Retry</Button>}>{bookings.error}</Alert>
+			) : trip ? (
+				<article className="profile-trip-card">
+					<div className="profile-trip-image">
+						<PackageImage path={trip.packageData?.packageImages[0]} alt={trip.packageData?.packageTitle ?? 'Upcoming travel package'} />
+						<Chip label={trip.bookingStatus} size="small" />
+					</div>
+					<div className="profile-trip-copy">
+						<Typography component="h3">{trip.packageData?.packageTitle ?? 'Package information unavailable'}</Typography>
+						{destination && <Typography className="profile-trip-detail"><LocationOnOutlined aria-hidden="true" /> {destination}</Typography>}
+						{trip.scheduleData && (
+							<Typography className="profile-trip-detail">
+								<CalendarMonthOutlined aria-hidden="true" /> {formatScheduleDate(trip.scheduleData.startDate)} – {formatScheduleDate(trip.scheduleData.endDate)}
+							</Typography>
+						)}
+						<Button component={Link} href={`/mypage/my-bookings/${trip._id}`} endIcon={<ArrowForward />}>View Details</Button>
+					</div>
+				</article>
+			) : (
+				<div className="profile-card-empty profile-trip-empty">
+					<TravelExploreOutlined aria-hidden="true" />
+					<Typography component="h3">No upcoming trips yet.</Typography>
+					<Typography>Start exploring real WWT packages for your next journey.</Typography>
+					<Button component={Link} href="/package" endIcon={<ArrowForward />}>Browse Packages</Button>
+				</div>
+			)}
+		</Paper>
+	);
+}
+
+const quickActions = [
+	{ label: 'Create Story', href: '/community/stories/create', icon: <AddOutlined /> },
+	{ label: 'Find Travel Mate', href: '/community/travel-mate', icon: <GroupsOutlined /> },
+	{ label: 'Browse Packages', href: '/package', icon: <LuggageOutlined /> },
+	{ label: 'Explore Community', href: '/community', icon: <ExploreOutlined /> },
+];
+
+function QuickActions() {
+	return (
+		<Paper component="section" className="profile-dashboard-card profile-quick-actions" aria-labelledby="quick-actions-title">
+			<div className="profile-card-header">
+				<Typography component="h2" id="quick-actions-title">Quick Actions</Typography>
+			</div>
+			<div className="profile-action-grid">
+				{quickActions.map((action, index) => (
+					<Link key={action.label} href={action.href} className={index === 0 ? 'is-primary' : undefined}>
+						{action.icon}<span>{action.label}</span>
+					</Link>
+				))}
+			</div>
+		</Paper>
+	);
+}
+
 function useProfileArticles(skip: boolean) {
 	return useQuery(GET_PROFILE_ARTICLES, { skip, fetchPolicy: 'no-cache' });
 }
-function Activity({ articles }: { articles: ReturnType<typeof useProfileArticles> }) {
-	const mates = useQuery(GET_PROFILE_TRAVEL_MATES, { fetchPolicy: 'no-cache' });
-	const article = articles.data?.getMyBoardArticles;
-	const mate = mates.data?.getMyTravelMatePosts;
-	return (
-		<section>
-			<Typography component="h2">My Activity</Typography>
-			<div className="profile-activity">
-				<Paper variant="outlined">
-					<Typography component="h3">My Articles</Typography>
-					{articles.loading ? (
-						<Skeleton height={100} />
-					) : articles.error ? (
-						<Alert
-							severity="error"
-							action={
-								<Button
-									onClick={() => {
-										void articles.refetch().catch(() => undefined);
-									}}
-								>
-									Retry
-								</Button>
-							}
-						>
-							Articles unavailable.
-						</Alert>
-					) : (
-						<>
-							<Typography className="profile-activity-count">
-								{article?.metaCounter?.[0]?.total ?? 0} articles
-							</Typography>
-							{article?.list[0] ? (
-								<>
-									<Typography>{article.list[0].articleTitle}</Typography>
-									<Typography variant="body2" color="text.secondary">
-										{article.list[0].articleLikeCount} likes · {article.list[0].articleCommentCount} comments ·{' '}
-										{article.list[0].articleViewCount} views
-									</Typography>
-								</>
-							) : (
-								<Typography color="text.secondary">No articles yet.</Typography>
-							)}
-						</>
-					)}
-				</Paper>
-				<Paper variant="outlined">
-					<Typography component="h3">Travel Mate Posts</Typography>
-					{mates.loading ? (
-						<Skeleton height={100} />
-					) : mates.error ? (
-						<Alert
-							severity="error"
-							action={
-								<Button
-									onClick={() => {
-										void mates.refetch().catch(() => undefined);
-									}}
-								>
-									Retry
-								</Button>
-							}
-						>
-							Travel mate posts unavailable.
-						</Alert>
-					) : (
-						<>
-							<Typography className="profile-activity-count">{mate?.metaCounter?.[0]?.total ?? 0} posts</Typography>
-							{mate?.list[0] ? (
-								<>
-									<Typography>{mate.list[0].matePostTitle}</Typography>
-									<Typography variant="body2" color="text.secondary">
-										{mate.list[0].matePostStatus}
-									</Typography>
-								</>
-							) : (
-								<Typography color="text.secondary">No travel mate posts yet.</Typography>
-							)}
-						</>
-					)}
-				</Paper>
-			</div>
-		</section>
-	);
-}
+
 export default function MyProfile() {
 	const user = useReactiveVar(currentUserVar);
 	if (user?.memberType === MemberType.AGENT) return <AgentOverview key={user._id} memberId={user._id} />;
 	return <ProfileContent key={user?._id ?? 'guest'} authenticated={Boolean(user)} />;
 }
+
 function ProfileContent({ authenticated }: { authenticated: boolean }) {
-	const { data, loading, error, refetch } = useQuery(GET_MY_PROFILE, { skip: !authenticated, fetchPolicy: 'no-cache' });
-	const member = data?.getMyProfile;
-	const connectionCounts = useQuery(GET_CONNECTION_COUNTS, {
-  variables: {
-    followers: {
-      page: 1,
-      limit: 1,
-      search: {
-        followingId: member?._id,
-      },
-    },
-    following: {
-      page: 1,
-      limit: 1,
-      search: {
-        followerId: member?._id,
-      },
-    },
-  },
-  skip: !authenticated || !member?._id,
-  fetchPolicy: 'no-cache',
-});
-
-const followerCount =
-  connectionCounts.data?.getMemberFollowers.metaCounter?.[0]?.total ?? 0;
-
-const followingCount =
-  connectionCounts.data?.getMemberFollowings.metaCounter?.[0]?.total ?? 0;
+	const profile = useQuery(GET_MY_PROFILE, { skip: !authenticated, fetchPolicy: 'no-cache' });
+	const member = profile.data?.getMyProfile;
 	const articles = useProfileArticles(!authenticated || !member);
+	const bookings = useOverviewBookings(!authenticated || !member);
+	const connectionCounts = useQuery(GET_CONNECTION_COUNTS, {
+		variables: {
+			followers: { page: 1, limit: 1, search: { followingId: member?._id } },
+			following: { page: 1, limit: 1, search: { followerId: member?._id } },
+		},
+		skip: !authenticated || !member?._id,
+		fetchPolicy: 'no-cache',
+	});
+	const joinRequests = useQuery(GET_MY_INCOMING_TRAVEL_MATE_JOIN_REQUESTS, {
+		variables: { input: { page: 1, limit: 1, search: { joinStatus: TravelMateJoinStatus.PENDING } } },
+		skip: !authenticated || !member?._id,
+		fetchPolicy: 'no-cache',
+	});
+
 	const name = member?.memberFullName || member?.memberNick;
+	const firstName = name?.trim().split(/\s+/)[0] || member?.memberNick;
+	const articleTotal = articles.data?.getMyBoardArticles.metaCounter?.[0]?.total;
+	const followerCount = connectionCounts.data?.getMemberFollowers.metaCounter?.[0]?.total ?? undefined;
+	const followingCount = connectionCounts.data?.getMemberFollowings.metaCounter?.[0]?.total ?? undefined;
+	const pendingJoinRequests = joinRequests.data?.getMyIncomingTravelMateJoinRequests.metaCounter?.[0]?.total;
+	const location = [member?.memberCity, member?.memberCountry].filter(Boolean).join(', ');
+
 	return (
 		<div className="profile-overview">
-			<div className="profile-cover" aria-hidden="true" />
-			<div className="my-bookings-page profile-container">
-				<Paper className="profile-header">
-					<Avatar className="profile-avatar" src={packageImageUrl(member?.memberImage)}>
-						{name?.slice(0, 1)}
-					</Avatar>
-					{loading ? (
-						<Stack spacing={1} className="profile-identity">
-							<Skeleton width="60%" height={45} />
-							<Skeleton />
-							<Skeleton height={60} />
-						</Stack>
+			<section className="profile-hero" aria-labelledby="profile-name">
+				<div className="profile-hero-inner">
+					{profile.loading ? (
+						<div className="profile-hero-loading" role="status" aria-label="Loading profile">
+							<Skeleton variant="circular" width={144} height={144} />
+							<div><Skeleton width={360} height={50} /><Skeleton width={240} /><Skeleton width={500} height={54} /></div>
+						</div>
 					) : !authenticated ? (
-						<Alert
-							severity="info"
-							action={
-								<Button component={Link} href="/account/login">
-									Login
-								</Button>
-							}
-						>
-							Log in to view your profile.
-						</Alert>
-					) : error ? (
-						<Alert
-							severity="error"
-							action={
-								<Button
-									onClick={() => {
-										void refetch().catch(() => undefined);
-									}}
-								>
-									Retry
-								</Button>
-							}
-						>
+						<Alert severity="info" action={<Button component={Link} href="/account/login">Login</Button>}>Log in to view your profile.</Alert>
+					) : profile.error || !member ? (
+						<Alert severity="error" action={<Button onClick={() => void profile.refetch().catch(() => undefined)}>Retry</Button>}>
 							Your profile could not be loaded.
 						</Alert>
-					) : member ? (
+					) : (
 						<>
+							<div className="profile-avatar-wrap">
+								<Avatar className="profile-avatar" src={packageImageUrl(member.memberImage)} alt={name}>{initials(name)}</Avatar>
+								<IconButton component={Link} href="/mypage/edit-profile" className="profile-avatar-edit" aria-label="Change profile photo">
+									<CameraAltOutlined />
+								</IconButton>
+							</div>
 							<div className="profile-identity">
 								<div className="profile-name">
-									<Typography component="h1">{name}</Typography>
-									<Chip label={member.memberType} size="small" />
+									<Typography component="h1" id="profile-name">{name}</Typography>
+									<Chip className={`role-${member.memberType.toLowerCase()}`} label={member.memberType} size="small" />
 								</div>
-								<Typography color="text.secondary">@{member.memberNick}</Typography>
+								<div className="profile-identity-meta">
+									<span>@{member.memberNick}</span>
+									{location && <span><LocationOnOutlined aria-hidden="true" /> {location}</span>}
+								</div>
 								{member.memberDesc && <Typography className="profile-bio">{member.memberDesc}</Typography>}
-								{(member.memberCity || member.memberCountry) && (
-									<Typography color="text.secondary">
-										{[member.memberCity, member.memberCountry].filter(Boolean).join(', ')}
-									</Typography>
-								)}
-								<div className="profile-stats">
-									<div>
-										{articles.loading ? (
-											<Skeleton width={40} height={32} />
-										) : (
-											<strong>
-												{articles.error || !articles.data
-													? '—'
-													: (articles.data.getMyBoardArticles.metaCounter?.[0]?.total ?? 0)}
-											</strong>
-										)}
-										<span>Articles</span>
-									</div>
-										<Link href="/mypage/followers" className="profile-stat-link">
-											<strong>
-												{connectionCounts.loading ? '—' : followerCount}
-											</strong>
-											<span>Followers</span>
-										</Link>
-
-										<Link href="/mypage/following" className="profile-stat-link">
-											<strong>
-												{connectionCounts.loading ? '—' : followingCount}
-											</strong>
-											<span>Following</span>
-										</Link>
+								<div className="profile-stats" aria-label="Profile statistics">
+									<Link href="/mypage/articles"><strong>{articles.loading || articles.error ? '—' : (articleTotal ?? 0)}</strong><span>Articles</span></Link>
+									<Link href="/mypage/followers"><strong>{connectionCounts.loading || connectionCounts.error ? '—' : (followerCount ?? 0)}</strong><span>Followers</span></Link>
+									<Link href="/mypage/following"><strong>{connectionCounts.loading || connectionCounts.error ? '—' : (followingCount ?? 0)}</strong><span>Following</span></Link>
 								</div>
 							</div>
-							<Button
-								component={Link}
-								href="/mypage/edit-profile"
-								variant="outlined"
-								startIcon={<EditOutlined />}
-								className="profile-edit"
-							>
-								Edit Profile
-							</Button>
+							<Button component={Link} href="/mypage/edit-profile" variant="contained" startIcon={<EditOutlined />} className="profile-edit">Edit Profile</Button>
 						</>
-					) : (
-						<Typography>Profile information unavailable.</Typography>
 					)}
-				</Paper>
-				<div className="my-bookings-layout">
-					<ProfileSidebar active="Overview" />
-					<div className="profile-content">
+				</div>
+			</section>
+
+			<div className="profile-dashboard-shell">
+				<div className="profile-dashboard-layout">
+					<ProfileSidebar active="Overview" pendingJoinRequests={pendingJoinRequests} />
+					<main className="profile-dashboard-main">
 						{member ? (
 							<>
-								<header>
+								<header className="profile-dashboard-heading">
 									<Typography className="profile-eyebrow">Overview</Typography>
-									<Typography component="h2">Welcome back, {name}</Typography>
-									<Typography color="text.secondary">Here&apos;s what&apos;s happening with your travels.</Typography>
+									<Typography component="h2">Welcome back, {firstName}!</Typography>
+									<Typography>Here&apos;s what&apos;s happening with your travels.</Typography>
 								</header>
-								{member.memberType === MemberType.USER && <UpcomingTrip />}
-								<Activity articles={articles} />
-								<section>
-									<Typography component="h2">Join Requests</Typography>
-									{/* No owner-wide incoming-request summary API is currently exposed. */}
-									<Paper variant="outlined" className="profile-empty">
-										<Typography color="text.secondary">
-											Pending join requests are not available in Overview yet.
-										</Typography>
-									</Paper>
+
+								<section className="profile-metrics" aria-label="Profile overview statistics">
+									<DashboardMetric label="My Articles" value={articleTotal} loading={articles.loading} unavailable={Boolean(articles.error)} href="/mypage/articles" linkLabel="View Articles" tone="blue" icon={<ArticleOutlined />} />
+									<DashboardMetric label="My Bookings" value={bookings.total} loading={bookings.loading} unavailable={Boolean(bookings.error)} href="/mypage/my-bookings" linkLabel="View Bookings" tone="orange" icon={<LuggageOutlined />} />
+									<DashboardMetric label="Followers" value={followerCount} loading={connectionCounts.loading} unavailable={Boolean(connectionCounts.error)} href="/mypage/followers" linkLabel="View Followers" tone="green" icon={<GroupsOutlined />} />
+									<DashboardMetric label="Following" value={followingCount} loading={connectionCounts.loading} unavailable={Boolean(connectionCounts.error)} href="/mypage/following" linkLabel="View Following" tone="purple" icon={<PersonAddAlt1Outlined />} />
 								</section>
-								<section>
-									<Typography component="h2">Saved</Typography>
-									<Typography color="text.secondary" className="profile-section-subtitle">
-										Quick access to things you&apos;ve saved.
-									</Typography>
-									{/* A saved-items query is required before real saved content can be displayed. */}
-									<Paper variant="outlined" className="profile-empty">
-										<Typography color="text.secondary">Saved items are not available yet.</Typography>
-										<Button component={Link} href="/package">
-											Browse Packages
-										</Button>
-									</Paper>
-								</section>
+
+								<div className="profile-dashboard-columns">
+									<RecentActivity articles={articles} />
+									<div className="profile-dashboard-rail">
+										<UpcomingTrips bookings={bookings} />
+										<QuickActions />
+									</div>
+								</div>
 							</>
-						) : loading ? (
-							<>
-								<Skeleton height={80} />
-								<Skeleton variant="rounded" height={230} />
-								<Skeleton variant="rounded" height={180} />
-							</>
+						) : profile.loading ? (
+							<div className="profile-dashboard-loading" role="status" aria-label="Loading dashboard">
+								<Skeleton height={86} />
+								<div className="profile-metrics">{[0, 1, 2, 3].map((item) => <Skeleton key={item} variant="rounded" height={140} />)}</div>
+								<Skeleton variant="rounded" height={360} />
+							</div>
 						) : null}
-					</div>
+					</main>
 				</div>
 			</div>
 		</div>

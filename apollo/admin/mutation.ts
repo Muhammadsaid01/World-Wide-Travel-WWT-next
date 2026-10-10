@@ -16,6 +16,8 @@ import type { Notice } from '@/libs/types/system/notice';
 import type { NoticeInput } from '@/libs/types/system/notice.input';
 import type { Faq } from '@/libs/types/system/faq';
 import type { FaqInput, FaqUpdate } from '@/libs/types/system/faq.input';
+import type { ReportEntity } from '@/libs/types/system/report';
+import type { UpdateReportStatusInput } from '@/libs/types/system/report.input';
 
 export type AdminMemberUpdateResult = Pick<
 	Member,
@@ -275,3 +277,37 @@ export const DELETE_FAQ: TypedDocumentNode<{ deleteFaq: Pick<Faq, '_id' | 'faqQu
 		}
 	}
 `;
+
+export const UPDATE_REPORT_STATUS_BY_ADMIN: TypedDocumentNode<
+	{ updateReportStatusByAdmin: ReportEntity },
+	{ input: UpdateReportStatusInput }
+> = gql`
+	mutation UpdateReportStatusByAdmin($input: UpdateReportStatusInput!) {
+		updateReportStatusByAdmin(input: $input) {
+			_id
+			reporterId
+			targetId
+			targetType
+			reportType
+			reportDesc
+			reportStatus
+			reviewedBy
+			reviewedAt
+			adminNote
+			createdAt
+			updatedAt
+		}
+	}
+`;
+
+export const DELETE_REPORT_BY_ADMIN: TypedDocumentNode<
+	{ deleteReportByAdmin: Pick<ReportEntity, '_id' | 'reportStatus'> },
+	{ reportId: string }
+> = gql`
+		mutation DeleteReportByAdmin($reportId: String!) {
+			deleteReportByAdmin(reportId: $reportId) {
+				_id
+				reportStatus
+			}
+		}
+	`;

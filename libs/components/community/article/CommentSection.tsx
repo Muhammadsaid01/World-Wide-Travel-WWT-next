@@ -30,6 +30,8 @@ import { restoreUserFromToken } from '@/libs/auth';
 import { packageImageUrl } from '../../package/PackageImage';
 import { formatScheduleDate } from '../../package/PackageSchedules';
 import { memberName, memberRole } from '../communityState';
+import ReportForm from '../../cs/ReportForm';
+import { ReportTargetType } from '@/libs/enums/system.enum';
 
 const COMMENT_LIMIT = 5;
 
@@ -280,7 +282,7 @@ export default function CommentSection({ articleId, onTotalChange }: CommentSect
 											</small>
 										</div>
 									</div>
-									{isOwner && (
+									{isOwner ? (
 										<Button
 											size="small"
 											color="inherit"
@@ -293,6 +295,12 @@ export default function CommentSection({ articleId, onTotalChange }: CommentSect
 										>
 											Delete
 										</Button>
+									) : (
+										<ReportForm
+											targetId={comment._id}
+											targetType={ReportTargetType.COMMENT}
+											targetLabel={`Comment by ${author}`}
+										/>
 									)}
 								</div>
 								<Typography component="p" className="travel-story-comment-content">{comment.commentContent}</Typography>

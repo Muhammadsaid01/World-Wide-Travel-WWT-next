@@ -13,6 +13,8 @@ import type {
 } from '@/libs/types/agent-request/agent-request.input';
 import type { Notification } from '@/libs/types/system/notification';
 import type { ReadNotificationInput } from '@/libs/types/system/notification.input';
+import type { ReportEntity } from '@/libs/types/system/report';
+import type { ReportInput } from '@/libs/types/system/report.input';
 import type { PrivateConversation } from '@/libs/types/chat/private-conversation';
 import type { PrivateConversationInput } from '@/libs/types/chat/private-conversation.input';
 import type { PrivateMessage } from '@/libs/types/chat/private-message';
@@ -36,6 +38,38 @@ export const READ_NOTIFICATION: TypedDocumentNode<
 export const READ_ALL_NOTIFICATIONS: TypedDocumentNode<{ readAllNotifications: boolean }, Record<string, never>> = gql`
 	mutation ReadAllNotifications {
 		readAllNotifications
+	}
+`;
+
+export const CREATE_REPORT: TypedDocumentNode<
+	{
+		createReport: Pick<
+			ReportEntity,
+			| '_id'
+			| 'reporterId'
+			| 'targetId'
+			| 'targetType'
+			| 'reportType'
+			| 'reportDesc'
+			| 'reportStatus'
+			| 'createdAt'
+			| 'updatedAt'
+		>;
+	},
+	{ input: ReportInput }
+> = gql`
+	mutation CreateReport($input: ReportInput!) {
+		createReport(input: $input) {
+			_id
+			reporterId
+			targetId
+			targetType
+			reportType
+			reportDesc
+			reportStatus
+			createdAt
+			updatedAt
+		}
 	}
 `;
 

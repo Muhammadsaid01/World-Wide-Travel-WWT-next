@@ -27,12 +27,13 @@
 		position: sticky;
 		top: 110px;
 		align-self: flex-start;
-	}
-	.my-bookings-sidebar {
-		border-right: 1px solid #e5e7eb;
-		padding-right: 24px;
+		padding: 18px 12px;
+		border: 1px solid #e2e8f0;
+		border-radius: 16px;
+		background: #fff;
+		box-shadow: 0 8px 28px rgba(8, 43, 80, 0.05);
 		section {
-			margin-bottom: 32px;
+			margin-bottom: 20px;
 		}
 		h2 {
 			font-size: 11px;
@@ -43,25 +44,44 @@
 		}
 		.MuiButton-root {
 			width: 100%;
-			justify-content: space-between;
+			justify-content: flex-start;
 			text-transform: none;
 			padding: 10px 12px;
 			font-size: 14px;
 			border-radius: 8px;
+			text-align: left;
+			.MuiButton-startIcon {
+				margin: 0 10px 0 0;
+			}
+			svg {
+				font-size: 18px;
+			}
 		}
 		.Mui-disabled {
 			color: #77808c;
 		}
 		.is-active {
-			background: #e9eef4;
+			background: #e7f1fa;
+			color: #0a4e87;
 			font-weight: 700;
-			> .my-bookings-active-dot {
-				flex-shrink: 0;
-				width: 6px;
-				height: 6px;
-				border-radius: 50%;
-				background: #0b2d4f;
-			}
+		}
+		.profile-nav-label {
+			min-width: 0;
+			flex: 1;
+			overflow-wrap: anywhere;
+		}
+		.profile-nav-badge {
+			display: inline-grid;
+			min-width: 20px;
+			height: 20px;
+			margin-left: 8px;
+			padding: 0 5px;
+			place-items: center;
+			border-radius: 999px;
+			background: #f59e0b;
+			color: #fff;
+			font-size: 10px;
+			font-weight: 800;
 		}
 	}
 	.my-bookings-main {
@@ -342,7 +362,17 @@
 	}
 	@media (max-width: 1023px) {
 		.my-bookings-sidebar {
-			display: none;
+			position: static;
+			display: flex;
+			max-width: 100%;
+			gap: 10px;
+			overflow-x: auto;
+			scrollbar-width: thin;
+			overscroll-behavior-x: contain;
+			section {
+				min-width: 180px;
+				margin-bottom: 0;
+			}
 		}
 		.my-bookings-layout {
 			grid-template-columns: minmax(0, 1fr);

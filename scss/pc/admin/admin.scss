@@ -86,6 +86,8 @@
 
 .admin-navigation nav {
 	flex: 1;
+	min-height: 0;
+	overflow-y: auto;
 	padding-top: 30px;
 
 	h2 {
@@ -114,6 +116,7 @@
 
 .admin-account {
 	display: grid;
+	flex-shrink: 0;
 	gap: 4px;
 	padding: 18px 8px 0;
 	border-top: 1px solid rgba(255, 255, 255, 0.14);

@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from '@apollo/client';
+import { useMutation, useQuery, useReactiveVar } from '@apollo/client';
 import { Alert, Avatar, Breadcrumbs, Button, Chip, Skeleton, Typography } from '@mui/material';
 import ArrowBack from '@mui/icons-material/ArrowBack';
 import Favorite from '@mui/icons-material/Favorite';
@@ -18,6 +18,8 @@ import PackageImage, { packageImageUrl } from '../../package/PackageImage';
 import { formatScheduleDate } from '../../package/PackageSchedules';
 import CommentSection from '../article/CommentSection';
 import { memberName, memberRole } from '../communityState';
+import ReportForm from '../../cs/ReportForm';
+import { ReportTargetType } from '@/libs/enums/system.enum';
 
 const categoryLabels: Record<ArticleCategory, string> = {
 	[ArticleCategory.FREE]: 'Free',
@@ -82,6 +84,7 @@ function ArticleContent({ article }: { article: CommunityArticleDetail }) {
 
 export default function TravelStoryDetail({ id, ready }: { id: string; ready: boolean }) {
 	const router = useRouter();
+	const user = useReactiveVar(currentUserVar);
 	const valid = /^[a-f\d]{24}$/i.test(id);
 	const { data, loading, error, refetch } = useQuery(GET_COMMUNITY_ARTICLE_DETAIL, {
 		variables: { articleId: id },
@@ -175,6 +178,14 @@ export default function TravelStoryDetail({ id, ready }: { id: string; ready: bo
 										</span>
 									</div>
 									<time dateTime={article.createdAt}>{formatScheduleDate(article.createdAt)}</time>
+									{user?._id !== article.memberData?._id ? (
+										<ReportForm
+											targetId={article._id}
+											targetType={ReportTargetType.ARTICLE}
+											targetLabel={article.articleTitle}
+											className="travel-story-report-action"
+										/>
+									) : null}
 								</div>
 								<div className="travel-story-detail-stats" aria-label="Story engagement">
 									<span className="travel-story-like-stat">

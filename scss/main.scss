@@ -12,7 +12,7 @@
 
 @use './pc/mypage/bookingDetail';
 
-@use './pc/mypage/myProfile';
+@use './pc/mypage/myProfile.scss';
 
 @use './pc/mypage/editProfile';
 
@@ -26,6 +26,7 @@
 @use './pc/community/community';
 @use './pc/community/travelStories';
 @use './pc/cs/faq';
+@use './pc/cs/report';
 
 @use './pc/mypage/joinRequests';
 

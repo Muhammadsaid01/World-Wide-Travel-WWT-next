@@ -1,4 +1,5 @@
 import { Alert, Button, Skeleton, Typography } from '@mui/material';
+import type { ReactNode } from 'react';
 import Link from 'next/link';
 import type { QueryResult } from '@apollo/client';
 import type { CommunityTravelMateItem, MyTravelMatesInput } from '@/apollo/user/query';
@@ -9,9 +10,11 @@ type MateResult = { getTravelMatePosts: { list: CommunityTravelMateItem[]; metaC
 export default function TravelMateList({
 	query,
 	filtered,
+	toolbar,
 }: {
 	query: Pick<QueryResult<MateResult, { input: MyTravelMatesInput }>, 'data' | 'loading' | 'error' | 'refetch'>;
 	filtered: boolean;
+	toolbar?: ReactNode;
 }) {
 	const posts = query.data?.getTravelMatePosts.list ?? [];
 	return (
@@ -27,6 +30,7 @@ export default function TravelMateList({
 					View All →
 				</Button>
 			</header>
+			{toolbar}
 			{query.loading ? (
 				<div className="community-mate-grid" aria-label="Loading travel mates">
 					{Array.from({ length: 3 }, (_, index) => (

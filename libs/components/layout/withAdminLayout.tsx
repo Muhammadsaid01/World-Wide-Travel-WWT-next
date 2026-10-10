@@ -21,6 +21,7 @@ const adminRoutes = [
 	{ label: 'Bookings', href: '/admin/bookings' },
 	{ label: 'Payments', href: '/admin/payments' },
 	{ label: 'Community', href: '/admin/community' },
+	{ label: 'Reports', href: '/admin/reports' },
 	{ label: 'Notices', href: '/admin/notices' },
 	{ label: 'FAQs', href: '/admin/faqs' },
 	{ label: 'Coupons', href: '/admin/coupons' },
