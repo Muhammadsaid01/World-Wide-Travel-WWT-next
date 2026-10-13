@@ -2,6 +2,7 @@ import { Alert, Button, CircularProgress, Skeleton, Typography } from '@mui/mate
 import { useLayoutEffect, useRef } from 'react';
 import type { PrivateMessage } from '@/libs/types/chat/private-message';
 import MessageItem from './MessageItem';
+import { useTranslation } from 'react-i18next';
 
 export default function MessageList({
 	conversationId,
@@ -24,6 +25,7 @@ export default function MessageList({
 	onLoadOlder: () => Promise<void>;
 	onRetry: () => void;
 }) {
+	const { t } = useTranslation(['chat', 'common']);
 	const scroller = useRef<HTMLDivElement>(null);
 	const previousConversation = useRef('');
 	const preserve = useRef<{ height: number; top: number } | null>(null);
@@ -57,10 +59,10 @@ export default function MessageList({
 				const node = scroller.current;
 				if (node) preserve.current = { height: node.scrollHeight, top: node.scrollTop };
 				void onLoadOlder();
-			}}>{loadingOlder ? <CircularProgress size={18} /> : 'Load older messages'}</Button>}
+			}}>{loadingOlder ? <CircularProgress size={18} /> : t('loadOlder')}</Button>}
 			{loading ? <div className="chat-message-skeleton"><Skeleton width="55%" height={60} /><Skeleton width="48%" height={60} /><Skeleton width="64%" height={60} /></div>
-				: error ? <Alert severity="error" action={<Button onClick={onRetry}>Retry</Button>}>{error}</Alert>
-				: messages.length === 0 ? <div className="chat-empty"><Typography component="h3">Say hello</Typography><Typography color="text.secondary">Messages in this conversation will appear here.</Typography></div>
+				: error ? <Alert severity="error" action={<Button onClick={onRetry}>{t('actions.retry', { ns: 'common' })}</Button>}>{error}</Alert>
+				: messages.length === 0 ? <div className="chat-empty"><Typography component="h3">{t('sayHello')}</Typography><Typography color="text.secondary">{t('messageEmpty')}</Typography></div>
 				: <ol>{messages.map((message) => <MessageItem key={message._id} message={message} own={message.senderId === currentMemberId} />)}</ol>}
 		</div>
 	);

@@ -20,10 +20,12 @@ import { currentUserVar } from '@/apollo/store';
 import { GET_MORE_TRAVEL_MATES, type MyTravelMatesInput } from '@/apollo/user/query';
 import { escapeTravelMateSearch } from '../communityState';
 import TravelMateCard from './TravelMateCard';
+import { useTranslation } from 'react-i18next';
 
 const PAGE_SIZE = 9;
 
 export default function TravelMateBrowsePage() {
+	const { t } = useTranslation(['community', 'common']);
 	const user = useReactiveVar(currentUserVar);
 	const [draft, setDraft] = useState({ text: '', country: '', city: '' });
 	const [filters, setFilters] = useState(draft);
@@ -74,19 +76,19 @@ export default function TravelMateBrowsePage() {
 			<div className="travel-mate-browse-breadcrumb">
 				<div className="travel-mate-browse-container">
 					<Breadcrumbs separator="›">
-						<Link href="/"><HomeOutlined fontSize="small" /> Home</Link>
-						<Link href="/community">Community</Link>
-						<span aria-current="page">Travel Mate</span>
+						<Link href="/"><HomeOutlined fontSize="small" /> {t('navigation.home', { ns: 'common' })}</Link>
+						<Link href="/community">{t('navigation.community', { ns: 'common' })}</Link>
+						<span aria-current="page">{t('mates.title')}</span>
 					</Breadcrumbs>
 				</div>
 			</div>
 			<header className="travel-mate-browse-header">
 				<div className="travel-mate-browse-container">
 					<div>
-						<Typography variant="overline">Meet travelers. Plan together.</Typography>
-						<Typography component="h1">Find a Travel Mate</Typography>
+						<Typography variant="overline">{t('home.matesEyebrow')}</Typography>
+						<Typography component="h1">{t('mates.title')}</Typography>
 						<Typography>
-							Discover real trips from the WWT community and request to join a journey that fits your plans.
+							{t('mates.description')}
 						</Typography>
 					</div>
 					<Button
@@ -95,7 +97,7 @@ export default function TravelMateBrowsePage() {
 						variant="contained"
 						startIcon={<Add />}
 					>
-						Create Travel Mate
+						{t('mates.create')}
 					</Button>
 				</div>
 			</header>
@@ -104,61 +106,61 @@ export default function TravelMateBrowsePage() {
 				<form className="travel-mate-browse-filters" onSubmit={applyFilters} role="search">
 					<TextField
 						className="travel-mate-browse-search"
-						label="Search trips"
-						placeholder="Search by title"
+						label={t('actions.search', { ns: 'common' })}
+						placeholder={t('mates.search')}
 						value={draft.text}
 						onChange={(event) => setDraft((current) => ({ ...current, text: event.target.value }))}
 						slotProps={{
-							htmlInput: { 'aria-label': 'Search travel mate titles' },
+							htmlInput: { 'aria-label': t('mates.searchLabel') },
 							input: { startAdornment: <InputAdornment position="start"><Search /></InputAdornment> },
 						}}
 					/>
 					<TextField
-						label="Destination country"
-						placeholder="Exact country"
+						label={t('mates.country')}
+						placeholder={t('mates.country')}
 						value={draft.country}
 						onChange={(event) => setDraft((current) => ({ ...current, country: event.target.value }))}
 						slotProps={{ input: { startAdornment: <InputAdornment position="start"><PlaceOutlined /></InputAdornment> } }}
 					/>
 					<TextField
-						label="Destination city"
-						placeholder="Exact city"
+						label={t('mates.city')}
+						placeholder={t('mates.city')}
 						value={draft.city}
 						onChange={(event) => setDraft((current) => ({ ...current, city: event.target.value }))}
 					/>
 					<TextField
 						select
-						label="Sort"
+						label={t('sort.label', { ns: 'common' })}
 						value={direction}
 						onChange={(event) => {
 							setDirection(event.target.value === 'ASC' ? 'ASC' : 'DESC');
 							setPage(1);
 						}}
 					>
-						<MenuItem value="DESC">Newest</MenuItem>
-						<MenuItem value="ASC">Oldest</MenuItem>
+						<MenuItem value="DESC">{t('sort.newest', { ns: 'common' })}</MenuItem>
+						<MenuItem value="ASC">{t('sort.oldest', { ns: 'common' })}</MenuItem>
 					</TextField>
 					<div className="travel-mate-browse-filter-actions">
-						<Button type="submit" variant="contained">Search</Button>
-						{(filtered || direction === 'ASC') && <Button type="button" onClick={reset}>Reset</Button>}
+						<Button type="submit" variant="contained">{t('actions.search', { ns: 'common' })}</Button>
+						{(filtered || direction === 'ASC') && <Button type="button" onClick={reset}>{t('actions.clearAll', { ns: 'common' })}</Button>}
 					</div>
 				</form>
 
 				<section className="travel-mate-browse-results" ref={resultsRef} aria-labelledby="travel-mate-results-title">
 					<header>
 						<div>
-							<Typography variant="overline">Open community trips</Typography>
-							<Typography component="h2" id="travel-mate-results-title">Trips looking for travel mates</Typography>
+							<Typography variant="overline">{t('home.matesEyebrow')}</Typography>
+							<Typography component="h2" id="travel-mate-results-title">{t('mates.title')}</Typography>
 						</div>
-						{!loading && !error && <Typography role="status">{total} {total === 1 ? 'trip' : 'trips'}</Typography>}
+						{!loading && !error && <Typography role="status">{t('mates.count', { count: total })}</Typography>}
 					</header>
 					{loading ? (
-						<div className="travel-mate-browse-grid" aria-label="Loading travel mates">
+						<div className="travel-mate-browse-grid" aria-label={t('mates.loading')}>
 							{Array.from({ length: 6 }, (_, index) => <Skeleton key={index} variant="rounded" height={360} />)}
 						</div>
 					) : error ? (
-						<Alert severity="error" action={<Button onClick={() => void refetch()}>Retry</Button>}>
-							Travel mates could not be loaded. {error.message}
+						<Alert severity="error" action={<Button onClick={() => void refetch()}>{t('actions.retry', { ns: 'common' })}</Button>}>
+							{t('mates.error')} {error.message}
 						</Alert>
 					) : result?.list.length ? (
 						<div className="travel-mate-browse-grid">
@@ -166,11 +168,8 @@ export default function TravelMateBrowsePage() {
 						</div>
 					) : (
 						<div className="travel-mate-browse-empty">
-							<Typography component="h2">No travel mates found</Typography>
-							<Typography color="text.secondary">
-								{filtered ? 'Try a different title or exact destination.' : 'No open travel mate posts are available yet.'}
-							</Typography>
-							{filtered && <Button onClick={reset}>Clear filters</Button>}
+							<Typography component="h2">{t('mates.empty')}</Typography>
+							{filtered && <Button onClick={reset}>{t('actions.clearAll', { ns: 'common' })}</Button>}
 						</div>
 					)}
 					{!loading && !error && total > PAGE_SIZE && (

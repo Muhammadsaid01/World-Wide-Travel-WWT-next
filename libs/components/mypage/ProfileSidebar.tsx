@@ -20,6 +20,7 @@ import ChatBubbleOutline from '@mui/icons-material/ChatBubbleOutlined';
 import EditOutlined from '@mui/icons-material/EditOutlined';
 import SettingsOutlined from '@mui/icons-material/SettingsOutlined';
 import WorkspacePremiumOutlined from '@mui/icons-material/WorkspacePremiumOutlined';
+import { useTranslation } from 'react-i18next';
 
 const routes = {
 	Overview: '/mypage',
@@ -63,6 +64,33 @@ const icons: Record<SidebarItem, ReactNode> = {
 	Settings: <SettingsOutlined />,
 	'Become an Agent': <WorkspacePremiumOutlined />,
 };
+const labelKeys: Record<SidebarItem, string> = {
+	Overview: 'sidebar.overview',
+	'My Packages': 'sidebar.myPackages',
+	Bookings: 'sidebar.bookings',
+	'My Bookings': 'sidebar.myBookings',
+	'My Articles': 'sidebar.myArticles',
+	'My Travel Mates': 'sidebar.myTravelMates',
+	'Join Requests': 'sidebar.joinRequests',
+	'My Reports': 'sidebar.myReports',
+	Saved: 'sidebar.saved',
+	Followers: 'sidebar.followers',
+	Following: 'sidebar.following',
+	Chats: 'sidebar.chats',
+	'Edit Profile': 'sidebar.editProfile',
+	Settings: 'sidebar.settings',
+	'Become an Agent': 'sidebar.agentProfile',
+};
+const groupKeys: Record<string, string> = {
+	Dashboard: 'sidebar.dashboard',
+	'Agent Profile': 'sidebar.agentProfile',
+	Business: 'sidebar.business',
+	Community: 'sidebar.community',
+	Connections: 'sidebar.connections',
+	Messages: 'sidebar.messages',
+	Account: 'sidebar.account',
+	Agent: 'sidebar.agentProfile',
+};
 
 export default function ProfileSidebar({
 	active,
@@ -73,6 +101,7 @@ export default function ProfileSidebar({
 	profileCard?: ReactNode;
 	pendingJoinRequests?: number;
 }) {
+	const { t } = useTranslation('profile');
 	const user = useReactiveVar(currentUserVar);
 	const router = useRouter();
 	const isAgent = user?.memberType === MemberType.AGENT;
@@ -91,12 +120,12 @@ export default function ProfileSidebar({
 	);
 	const selected = routeActive ?? active;
 	return (
-		<aside className="my-bookings-sidebar" aria-label="Profile navigation">
+		<aside className="my-bookings-sidebar" aria-label={t('sidebar.dashboard')}>
 			{profileCard}
 			{groups.map((group) => (
 				<section key={group.title} aria-labelledby={`profile-nav-${group.title.toLowerCase().replace(/\s+/g, '-')}`}>
 					<Typography component="h2" id={`profile-nav-${group.title.toLowerCase().replace(/\s+/g, '-')}`}>
-						{group.title}
+						{t(groupKeys[group.title] ?? group.title)}
 					</Typography>
 					{group.items.map((item) => {
 						const href = routes[item as keyof typeof routes];
@@ -110,7 +139,7 @@ export default function ProfileSidebar({
 								aria-current={isActive ? 'page' : undefined}
 								startIcon={icons[item]}
 							>
-								<span className="profile-nav-label">{item}</span>
+								<span className="profile-nav-label">{t(labelKeys[item])}</span>
 								{item === 'Join Requests' && typeof pendingJoinRequests === 'number' && pendingJoinRequests > 0 && (
 									<span className="profile-nav-badge" aria-label={`${pendingJoinRequests} pending`}>
 										{pendingJoinRequests > 99 ? '99+' : pendingJoinRequests}

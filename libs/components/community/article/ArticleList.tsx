@@ -4,6 +4,7 @@ import type { QueryResult } from '@apollo/client';
 import Link from 'next/link';
 import type { CommunityArticleItem, CommunityArticlesInput } from '@/apollo/user/query';
 import ArticleCard from './ArticleCard';
+import { useTranslation } from 'react-i18next';
 
 type ArticleResult = { getBoardArticles: { list: CommunityArticleItem[]; metaCounter?: { total: number }[] | null } };
 
@@ -22,6 +23,7 @@ export default function ArticleList({
 	pageSize: number;
 	onPageChange: (page: number) => void;
 }) {
+	const { t } = useTranslation(['community', 'common']);
 	const articles = query.data?.getBoardArticles.list ?? [];
 	const total = query.data?.getBoardArticles.metaCounter?.[0]?.total ?? 0;
 	const pageCount = Math.ceil(total / pageSize);
@@ -29,18 +31,18 @@ export default function ArticleList({
 		<section className="community-section" id="community-stories" aria-labelledby="community-stories-title">
 			<header className="community-section-heading">
 				<div>
-					<Typography variant="overline">Stories from our community</Typography>
+					<Typography variant="overline">{t('home.storiesEyebrow')}</Typography>
 					<Typography component="h2" id="community-stories-title">
-						Latest Travel Stories
+						{t('home.storiesTitle')}
 					</Typography>
 				</div>
 				<Button className="community-view-all" component={Link} href="/community/stories">
-					View All Articles →
+					{t('home.allArticles')}
 				</Button>
 			</header>
 			{toolbar}
 			{query.loading ? (
-				<div className="community-story-grid" aria-label="Loading travel stories">
+				<div className="community-story-grid" aria-label={t('stories.loading')}>
 					{Array.from({ length: 3 }, (_, index) => (
 						<Skeleton key={index} variant="rounded" height={380} />
 					))}
@@ -48,14 +50,14 @@ export default function ArticleList({
 			) : query.error ? (
 				<Alert
 					severity="error"
-					action={<Button onClick={() => void query.refetch().catch(() => undefined)}>Retry</Button>}
+					action={<Button onClick={() => void query.refetch().catch(() => undefined)}>{t('actions.retry', { ns: 'common' })}</Button>}
 				>
-					Travel stories could not be loaded.
+					{t('stories.error')}
 				</Alert>
 			) : !articles.length ? (
 				<div className="community-empty">
 					<Typography component="h3">
-						{filtered ? 'No travel stories match your search.' : 'No travel stories have been published yet.'}
+						{t(filtered ? 'stories.empty' : 'stories.emptyPublished')}
 					</Typography>
 				</div>
 			) : (

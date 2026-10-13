@@ -1,0 +1,98 @@
+{
+	"hero": {
+		"aria": "Featured destinations",
+		"eyebrow": "EXPLORE. DISCOVER. BELONG.",
+		"titleBefore": "Your Next",
+		"titleAccent": "Journey",
+		"titleAfter": "Starts Here",
+		"description": "Discover remarkable places, trusted travel experts, and journeys designed around you.",
+		"explore": "Explore Packages",
+		"previous": "Previous destination slide",
+		"next": "Next destination slide",
+		"choose": "Choose destination slide",
+		"showSlide": "Show slide {{number}}: {{name}}"
+	},
+	"search": {
+		"destination": "Destination",
+		"destinationPlaceholder": "Where do you want to go?",
+		"dates": "Travel Dates",
+		"datesPlaceholder": "Select dates",
+		"travelers": "Travelers",
+		"travelersValue": "{{count}} Travelers",
+		"aria": "Search travel packages"
+	},
+	"categories": {
+		"eyebrow": "Find your travel style",
+		"title": "Browse by Category",
+		"aria": "Browse travel styles",
+		"adventure": "Adventure",
+		"beach": "Beach",
+		"culture": "Culture",
+		"food": "Food",
+		"nature": "Nature",
+		"luxury": "Luxury",
+		"family": "Family",
+		"city": "City",
+		"honeymoon": "Honeymoon",
+		"business": "Business"
+	},
+	"flags": "Explore destinations around the world",
+	"offers": {
+		"eyebrow": "Make your journey go further",
+		"title": "Special Offers",
+		"loading": "Loading special offers",
+		"error": "Offers are temporarily unavailable.",
+		"empty": "No public offers are available right now.",
+		"minimum": "Minimum {{amount}} · Valid until {{date}}",
+		"percentOff": "{{value}}% off",
+		"amountOff": "{{value}} off",
+		"explore": "Explore"
+	},
+	"destinations": {
+		"eyebrow": "Ideas for your next escape",
+		"title": "Popular Destinations",
+		"all": "Explore all packages →",
+		"error": "Destinations could not be loaded.",
+		"empty": "No destinations are available yet."
+	},
+	"packages": {
+		"eyebrow": "Curated journeys",
+		"title": "Popular Travel Packages",
+		"all": "View all packages →",
+		"error": "Packages could not be loaded.",
+		"empty": "No active travel packages are available yet."
+	},
+	"agents": {
+		"eyebrow": "Guidance you can trust",
+		"title": "Top Travel Agents",
+		"all": "View all agents →",
+		"error": "Agents could not be loaded.",
+		"empty": "No active travel agents are available yet."
+	},
+	"why": {
+		"title": "Why Choose WWT",
+		"trustedTitle": "Trusted Agents",
+		"trustedText": "Verified and experienced travel professionals.",
+		"secureTitle": "Secure Booking",
+		"secureText": "Safe and reliable booking experience.",
+		"experiencesTitle": "Best Travel Experiences",
+		"experiencesText": "Carefully selected travel packages.",
+		"supportTitle": "24/7 Support",
+		"supportText": "Travel assistance whenever you need help.",
+		"communityTitle": "Traveler Community",
+		"communityText": "Share travel stories and connect with people planning their next journey."
+	},
+	"stories": {
+		"eyebrow": "Stories from our community",
+		"title": "Travel Stories",
+		"description": "Real journeys, useful ideas, and inspiration from fellow travelers.",
+		"all": "Explore all stories →",
+		"error": "Stories could not be loaded.",
+		"empty": "No travel stories have been published yet."
+	},
+	"cta": {
+		"title": "Your Next Journey Starts Here",
+		"description": "Discover amazing places and create memories that last a lifetime.",
+		"button": "Explore Packages"
+	}
+}

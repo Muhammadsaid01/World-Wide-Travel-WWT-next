@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 
 import { getApolloClient } from '@/apollo/client';
 import { restoreUserFromToken } from '@/libs/auth';
+import LanguageProvider from '@/libs/i18n/LanguageProvider';
 import light from '@/scss/MaterialTheme';
 import '@/scss/main.scss';
 
@@ -17,11 +18,13 @@ export default function App({ Component, pageProps }: AppProps) {
   }, []);
 
   return (
-    <ApolloProvider client={apolloClient}>
-      <ThemeProvider theme={light}>
-        <CssBaseline />
-        <Component {...pageProps} />
-      </ThemeProvider>
-    </ApolloProvider>
+    <LanguageProvider>
+      <ApolloProvider client={apolloClient}>
+        <ThemeProvider theme={light}>
+          <CssBaseline />
+          <Component {...pageProps} />
+        </ThemeProvider>
+      </ApolloProvider>
+    </LanguageProvider>
   );
 }

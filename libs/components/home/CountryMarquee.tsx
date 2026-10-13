@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import { useTranslation } from 'react-i18next';
 
 const countries = [
 	['uz', 'Uzbekistan'], ['sa', 'Saudi Arabia'], ['ae', 'United Arab Emirates'], ['qa', 'Qatar'],
@@ -26,8 +27,9 @@ function CountrySequence({ hidden = false }: { hidden?: boolean }) {
 }
 
 export default function CountryMarquee() {
+	const { t } = useTranslation('home');
 	return (
-		<section className="home-flags" aria-label="Explore destinations around the world">
+		<section className="home-flags" aria-label={t('flags')}>
 			<div className="home-flags-track"><CountrySequence /><CountrySequence hidden /></div>
 		</section>
 	);

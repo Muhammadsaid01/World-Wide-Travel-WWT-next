@@ -9,6 +9,7 @@ import { Alert, Avatar, Button, CircularProgress, IconButton, TextField, Typogra
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import { chatMemberName, chatTime } from '../../chat/chatUtils';
+import { useTranslation } from 'react-i18next';
 
 const OPEN_PAGE_SIZE = 20;
 
@@ -20,6 +21,7 @@ function unique(messages: OpenChatMessage[]) {
 }
 
 export default function OpenChat({ user, socket }: { user: CustomJwtPayload | null; socket: ChatSocket }) {
+	const { t } = useTranslation(['chat', 'common']);
 	const { status: socketStatus, error: socketError, send, subscribe } = socket;
 	const [messages, setMessages] = useState<OpenChatMessage[]>([]);
 	const [page, setPage] = useState(1);
@@ -63,10 +65,10 @@ export default function OpenChat({ user, socket }: { user: CustomJwtPayload | nu
 			}
 		});
 		const failed = subscribe('openChatError', (event: SocketEvent) => {
-			setBusy(false); setError(event.message || 'Open Chat request failed.');
+			setBusy(false); setError(event.message || t('widget.openRequestError'));
 		});
 		return () => { history(); incoming(); failed(); };
-	}, [subscribe, user?._id]);
+	}, [subscribe, t, user?._id]);
 
 	useEffect(() => {
 		// Socket connectivity is external state; release an in-flight UI lock after disconnect.
@@ -79,7 +81,7 @@ export default function OpenChat({ user, socket }: { user: CustomJwtPayload | nu
 		if (node) node.scrollTop = node.scrollHeight;
 	}, [messages.length]);
 
-	if (!user) return <div className="chat-auth-state"><Typography component="h3">Sign in to join Open Chat</Typography><Typography color="text.secondary">Open Chat uses your WWT member identity.</Typography><Button component={Link} href="/account/login" variant="contained">Sign in</Button></div>;
+	if (!user) return <div className="chat-auth-state"><Typography component="h3">{t('widget.signInOpen')}</Typography><Typography color="text.secondary">{t('widget.openIdentity')}</Typography><Button component={Link} href="/account/login" variant="contained">{t('widget.signIn')}</Button></div>;
 
 	async function loadOlder() {
 		if (messages.length >= total) return;
@@ -88,24 +90,24 @@ export default function OpenChat({ user, socket }: { user: CustomJwtPayload | nu
 			const result = await query.fetchMore({ variables: { input: { page: next, limit: OPEN_PAGE_SIZE, sort: 'createdAt', direction: 'DESC' } } });
 			setMessages((current) => unique([...result.data.getOpenChatMessages.list].reverse().concat(current)));
 			setPage(next);
-		} catch { setError('Older Open Chat messages could not be loaded.'); }
+		} catch { setError(t('widget.openOlderError')); }
 	}
 
 	function sendMessage() {
 		const content = value.trim();
 		if (!content || busy) return;
 		setError(''); setBusy(true); pendingMessage.current = content;
-		if (!send('openChatMessage', content)) { setBusy(false); setError('Open Chat is reconnecting.'); return; }
+		if (!send('openChatMessage', content)) { setBusy(false); setError(t('widget.openReconnecting')); return; }
 	}
 
 	return <div className="open-chat">
 		{(error || (socketError && socketStatus !== 'connected')) && <Alert severity="warning" onClose={() => setError('')}>{error || socketError}</Alert>}
 		<div className="open-chat-messages" ref={scroller}>
-			{messages.length < total && <Button size="small" onClick={() => { void loadOlder(); }}>Load older</Button>}
-			{query.loading && !messages.length ? <CircularProgress size={24} /> : query.error ? <Alert severity="error" action={<Button onClick={() => { void query.refetch(); }}>Retry</Button>}>Open Chat could not be loaded.</Alert>
-				: !messages.length ? <div className="chat-empty"><Typography component="h3">Start the conversation</Typography><Typography color="text.secondary">Be the first traveler to say hello.</Typography></div>
+			{messages.length < total && <Button size="small" onClick={() => { void loadOlder(); }}>{t('loadOlder')}</Button>}
+			{query.loading && !messages.length ? <CircularProgress size={24} /> : query.error ? <Alert severity="error" action={<Button onClick={() => { void query.refetch(); }}>{t('actions.retry', { ns: 'common' })}</Button>}>{t('widget.openLoadError')}</Alert>
+				: !messages.length ? <div className="chat-empty"><Typography component="h3">{t('widget.startConversation')}</Typography><Typography color="text.secondary">{t('widget.firstHello')}</Typography></div>
 				: <ol>{messages.map((message) => { const name = chatMemberName(message.memberData); return <li key={message._id} className={message.senderId === user._id ? 'is-own' : ''}><Avatar src={packageImageUrl(message.memberData?.memberImage)} alt={name}>{name.slice(0, 1)}</Avatar><div><strong>{name}</strong><Typography>{message.messageContent}</Typography><time>{chatTime(message.createdAt)}</time></div></li>; })}</ol>}
 		</div>
-		<div className="open-chat-composer"><TextField value={value} multiline maxRows={3} placeholder="Message Open Chat…" slotProps={{ htmlInput: { maxLength: 2000, 'aria-label': 'Open Chat message' } }} onChange={(event) => setValue(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); sendMessage(); } }} /><IconButton color="primary" onClick={sendMessage} disabled={!value.trim() || busy || socketStatus !== 'connected'} aria-label="Send to Open Chat"><Send /></IconButton></div>
+		<div className="open-chat-composer"><TextField value={value} multiline maxRows={3} placeholder={t('widget.openPlaceholder')} slotProps={{ htmlInput: { maxLength: 2000, 'aria-label': t('widget.openMessageLabel') } }} onChange={(event) => setValue(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); sendMessage(); } }} /><IconButton color="primary" onClick={sendMessage} disabled={!value.trim() || busy || socketStatus !== 'connected'} aria-label={t('widget.sendOpen')}><Send /></IconButton></div>
 	</div>;
 }

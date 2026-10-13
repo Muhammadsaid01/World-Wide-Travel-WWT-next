@@ -6,16 +6,10 @@ import { ArticleCategory } from '@/libs/enums/community.enum';
 import type { CustomJwtPayload } from '@/libs/types/customJwtPayload';
 import { packageImageUrl } from '../../package/PackageImage';
 import { memberName } from '../communityState';
+import { useTranslation } from 'react-i18next';
 
 const maxFileSize = 15_000_000;
-const categoryOptions: Array<{ value: ArticleCategory; label: string }> = [
-	{ value: ArticleCategory.FREE, label: 'Free' },
-	{ value: ArticleCategory.TRAVEL_TIP, label: 'Travel Tips' },
-	{ value: ArticleCategory.TRAVEL_REVIEW, label: 'Travel Reviews' },
-	{ value: ArticleCategory.QUESTION, label: 'Questions' },
-	{ value: ArticleCategory.FIND_COMPANION, label: 'Find Companion' },
-	{ value: ArticleCategory.NOTICE, label: 'Notice' },
-];
+const categoryOptions = Object.values(ArticleCategory);
 
 export interface ArticleFormValues {
 	articleTitle: string;
@@ -39,6 +33,7 @@ function isAllowedImage(file: File) {
 }
 
 export default function ArticleForm({ member, submitting, submitError, onSubmit, onCancel }: ArticleFormProps) {
+	const { t, i18n } = useTranslation(['community', 'common']);
 	const [articleTitle, setArticleTitle] = useState('');
 	const [articleCategory, setArticleCategory] = useState<ArticleCategory | ''>('');
 	const [articleContent, setArticleContent] = useState('');
@@ -57,11 +52,11 @@ export default function ArticleForm({ member, submitting, submitError, onSubmit,
 	function selectCover(file?: File) {
 		if (!file) return;
 		if (!isAllowedImage(file)) {
-			setErrors((previous) => ({ ...previous, coverFile: 'Choose a JPG, JPEG, or PNG image.' }));
+			setErrors((previous) => ({ ...previous, coverFile: t('create.imageType') }));
 			return;
 		}
 		if (file.size > maxFileSize) {
-			setErrors((previous) => ({ ...previous, coverFile: 'Image must be 15 MB or smaller.' }));
+			setErrors((previous) => ({ ...previous, coverFile: t('create.imageSize') }));
 			return;
 		}
 		if (coverPreview) URL.revokeObjectURL(coverPreview);
@@ -85,11 +80,11 @@ export default function ArticleForm({ member, submitting, submitError, onSubmit,
 		const title = articleTitle.trim();
 		const content = articleContent.trim();
 		const nextErrors: ArticleFormErrors = {};
-		if (!title) nextErrors.articleTitle = 'Enter a title for your story.';
-		else if (title.length < 3 || title.length > 200) nextErrors.articleTitle = 'Use 3–200 characters.';
-		if (!articleCategory) nextErrors.articleCategory = 'Choose a category.';
-		if (!content) nextErrors.articleContent = 'Tell us about your journey.';
-		else if (content.length < 10 || content.length > 10_000) nextErrors.articleContent = 'Use 10–10,000 characters.';
+		if (!title) nextErrors.articleTitle = t('create.titleRequired');
+		else if (title.length < 3 || title.length > 200) nextErrors.articleTitle = t('create.titleLength');
+		if (!articleCategory) nextErrors.articleCategory = t('create.categoryRequired');
+		if (!content) nextErrors.articleContent = t('create.contentRequired');
+		else if (content.length < 10 || content.length > 10_000) nextErrors.articleContent = t('create.contentLength');
 		if (errors.coverFile) nextErrors.coverFile = errors.coverFile;
 		setErrors(nextErrors);
 		if (Object.keys(nextErrors).length || !articleCategory) return null;
@@ -111,16 +106,16 @@ export default function ArticleForm({ member, submitting, submitError, onSubmit,
 			}}
 		>
 			<header className="travel-story-form-heading">
-				<Typography component="h1">Share Your Travel Story</Typography>
+				<Typography component="h1">{t('create.title')}</Typography>
 				<Typography>
-					Inspire fellow travelers with the places, people, and moments that made your journey memorable.
+					{t('create.description')}
 				</Typography>
 			</header>
 
 			<div className="travel-story-form-fields">
 				<TextField
 					fullWidth
-					label="Article Title"
+					label={t('create.articleTitle')}
 					disabled={submitting}
 					value={articleTitle}
 					onChange={(event) => {
@@ -128,13 +123,13 @@ export default function ArticleForm({ member, submitting, submitError, onSubmit,
 						clearFieldError('articleTitle');
 					}}
 					error={Boolean(errors.articleTitle)}
-					helperText={errors.articleTitle || 'Give your story a clear, inviting title.'}
+					helperText={errors.articleTitle || t('create.titlePlaceholder')}
 					slotProps={{ htmlInput: { maxLength: 200 } }}
 				/>
 				<TextField
 					fullWidth
 					select
-					label="Category"
+					label={t('create.category')}
 					disabled={submitting}
 					value={articleCategory}
 					onChange={(event) => {
@@ -142,20 +137,20 @@ export default function ArticleForm({ member, submitting, submitError, onSubmit,
 						clearFieldError('articleCategory');
 					}}
 					error={Boolean(errors.articleCategory)}
-					helperText={errors.articleCategory || 'Choose the category that best fits your story.'}
+					helperText={errors.articleCategory || t('create.categoryRequired')}
 				>
-					<MenuItem value="">Select a category</MenuItem>
+					<MenuItem value="">{t('create.categoryRequired')}</MenuItem>
 					{categoryOptions.map((option) => (
-						<MenuItem key={option.value} value={option.value}>
-							{option.label}
+						<MenuItem key={option} value={option}>
+							{t(`categories.${option}`)}
 						</MenuItem>
 					))}
 				</TextField>
 
 				<section className="travel-story-form-upload" aria-labelledby="cover-image-title">
 					<div>
-						<Typography component="h2" id="cover-image-title">Cover Image</Typography>
-						<Typography color="text.secondary">Optional. JPG, JPEG, or PNG up to 15 MB.</Typography>
+						<Typography component="h2" id="cover-image-title">{t('create.cover')}</Typography>
+						<Typography color="text.secondary">{t('create.coverHelp')}</Typography>
 					</div>
 					{coverPreview ? (
 						<div className="travel-story-cover-selected">
@@ -164,7 +159,7 @@ export default function ArticleForm({ member, submitting, submitError, onSubmit,
 								<Typography title={coverFile?.name}>{coverFile?.name}</Typography>
 								<div className="travel-story-cover-actions">
 									<Button component="label" type="button" color="inherit" startIcon={<AddPhotoAlternateOutlined />} disabled={submitting}>
-										Change image
+									{t('create.changeImage')}
 										<input
 											hidden
 											type="file"
@@ -177,14 +172,14 @@ export default function ArticleForm({ member, submitting, submitError, onSubmit,
 										/>
 									</Button>
 									<Button type="button" color="inherit" startIcon={<DeleteOutlineOutlined />} onClick={removeCover} disabled={submitting}>
-										Remove image
+									{t('create.removeImage')}
 									</Button>
 								</div>
 							</div>
 						</div>
 					) : (
 						<Button component="label" variant="outlined" startIcon={<AddPhotoAlternateOutlined />} disabled={submitting}>
-							Choose Cover Image
+							{t('create.chooseImage')}
 							<input
 								hidden
 								type="file"
@@ -202,7 +197,7 @@ export default function ArticleForm({ member, submitting, submitError, onSubmit,
 
 				<TextField
 					fullWidth
-					label="Story Content"
+					label={t('create.content')}
 					disabled={submitting}
 					value={articleContent}
 					onChange={(event) => {
@@ -210,21 +205,21 @@ export default function ArticleForm({ member, submitting, submitError, onSubmit,
 						clearFieldError('articleContent');
 					}}
 					error={Boolean(errors.articleContent)}
-					helperText={errors.articleContent || `${articleContent.length.toLocaleString()} / 10,000 characters`}
+					helperText={errors.articleContent || t('create.characterCount', { count: articleContent.length.toLocaleString(i18n.language) })}
 					multiline
 					minRows={12}
 					slotProps={{ htmlInput: { maxLength: 10_000 } }}
 				/>
 
 				<section className="travel-story-form-identity" aria-labelledby="publishing-identity-title">
-					<Typography component="h2" id="publishing-identity-title">Publishing as</Typography>
+					<Typography component="h2" id="publishing-identity-title">{t('create.publishingAs')}</Typography>
 					<div>
 						<Avatar src={packageImageUrl(member.memberImage)} alt={displayName}>
 							{displayName.charAt(0).toUpperCase()}
 						</Avatar>
 						<span>
 							<strong>{displayName}</strong>
-							<small>Your story will be published to the WWT community.</small>
+							<small>{t('create.publishingNote')}</small>
 						</span>
 					</div>
 				</section>
@@ -234,7 +229,7 @@ export default function ArticleForm({ member, submitting, submitError, onSubmit,
 
 			<footer className="travel-story-form-actions">
 				<Button type="button" variant="outlined" onClick={onCancel} disabled={submitting}>
-					Cancel
+					{t('actions.cancel', { ns: 'common' })}
 				</Button>
 				<Button
 					type="submit"
@@ -242,7 +237,7 @@ export default function ArticleForm({ member, submitting, submitError, onSubmit,
 					disabled={submitting}
 					startIcon={submitting ? <CircularProgress size={16} color="inherit" /> : undefined}
 				>
-					{submitting ? 'Publishing…' : 'Publish Story'}
+					{submitting ? t('create.publishing') : t('create.publish')}
 				</Button>
 			</footer>
 		</Paper>

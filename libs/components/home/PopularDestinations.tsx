@@ -6,6 +6,7 @@ import { Alert, Button, Skeleton } from '@mui/material';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 const localDestinationImages: Record<string, string> = {
 	seoul: '/images/home/hero/04-east-asia/seoul.jpg',
@@ -34,6 +35,7 @@ function DestinationImage({ city, image }: { city: string; image?: string }) {
 }
 
 export default function PopularDestinations() {
+	const { t } = useTranslation(['home', 'common']);
 	const query = useQuery(GET_TRAVEL_PACKAGES, {
 		variables: { input: { page: 1, limit: 50, sort: 'packageRating', direction: 'DESC' } },
 	});
@@ -46,11 +48,11 @@ export default function PopularDestinations() {
 			.slice(0, 3);
 	return (
 		<section className="home-section" aria-labelledby="home-destinations-title">
-			<div className="home-section-heading"><div><span className="home-section-kicker">Ideas for your next escape</span>
-				<h2 id="home-destinations-title">Popular Destinations</h2></div><Link href="/package">Explore all packages →</Link></div>
+			<div className="home-section-heading"><div><span className="home-section-kicker">{t('destinations.eyebrow')}</span>
+				<h2 id="home-destinations-title">{t('destinations.title')}</h2></div><Link href="/package">{t('destinations.all')}</Link></div>
 			{query.loading ? <div className="home-destinations-grid">{Array.from({ length: 3 }, (_, index) => <Skeleton key={index} variant="rounded" height={320} />)}</div>
-				: query.error ? <Alert severity="info" action={<Button onClick={() => void query.refetch()}>Retry</Button>}>Destinations could not be loaded.</Alert>
-				: destinations.length === 0 ? <div className="home-empty-state">No destinations are available yet.</div>
+				: query.error ? <Alert severity="info" action={<Button onClick={() => void query.refetch()}>{t('actions.retry', { ns: 'common' })}</Button>}>{t('destinations.error')}</Alert>
+				: destinations.length === 0 ? <div className="home-empty-state">{t('destinations.empty')}</div>
 				: <div className="home-destinations-grid">{destinations.map((item) => (
 					<Link className="home-destination" key={item._id} href={{ pathname: '/package', query: { country: item.destinationCountry } }}>
 						<DestinationImage city={item.destinationCity} image={item.packageImages.find((image) => image.trim())} />

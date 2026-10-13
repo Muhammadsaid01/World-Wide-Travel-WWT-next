@@ -1,0 +1,69 @@
+{
+	"skipToContent": "Asosiy qismga o‘tish",
+	"navigation": {
+		"main": "Asosiy menyu",
+		"mobile": "Mobil menyu",
+		"home": "Bosh sahifa",
+		"packages": "Sayohat paketlari",
+		"agents": "Agentlar",
+		"community": "Hamjamiyat",
+		"profile": "Mening profilim",
+		"support": "Yordam markazi"
+	},
+	"language": { "label": "Til", "menu": "Tilni tanlang" },
+	"account": {
+		"login": "Kirish",
+		"menu": "{{name}} hisobi menyusi",
+		"profile": "Mening profilim",
+		"chats": "Chatlar",
+		"admin": "Administrator paneli",
+		"logout": "Chiqish"
+	},
+	"actions": {
+		"search": "Qidirish",
+		"clear": "Tozalash",
+		"clearAll": "Barchasini tozalash",
+		"clearFilters": "Filtrlarni tozalash",
+		"retry": "Qayta urinish",
+		"viewAll": "Barchasini ko‘rish →",
+		"viewDetails": "Batafsil",
+		"back": "Orqaga",
+		"cancel": "Bekor qilish",
+		"save": "Saqlash",
+		"delete": "O‘chirish",
+		"edit": "Tahrirlash",
+		"close": "Yopish",
+		"submit": "Yuborish",
+		"loadMore": "Yana ko‘rsatish"
+	},
+	"states": {
+		"loading": "Yuklanmoqda…",
+		"updating": "Yangilanmoqda…",
+		"opening": "Ochilmoqda…",
+		"unavailable": "Mavjud emas",
+		"noResults": "Hech narsa topilmadi."
+	},
+	"sort": { "label": "Saralash:", "newest": "Eng yangi", "oldest": "Eng eski" },
+	"notifications": "Bildirishnomalar",
+	"notificationsUnread": "{{count}} ta o‘qilmagan bildirishnoma",
+	"savedPackages": "Saqlangan paketlar",
+	"unreadMessages": "{{count}} ta o‘qilmagan xabar",
+	"footer": {
+		"brand": "World Wide Travel",
+		"description": "Ilhomlantiruvchi yo‘nalishlarni kashf eting, sayohat paketlarini tanlang va dunyo sayohatchilari bilan bog‘laning.",
+		"explore": "Kashf etish",
+		"company": "Kompaniya",
+		"support": "Yordam",
+		"social": "Ijtimoiy tarmoqlar",
+		"deals": "Aksiyalar",
+		"coupons": "Kuponlar",
+		"about": "Biz haqimizda",
+		"contact": "Aloqa",
+		"faq": "Ko‘p so‘raladigan savollar",
+		"terms": "Shartlar",
+		"privacy": "Maxfiylik",
+		"copyright": "© 2026 World Wide Travel (WWT). Barcha huquqlar himoyalangan.",
+		"languages": "English · 한국어 · Русский · O‘zbekcha",
+		"comingSoon": "{{name}} tez orada ishga tushadi"
+	}
+}

@@ -33,14 +33,10 @@ import { BookingStatus } from '@/libs/enums/booking.enum';
 import { formatScheduleDate } from '../package/PackageSchedules';
 import ProfileSidebar from './ProfileSidebar';
 import { agentBookingsInput, agentBookingTransitions, AGENT_BOOKINGS_PAGE_SIZE } from './agentBookingsState';
-
-const actionLabels: Partial<Record<BookingStatus, string>> = {
-	[BookingStatus.CONFIRMED]: 'Confirm',
-	[BookingStatus.REJECTED]: 'Reject',
-	[BookingStatus.COMPLETED]: 'Complete',
-};
+import { useTranslation } from 'react-i18next';
 
 export default function AgentBookings({ memberId }: { memberId: string }) {
+	const { t, i18n } = useTranslation(['profile', 'common']);
 	const [page, setPage] = useState(1);
 	const [status, setStatus] = useState<BookingStatus | ''>('');
 	const [searchDraft, setSearchDraft] = useState('');
@@ -64,6 +60,13 @@ export default function AgentBookings({ memberId }: { memberId: string }) {
 	// Adjust only after an authoritative response; never render an invented page count.
 	if (!query.loading && !query.error && result && page > lastPage) setPage(lastPage);
 	const filtered = Boolean(status || text);
+	const statusLabel = (value: BookingStatus) => t(`bookings.statuses.${value}`);
+	const actionLabel = (value: BookingStatus) => {
+		if (value === BookingStatus.CONFIRMED) return t('bookings.confirm');
+		if (value === BookingStatus.REJECTED) return t('bookings.reject');
+		if (value === BookingStatus.COMPLETED) return t('bookings.complete');
+		return t('bookings.update');
+	};
 	function clearFilters() {
 		setStatus('');
 		setSearchDraft('');
@@ -81,7 +84,7 @@ export default function AgentBookings({ memberId }: { memberId: string }) {
 			!agentBookingTransitions[current.bookingStatus].includes(selected.target)
 		) {
 			setSelected(null);
-			setNotice({ severity: 'warning', message: 'This booking changed. Refresh the list before updating its status.' });
+			setNotice({ severity: 'warning', message: t('bookings.updateChanged') });
 			return;
 		}
 		saving.current = true;
@@ -101,19 +104,18 @@ export default function AgentBookings({ memberId }: { memberId: string }) {
 			await query.refetch();
 			setNotice(
 				confirmed
-					? { severity: 'success', message: 'Booking status updated.' }
+					? { severity: 'success', message: t('bookings.updateSuccess') }
 					: {
 							severity: 'warning',
-							message:
-								'The update could not be confirmed. The list has been refreshed; check the current status before trying again.',
+							message: t('bookings.updateUnconfirmed'),
 						},
 			);
 		} catch {
 			setNotice({
 				severity: 'error',
 				message: confirmed
-					? 'Status updated, but the list could not be refreshed. Retry loading bookings.'
-					: 'The update could not be confirmed. Retry loading bookings before making another change.',
+					? t('bookings.refreshAfterSuccess')
+					: t('bookings.refreshBeforeRetry'),
 			});
 		} finally {
 			setSelected(null);
@@ -123,10 +125,10 @@ export default function AgentBookings({ memberId }: { memberId: string }) {
 	}
 	return (
 		<div className="my-bookings-page agent-dashboard-page agent-bookings-page">
-			<Breadcrumbs separator="/" className="my-bookings-breadcrumb" aria-label="Breadcrumb">
-				<Link href="/">Home</Link>
-				<Link href="/mypage">My Profile</Link>
-				<span aria-current="page">Business Bookings</span>
+			<Breadcrumbs separator="/" className="my-bookings-breadcrumb" aria-label={t('bookings.agentTitle')}>
+				<Link href="/">{t('navigation.home', { ns: 'common' })}</Link>
+				<Link href="/mypage">{t('navigation.profile', { ns: 'common' })}</Link>
+				<span aria-current="page">{t('bookings.agentTitle')}</span>
 			</Breadcrumbs>
 			<div className="my-bookings-layout">
 				<ProfileSidebar active="Bookings" />
@@ -134,20 +136,20 @@ export default function AgentBookings({ memberId }: { memberId: string }) {
 					<header className="my-bookings-header">
 						<div>
 							<Typography component="h1" id="agent-bookings-title">
-								Bookings
+								{t('bookings.agentTitle')}
 							</Typography>
-							<Typography color="text.secondary">Manage bookings for your travel packages.</Typography>
+							<Typography color="text.secondary">{t('bookings.agentDescription')}</Typography>
 						</div>
 						{!query.loading && !query.error && result && (
 							<span className="my-bookings-count" role="status">
-								{total} {filtered ? 'matching bookings' : 'bookings'}
+								{t(filtered ? 'bookings.matchingCount' : 'bookings.count', { count: total })}
 							</span>
 						)}
 					</header>
 					<div className="my-bookings-controls">
 						<TextField
 							select
-							label="Booking status"
+							label={t('bookings.status')}
 							size="small"
 							value={status || 'ALL'}
 							disabled={busy}
@@ -156,10 +158,10 @@ export default function AgentBookings({ memberId }: { memberId: string }) {
 								setPage(1);
 							}}
 						>
-							<MenuItem value="ALL">All statuses</MenuItem>
+							<MenuItem value="ALL">{t('bookings.allStatuses')}</MenuItem>
 							{Object.values(BookingStatus).map((value) => (
 								<MenuItem key={value} value={value}>
-									{value}
+									{statusLabel(value)}
 								</MenuItem>
 							))}
 						</TextField>
@@ -173,20 +175,20 @@ export default function AgentBookings({ memberId }: { memberId: string }) {
 							}}
 						>
 							<TextField
-								label="Search bookings"
-								helperText="Booking reference, contact name, phone or email"
+								label={t('bookings.search')}
+								helperText={t('bookings.searchHelp')}
 								size="small"
 								value={searchDraft}
 								disabled={busy}
 								onChange={(event) => setSearchDraft(event.target.value)}
 							/>
 							<Button type="submit" variant="outlined" disabled={busy}>
-								Search
+								{t('actions.search', { ns: 'common' })}
 							</Button>
 						</form>
 						<TextField
 							select
-							label="Sort by"
+							label={t('sort.label', { ns: 'common' })}
 							size="small"
 							value={direction}
 							disabled={busy}
@@ -195,18 +197,18 @@ export default function AgentBookings({ memberId }: { memberId: string }) {
 								setPage(1);
 							}}
 						>
-							<MenuItem value="DESC">Newest</MenuItem>
-							<MenuItem value="ASC">Oldest</MenuItem>
+							<MenuItem value="DESC">{t('sort.newest', { ns: 'common' })}</MenuItem>
+							<MenuItem value="ASC">{t('sort.oldest', { ns: 'common' })}</MenuItem>
 						</TextField>
 						{filtered && (
 							<Button onClick={clearFilters} disabled={busy}>
-								Clear filters
+								{t('actions.clearFilters', { ns: 'common' })}
 							</Button>
 						)}
 					</div>
 					<div aria-busy={query.loading}>
 						{query.loading ? (
-							<div aria-label="Loading agent bookings">
+							<div aria-label={t('bookings.loading')}>
 								{Array.from({ length: 5 }, (_, index) => (
 									<Skeleton key={index} height={72} />
 								))}
@@ -214,16 +216,16 @@ export default function AgentBookings({ memberId }: { memberId: string }) {
 						) : query.error ? (
 							<Alert
 								severity="error"
-								action={<Button onClick={() => void query.refetch().catch(() => undefined)}>Retry</Button>}
+								action={<Button onClick={() => void query.refetch().catch(() => undefined)}>{t('actions.retry', { ns: 'common' })}</Button>}
 							>
-								Bookings could not be loaded. Please try again.
+								{t('bookings.error')}
 							</Alert>
 						) : !result?.list.length ? (
 							<div className="my-bookings-empty">
 								<Typography component="h2">
-									{filtered ? 'No bookings match your filters.' : 'No bookings for your packages yet.'}
+									{t(filtered ? 'bookings.emptyFiltered' : 'bookings.emptyAgent')}
 								</Typography>
-								{filtered && <Button onClick={clearFilters}>Clear filters</Button>}
+								{filtered && <Button onClick={clearFilters}>{t('actions.clearFilters', { ns: 'common' })}</Button>}
 							</div>
 						) : (
 							<TableContainer
@@ -231,20 +233,20 @@ export default function AgentBookings({ memberId }: { memberId: string }) {
 								className="agent-dashboard-table"
 								tabIndex={0}
 								role="region"
-								aria-label="Agent bookings; scroll horizontally for all columns"
+								aria-label={t('bookings.tableRegion')}
 							>
-								<Table size="small" aria-label="Bookings for your packages">
+								<Table size="small" aria-label={t('bookings.tableLabel')}>
 									<TableHead>
 										<TableRow>
-											{['Package', 'Contact', 'Pax', 'Booked On', 'Status', 'Amount', 'Actions'].map((label) => (
-												<TableCell key={label}>{label}</TableCell>
+										{['package', 'contact', 'pax', 'bookedOn', 'status', 'amount', 'actions'].map((label) => (
+											<TableCell key={label}>{t(`bookings.${label}`)}</TableCell>
 											))}
 										</TableRow>
 									</TableHead>
 									<TableBody>
 										{result.list.map((booking) => (
 											<TableRow key={booking._id}>
-												<TableCell>{booking.packageData?.packageTitle ?? 'Package information unavailable'}</TableCell>
+											<TableCell>{booking.packageData?.packageTitle ?? t('bookings.packageUnavailable')}</TableCell>
 												<TableCell>
 													<strong>{booking.contactName}</strong>
 													<div>{booking.contactPhone}</div>
@@ -253,11 +255,11 @@ export default function AgentBookings({ memberId }: { memberId: string }) {
 												<TableCell>{booking.peopleCount}</TableCell>
 												<TableCell className="agent-bookings-nowrap">{formatScheduleDate(booking.createdAt)}</TableCell>
 												<TableCell>
-													<Chip size="small" label={booking.bookingStatus} variant="outlined" />
+												<Chip size="small" label={statusLabel(booking.bookingStatus)} variant="outlined" />
 												</TableCell>
 												<TableCell className="agent-bookings-nowrap">
 													{booking.currency}{' '}
-													{booking.finalPrice.toLocaleString('en-US', {
+												{booking.finalPrice.toLocaleString(i18n.language, {
 														minimumFractionDigits: 2,
 														maximumFractionDigits: 2,
 													})}
@@ -271,9 +273,9 @@ export default function AgentBookings({ memberId }: { memberId: string }) {
 																color={target === BookingStatus.REJECTED ? 'error' : 'primary'}
 																disabled={busy}
 																onClick={() => setSelected({ booking, target })}
-																aria-label={`${actionLabels[target]} booking for ${booking.contactName}`}
-															>
-																{actionLabels[target]}
+														aria-label={`${actionLabel(target)} — ${booking.contactName}`}
+													>
+														{actionLabel(target)}
 															</Button>
 														))}
 													</div>
@@ -305,25 +307,30 @@ export default function AgentBookings({ memberId }: { memberId: string }) {
 				aria-labelledby="agent-booking-status-title"
 			>
 				<DialogTitle id="agent-booking-status-title">
-					{selected ? actionLabels[selected.target] : 'Update'} booking?
+					{t('bookings.dialogTitle', { action: selected ? actionLabel(selected.target) : t('bookings.update') })}
 				</DialogTitle>
 				<DialogContent>
 					<DialogContentText>
-						{selected?.booking.contactName} —{' '}
-						{selected?.booking.packageData?.packageTitle ?? 'Package information unavailable'}. Change status from{' '}
-						{selected?.booking.bookingStatus} to {selected?.target}?
+					{selected
+						? t('bookings.dialogBody', {
+								contact: selected.booking.contactName,
+								package: selected.booking.packageData?.packageTitle ?? t('bookings.packageUnavailable'),
+								from: statusLabel(selected.booking.bookingStatus),
+								to: statusLabel(selected.target),
+							})
+						: ''}
 					</DialogContentText>
 				</DialogContent>
 				<DialogActions>
 					<Button disabled={busy} onClick={() => setSelected(null)}>
-						Keep current status
+						{t('bookings.keepStatus')}
 					</Button>
 					<Button
 						variant="contained"
 						disabled={busy || query.loading || Boolean(query.error)}
 						onClick={() => void saveStatus()}
 					>
-						{busy ? 'Updating…' : 'Update status'}
+						{busy ? t('bookings.updating') : t('bookings.updateStatus')}
 					</Button>
 				</DialogActions>
 			</Dialog>

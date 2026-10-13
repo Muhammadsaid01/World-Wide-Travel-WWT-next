@@ -1,0 +1,69 @@
+{
+	"skipToContent": "Перейти к содержимому",
+	"navigation": {
+		"main": "Основная навигация",
+		"mobile": "Мобильная навигация",
+		"home": "Главная",
+		"packages": "Туры",
+		"agents": "Турагенты",
+		"community": "Сообщество",
+		"profile": "Мой профиль",
+		"support": "Поддержка"
+	},
+	"language": { "label": "Язык", "menu": "Выберите язык" },
+	"account": {
+		"login": "Войти",
+		"menu": "Меню пользователя {{name}}",
+		"profile": "Мой профиль",
+		"chats": "Чаты",
+		"admin": "Панель администратора",
+		"logout": "Выйти"
+	},
+	"actions": {
+		"search": "Поиск",
+		"clear": "Очистить",
+		"clearAll": "Сбросить всё",
+		"clearFilters": "Сбросить фильтры",
+		"retry": "Повторить",
+		"viewAll": "Смотреть все →",
+		"viewDetails": "Подробнее",
+		"back": "Назад",
+		"cancel": "Отмена",
+		"save": "Сохранить",
+		"delete": "Удалить",
+		"edit": "Изменить",
+		"close": "Закрыть",
+		"submit": "Отправить",
+		"loadMore": "Показать ещё"
+	},
+	"states": {
+		"loading": "Загрузка…",
+		"updating": "Обновление…",
+		"opening": "Открытие…",
+		"unavailable": "Недоступно",
+		"noResults": "Ничего не найдено."
+	},
+	"sort": { "label": "Сортировка:", "newest": "Сначала новые", "oldest": "Сначала старые" },
+	"notifications": "Уведомления",
+	"notificationsUnread": "Непрочитанных уведомлений: {{count}}",
+	"savedPackages": "Сохранённые туры",
+	"unreadMessages": "Непрочитанных сообщений: {{count}}",
+	"footer": {
+		"brand": "World Wide Travel",
+		"description": "Открывайте вдохновляющие маршруты, выбирайте туры и общайтесь с путешественниками со всего мира.",
+		"explore": "Путешествия",
+		"company": "Компания",
+		"support": "Поддержка",
+		"social": "Соцсети",
+		"deals": "Акции",
+		"coupons": "Купоны",
+		"about": "О нас",
+		"contact": "Контакты",
+		"faq": "Вопросы и ответы",
+		"terms": "Условия",
+		"privacy": "Конфиденциальность",
+		"copyright": "© 2026 World Wide Travel (WWT). Все права защищены.",
+		"languages": "English · 한국어 · Русский · O‘zbekcha",
+		"comingSoon": "Раздел «{{name}}» скоро откроется"
+	}
+}

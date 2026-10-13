@@ -1,0 +1,28 @@
+{
+	"faq": {
+		"eyebrow": "HELP CENTER",
+		"title": "How can we help?",
+		"description": "Find answers to common questions about WWT travel packages, bookings, payments, agents, and your account.",
+		"search": "Search frequently asked questions…",
+		"searchLabel": "Search FAQs",
+		"all": "All",
+		"categoryTitle": "{{category}} questions",
+		"categories": {
+			"GENERAL": "General",
+			"ACCOUNT": "Account",
+			"BOOKING": "Booking",
+			"PAYMENT": "Payment",
+			"REFUND": "Refunds",
+			"AGENT": "Agents",
+			"PACKAGE": "Packages",
+			"TRAVEL_MATE": "Travel Mate"
+		},
+		"loading": "Loading frequently asked questions",
+		"error": "Frequently asked questions could not be loaded.",
+		"empty": "No answers found",
+		"emptyHelp": "Try a different search or category.",
+		"contact": "Still need help?",
+		"contactText": "Send a report to our support team and we will review it.",
+		"report": "Contact Support"
+	}
+}

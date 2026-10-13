@@ -18,21 +18,15 @@ import Add from '@mui/icons-material/Add';
 import { GET_COMMUNITY_ARTICLES, type CommunityArticlesInput } from '@/apollo/user/query';
 import { ArticleCategory } from '@/libs/enums/community.enum';
 import ArticleCard from '../article/ArticleCard';
+import { useTranslation } from 'react-i18next';
 
 const pageSize = 6;
 const searchDebounceMs = 300;
 
-const categoryOptions: Array<{ value: ArticleCategory | null; label: string }> = [
-	{ value: null, label: 'All' },
-	{ value: ArticleCategory.FREE, label: 'Free' },
-	{ value: ArticleCategory.TRAVEL_TIP, label: 'Travel Tips' },
-	{ value: ArticleCategory.TRAVEL_REVIEW, label: 'Travel Reviews' },
-	{ value: ArticleCategory.QUESTION, label: 'Questions' },
-	{ value: ArticleCategory.FIND_COMPANION, label: 'Find Companion' },
-	{ value: ArticleCategory.NOTICE, label: 'Notice' },
-];
+const categoryOptions: Array<ArticleCategory | null> = [null, ...Object.values(ArticleCategory)];
 
 export default function TravelStoriesPage() {
+	const { t } = useTranslation(['community', 'common']);
 	const [category, setCategory] = useState<ArticleCategory | null>(null);
 	const [searchDraft, setSearchDraft] = useState('');
 	const [search, setSearch] = useState('');
@@ -108,64 +102,64 @@ export default function TravelStoriesPage() {
 		<div className="travel-stories-page">
 			<div className="travel-stories-breadcrumb-bar">
 				<div className="travel-stories-container">
-					<Breadcrumbs separator="›" aria-label="Breadcrumb">
-						<Link href="/"><HomeOutlined fontSize="small" /> Home</Link>
-						<Link href="/community">Community</Link>
-						<span aria-current="page">Travel Stories</span>
+					<Breadcrumbs separator="›" aria-label={t('stories.breadcrumb')}>
+						<Link href="/"><HomeOutlined fontSize="small" /> {t('navigation.home', { ns: 'common' })}</Link>
+						<Link href="/community">{t('navigation.community', { ns: 'common' })}</Link>
+						<span aria-current="page">{t('stories.title')}</span>
 					</Breadcrumbs>
 				</div>
 			</div>
 
 			<header className="travel-stories-header travel-stories-container">
 				<div>
-					<Typography component="h1">Travel Stories</Typography>
+					<Typography component="h1">{t('stories.title')}</Typography>
 					<Typography className="travel-stories-description">
-						Discover inspiring journeys, honest tips, and unforgettable moments shared by travelers around the world.
+						{t('stories.description')}
 					</Typography>
 				</div>
 				<Button component={Link} href="/community/stories/create" variant="contained" startIcon={<Add />}>
-					Share a Story
+					{t('stories.share')}
 				</Button>
 			</header>
 
 			<main className="travel-stories-container">
-				<section className="travel-stories-toolbar" aria-label="Travel story filters">
+			<section className="travel-stories-toolbar" aria-label={t('stories.category')}>
 					<form className="travel-stories-search" onSubmit={submitSearch} role="search">
 						<TextField
 							fullWidth
 							size="small"
-							placeholder="Search travel stories..."
+							placeholder={t('stories.search')}
 							value={searchDraft}
 							onChange={(event) => setSearchDraft(event.target.value)}
 							slotProps={{
-								htmlInput: { 'aria-label': 'Search travel stories' },
+								htmlInput: { 'aria-label': t('stories.searchLabel') },
 								input: { startAdornment: <InputAdornment position="start"><Search /></InputAdornment> },
 							}}
 						/>
-						<Button type="submit" variant="contained">Search</Button>
+						<Button type="submit" variant="contained">{t('actions.search', { ns: 'common' })}</Button>
 					</form>
 					<div className="travel-stories-filter-row">
-						<div className="travel-stories-categories" role="group" aria-label="Story categories">
+						<div className="travel-stories-categories" role="group" aria-label={t('stories.category')}>
 							{categoryOptions.map((item) => (
 								<Button
-									key={item.label}
-									className={category === item.value ? 'is-active' : ''}
-									aria-pressed={category === item.value}
-									onClick={() => selectCategory(item.value)}
+									key={item ?? 'all'}
+									className={category === item ? 'is-active' : ''}
+									aria-pressed={category === item}
+									onClick={() => selectCategory(item)}
 								>
-									{item.label}
+									{item ? t(`categories.${item}`) : t('stories.all')}
 								</Button>
 							))}
 						</div>
 						<TextField
 							select
 							size="small"
-							label="Sort"
+							label={t('sort.label', { ns: 'common' })}
 							value={sort}
 							onChange={(event) => changeSort(event.target.value as 'newest' | 'oldest')}
 						>
-							<MenuItem value="newest">Newest</MenuItem>
-							<MenuItem value="oldest">Oldest</MenuItem>
+							<MenuItem value="newest">{t('sort.newest', { ns: 'common' })}</MenuItem>
+							<MenuItem value="oldest">{t('sort.oldest', { ns: 'common' })}</MenuItem>
 						</TextField>
 					</div>
 				</section>
@@ -173,17 +167,17 @@ export default function TravelStoriesPage() {
 				<section className="travel-stories-results" ref={gridRef} aria-labelledby="travel-stories-results-title">
 					<div className="travel-stories-results-heading">
 						<div>
-							<Typography variant="overline">From the WWT community</Typography>
-							<Typography component="h2" id="travel-stories-results-title">Latest Travel Stories</Typography>
+							<Typography variant="overline">{t('home.storiesEyebrow')}</Typography>
+							<Typography component="h2" id="travel-stories-results-title">{t('home.storiesTitle')}</Typography>
 						</div>
 						{!loading && !error && (
 							<Typography className="travel-stories-result-count" role="status">
-								{total} {total === 1 ? 'story' : 'stories'}
+								{t('stories.count', { count: total })}
 							</Typography>
 						)}
 					</div>
 					{loading ? (
-						<div className="travel-stories-grid" aria-label="Loading travel stories">
+						<div className="travel-stories-grid" aria-label={t('stories.loading')}>
 							{Array.from({ length: pageSize }, (_, index) => (
 								<Skeleton key={index} variant="rounded" height={485} />
 							))}
@@ -191,9 +185,9 @@ export default function TravelStoriesPage() {
 					) : error ? (
 						<Alert
 							severity="error"
-							action={<Button onClick={() => void refetch().catch(() => undefined)}>Retry</Button>}
+							action={<Button onClick={() => void refetch().catch(() => undefined)}>{t('actions.retry', { ns: 'common' })}</Button>}
 						>
-							Travel stories could not be loaded.
+							{t('stories.error')}
 						</Alert>
 					) : articles.length ? (
 						<div className="travel-stories-grid">
@@ -208,9 +202,8 @@ export default function TravelStoriesPage() {
 						</div>
 					) : (
 						<div className="travel-stories-empty">
-							<Typography component="h2">No stories found</Typography>
-							<Typography>{filtered ? 'Try a different search term or category.' : 'No travel stories have been published yet.'}</Typography>
-							{filtered && <Button onClick={clearFilters}>Clear filters</Button>}
+							<Typography component="h2">{t('stories.empty')}</Typography>
+							{filtered && <Button onClick={clearFilters}>{t('actions.clearAll', { ns: 'common' })}</Button>}
 						</div>
 					)}
 					{!loading && !error && total > pageSize && (

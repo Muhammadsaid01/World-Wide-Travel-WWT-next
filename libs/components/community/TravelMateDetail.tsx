@@ -44,17 +44,18 @@ import { packageImageUrl } from '../package/PackageImage';
 import { formatScheduleDate } from '../package/PackageSchedules';
 import ReportForm from '../cs/ReportForm';
 import { ReportTargetType } from '@/libs/enums/system.enum';
-const statusLabels = { ACTIVE: 'Open', FULL: 'Full', CLOSED: 'Closed', DELETED: 'Deleted' };
-const joinLabels = {
-	PENDING: 'Request pending',
-	APPROVED: 'You have joined',
-	REJECTED: 'Request rejected',
-	CANCELLED: 'Request cancelled',
+import { useTranslation } from 'react-i18next';
+const statusKeys = { ACTIVE: 'mates.open', FULL: 'mates.full', CLOSED: 'mates.closed', DELETED: 'mates.deleted' } as const;
+const joinLabelKeys = {
+	PENDING: 'mates.requestPending',
+	APPROVED: 'mates.joined',
+	REJECTED: 'mates.requestRejected',
+	CANCELLED: 'mates.requestCancelled',
 };
-function statusLabel(post: Pick<Post, 'matePostStatus' | 'currentMembers' | 'maxMembers'>) {
+function statusKey(post: Pick<Post, 'matePostStatus' | 'currentMembers' | 'maxMembers'>) {
 	return post.matePostStatus === TravelMatePostStatus.ACTIVE && post.currentMembers >= post.maxMembers
-		? 'Full'
-		: statusLabels[post.matePostStatus];
+		? 'mates.full'
+		: statusKeys[post.matePostStatus];
 }
 function Person({
 	member,
@@ -81,6 +82,7 @@ function Person({
 	);
 }
 export default function TravelMateDetail({ id, ready }: { id: string; ready: boolean }) {
+	const { t, i18n } = useTranslation(['community', 'common']);
 	const valid = /^[a-f\d]{24}$/i.test(id);
 	const { data, loading, error, refetch } = useQuery(GET_TRAVEL_MATE_DETAIL, {
 		variables: { postId: id },
@@ -98,29 +100,29 @@ export default function TravelMateDetail({ id, ready }: { id: string; ready: boo
 			if (navigator.share) await navigator.share({ title: post?.matePostTitle, url: window.location.href });
 			else {
 				await navigator.clipboard.writeText(window.location.href);
-				setShareMessage('Link copied.');
+				setShareMessage(t('mates.linkCopied'));
 			}
 		} catch (failure) {
 			if (!(failure instanceof Error && failure.name === 'AbortError'))
-				setShareMessage('Unable to share. You can copy the address from your browser.');
+				setShareMessage(t('mates.shareError'));
 		}
 	}
 	return (
 		<div className="travel-mate-detail">
 			<Head>
-				<title>{post?.matePostTitle || 'Travel Mate'} | WWT</title>
+				<title>{post?.matePostTitle || t('mates.title')} | WWT</title>
 			</Head>
 			<Breadcrumbs separator="/" className="travel-mate-breadcrumb">
-				<Link href="/">Home</Link>
-				<Link href="/community">Community</Link>
-				<Link href="/community/travel-mate">Travel Mate</Link>
-				<span aria-current="page">{post?.matePostTitle || 'Post'}</span>
+				<Link href="/">{t('navigation.home', { ns: 'common' })}</Link>
+				<Link href="/community">{t('navigation.community', { ns: 'common' })}</Link>
+				<Link href="/community/travel-mate">{t('mates.title')}</Link>
+				<span aria-current="page">{post?.matePostTitle || t('mates.post')}</span>
 			</Breadcrumbs>
 			<Button component={Link} href="/community/travel-mate" startIcon={<ArrowBack />} className="travel-mate-back">
-				Back to Travel Mates
+				{t('mates.back')}
 			</Button>
 			{!ready || loading ? (
-				<div className="travel-mate-columns" aria-label="Loading travel mate">
+				<div className="travel-mate-columns" aria-label={t('mates.loadingDetail')}>
 					<div>
 						<Skeleton height={70} />
 						<Skeleton width="50%" height={45} />
@@ -136,11 +138,11 @@ export default function TravelMateDetail({ id, ready }: { id: string; ready: boo
 			) : notFound ? (
 				<Paper className="travel-mate-state" variant="outlined">
 					<Typography variant="h4" component="h1">
-						Travel mate unavailable
+						{t('mates.unavailableTitle')}
 					</Typography>
-					<Typography>This post could not be found or is no longer publicly available.</Typography>
+					<Typography>{t('mates.unavailableText')}</Typography>
 					<Button component={Link} href="/community/travel-mate">
-						Back to Travel Mates
+						{t('mates.back')}
 					</Button>
 				</Paper>
 			) : error ? (
@@ -152,11 +154,11 @@ export default function TravelMateDetail({ id, ready }: { id: string; ready: boo
 								void refetch().catch(() => undefined);
 							}}
 						>
-							Retry
+							{t('actions.retry', { ns: 'common' })}
 						</Button>
 					}
 				>
-					Unable to load this travel mate. {error.message}
+					{t('mates.detailError')} {error.message}
 				</Alert>
 			) : (
 				post && (
@@ -166,7 +168,7 @@ export default function TravelMateDetail({ id, ready }: { id: string; ready: boo
 								<header>
 									<Stack direction="row" sx={{ flexWrap: 'wrap', gap: 1, alignItems: 'center' }}>
 										<Chip label={[post.destinationCity, post.destinationCountry].filter(Boolean).join(', ')} />
-										<Chip color={statusLabel(post) === 'Open' ? 'info' : 'default'} label={statusLabel(post)} />
+										<Chip color={statusKey(post) === 'mates.open' ? 'info' : 'default'} label={t(statusKey(post))} />
 										<Button
 											startIcon={<ShareOutlined />}
 											onClick={() => {
@@ -174,7 +176,7 @@ export default function TravelMateDetail({ id, ready }: { id: string; ready: boo
 											}}
 											sx={{ ml: 'auto' }}
 										>
-											Share
+											{t('mates.share')}
 										</Button>
 										{user?._id !== post.memberId ? (
 											<ReportForm
@@ -190,27 +192,27 @@ export default function TravelMateDetail({ id, ready }: { id: string; ready: boo
 										</Typography>
 									)}
 									<Typography component="h1">{post.matePostTitle}</Typography>
-									{post.memberData && <Person member={post.memberData} role="Creator" />}
+									{post.memberData && <Person member={post.memberData} role={t('mates.creator')} />}
 								</header>
 								<div className="travel-mate-facts">
 									{[
-										{ label: 'Travel Date', value: formatScheduleDate(post.travelDate), Icon: CalendarMonthOutlined },
+										{ label: t('mates.travelDate'), value: formatScheduleDate(post.travelDate, i18n.language), Icon: CalendarMonthOutlined },
 										...(post.departureCity || post.departureCountry
 											? [{
-												label: 'Departure',
+												label: t('mates.departure'),
 												value: [post.departureCity, post.departureCountry].filter(Boolean).join(', '),
 												Icon: FlightTakeoffOutlined,
 											}]
 											: []),
 										{
-											label: 'Destination',
+											label: t('mates.destination'),
 											value: [post.destinationCity, post.destinationCountry].filter(Boolean).join(', '),
 											Icon: PlaceOutlined,
 										},
-										{ label: 'Max Group Size', value: `${post.maxMembers} travelers`, Icon: PeopleAltOutlined },
-										{ label: 'Status', value: statusLabel(post), Icon: InfoOutlined },
+										{ label: t('mates.maxGroup'), value: t('mates.maxTravelers', { count: post.maxMembers }), Icon: PeopleAltOutlined },
+										{ label: t('mates.status'), value: t(statusKey(post)), Icon: InfoOutlined },
 										...(typeof post.matePostViewCount === 'number'
-											? [{ label: 'Views', value: post.matePostViewCount.toLocaleString('en-US'), Icon: VisibilityOutlined }]
+											? [{ label: t('mates.views'), value: post.matePostViewCount.toLocaleString(i18n.language), Icon: VisibilityOutlined }]
 											: []),
 									].map(({ label, value, Icon }) => (
 										<Paper key={label} elevation={0}>
@@ -221,16 +223,16 @@ export default function TravelMateDetail({ id, ready }: { id: string; ready: boo
 									))}
 								</div>
 								<section>
-									<Typography component="h2">About This Trip</Typography>
+									<Typography component="h2">{t('mates.aboutTrip')}</Typography>
 									<Typography className="travel-mate-description">{post.matePostContent}</Typography>
 								</section>
 								{/* TravelMatePost has no structured itinerary or image fields. */}
 								<Participants post={post} />
 								{post.memberData && (
 									<section>
-										<Typography component="h2">About the Creator</Typography>
+										<Typography component="h2">{t('mates.aboutCreator')}</Typography>
 										<Paper variant="outlined" className="travel-mate-creator">
-											<Person member={post.memberData} role="Creator" />
+											<Person member={post.memberData} role={t('mates.creator')} />
 											{(post.memberData.memberCity || post.memberData.memberCountry) && (
 												<Typography color="text.secondary">
 													{[post.memberData.memberCity, post.memberData.memberCountry].filter(Boolean).join(', ')}
@@ -240,8 +242,7 @@ export default function TravelMateDetail({ id, ready }: { id: string; ready: boo
 												<Typography className="travel-mate-description">{post.memberData.memberDesc}</Typography>
 											)}
 											<Typography color="text.secondary">
-												{post.memberData.memberFollowerCount} followers · {post.memberData.memberFollowingCount}{' '}
-												following
+												{t('mates.followersFollowing', { followers: post.memberData.memberFollowerCount, following: post.memberData.memberFollowingCount })}
 											</Typography>
 										</Paper>
 									</section>
@@ -262,6 +263,7 @@ export default function TravelMateDetail({ id, ready }: { id: string; ready: boo
 	);
 }
 function Participants({ post }: { post: Post }) {
+	const { t } = useTranslation(['community', 'common']);
 	const [page, setPage] = useState(1);
 	const { data, loading, error, refetch } = useQuery(GET_TRAVEL_MATE_PARTICIPANTS, {
 		variables: {
@@ -273,9 +275,9 @@ function Participants({ post }: { post: Post }) {
 	const total = result?.metaCounter?.[0]?.total ?? 0;
 	return (
 		<section>
-			<Typography component="h2">Current Travelers</Typography>
+			<Typography component="h2">{t('mates.currentTravelers')}</Typography>
 			<Typography color="text.secondary">
-				{post.currentMembers} / {post.maxMembers} Joined
+				{t('mates.joinedCount', { current: post.currentMembers, maximum: post.maxMembers })}
 			</Typography>
 			{loading ? (
 				<Skeleton height={90} />
@@ -288,18 +290,18 @@ function Participants({ post }: { post: Post }) {
 								void refetch().catch(() => undefined);
 							}}
 						>
-							Retry
+							{t('actions.retry', { ns: 'common' })}
 						</Button>
 					}
 				>
-					Unable to load travelers.
+					{t('mates.travelersError')}
 				</Alert>
 			) : (
 				<>
 					<div className="travel-mate-travelers">
 						{page === 1 && post.memberData && (
 							<Paper variant="outlined">
-								<Person member={post.memberData} role="Creator" />
+								<Person member={post.memberData} role={t('mates.creator')} />
 							</Paper>
 						)}
 						{result?.list
@@ -307,14 +309,14 @@ function Participants({ post }: { post: Post }) {
 							.map((item) => (
 								<Paper key={item._id} variant="outlined">
 									{item.memberData ? (
-										<Person member={item.memberData} role="Approved" />
+										<Person member={item.memberData} role={t('mates.approved')} />
 									) : (
-										<Typography>Member profile unavailable</Typography>
+										<Typography>{t('mates.memberUnavailable')}</Typography>
 									)}
 								</Paper>
 							))}
 					</div>
-					{!result?.list.length && <Typography color="text.secondary">No approved join requests yet.</Typography>}
+					{!result?.list.length && <Typography color="text.secondary">{t('mates.noApproved')}</Typography>}
 					{total > 6 && (
 						<Pagination
 							count={Math.ceil(total / 6)}
@@ -329,6 +331,7 @@ function Participants({ post }: { post: Post }) {
 	);
 }
 function JoinPanel({ post, userId, refresh }: { post: Post; userId?: string; refresh: () => Promise<unknown> }) {
+	const { t } = useTranslation(['community', 'common']);
 	const owner = userId === post.memberId;
 	const { data, loading, error, refetch } = useQuery(GET_MY_TRAVEL_MATE_JOIN, {
 		variables: { input: { page: 1, limit: 1, search: { travelMatePostId: post._id } } },
@@ -372,11 +375,11 @@ function JoinPanel({ post, userId, refresh }: { post: Post; userId?: string; ref
 					},
 				},
 			});
-			if (!result.data?.joinTravelMate) throw new Error('The request did not return a result.');
+			if (!result.data?.joinTravelMate) throw new Error(t('mates.requestNoResult'));
 			setReturned(result.data.joinTravelMate);
 			setJoinOpen(false);
 		} catch (e) {
-			setFailure(e instanceof Error ? e.message : 'Unable to send join request.');
+			setFailure(e instanceof Error ? e.message : t('mates.joinError'));
 		} finally {
 			await Promise.allSettled([refetch(), refresh()]);
 			inFlight.current = false;
@@ -398,38 +401,38 @@ function JoinPanel({ post, userId, refresh }: { post: Post; userId?: string; ref
 			setMessage('');
 			await Promise.all([refetch(), refresh()]);
 		} catch (e) {
-			setFailure(e instanceof Error ? e.message : 'Unable to update your trip membership.');
+			setFailure(e instanceof Error ? e.message : t('mates.membershipError'));
 		} finally {
 			inFlight.current = false;
 			setBusy(false);
 		}
 	}
 	const label = owner
-		? 'You created this trip'
+		? t('mates.createdTrip')
 		: loading
-			? 'Checking request…'
+			? t('mates.checkingRequest')
 			: request
-				? joinLabels[request.joinStatus]
+				? t(joinLabelKeys[request.joinStatus])
 				: post.matePostStatus !== TravelMatePostStatus.ACTIVE
-					? 'Trip unavailable'
+					? t('mates.tripUnavailable')
 					: remaining === 0
-						? 'Trip full'
-						: 'Request to Join';
+						? t('mates.tripFull')
+						: t('mates.join');
 	return (
 		<Paper component="aside" variant="outlined" className="travel-mate-join">
-			<Typography component="h2">Join This Trip</Typography>
+			<Typography component="h2">{t('mates.joinTitle')}</Typography>
 			<Typography>
-				{post.currentMembers} / {post.maxMembers} travelers
+				{t('mates.travelers', { current: post.currentMembers, maximum: post.maxMembers })}
 			</Typography>
 			<Stack direction="row" sx={{ justifyContent: 'space-between' }}>
-				<Typography variant="caption">Capacity</Typography>
-				<Typography variant="caption">{Math.round(percent)}% full</Typography>
+				<Typography variant="caption">{t('mates.capacity')}</Typography>
+				<Typography variant="caption">{t('mates.percentFull', { percent: Math.round(percent) })}</Typography>
 			</Stack>
-			<LinearProgress variant="determinate" value={percent} aria-label="Group capacity" />
-			<Typography color="text.secondary">{remaining} spots remaining</Typography>
+			<LinearProgress variant="determinate" value={percent} aria-label={t('mates.capacity')} />
+			<Typography color="text.secondary">{t('mates.spotsRemaining', { count: remaining })}</Typography>
 			{!userId ? (
 				<Button component={Link} href="/account/login" variant="contained" fullWidth>
-					Log in to request to join
+					{t('mates.loginJoin')}
 				</Button>
 			) : (
 				<Button
@@ -443,33 +446,33 @@ function JoinPanel({ post, userId, refresh }: { post: Post; userId?: string; ref
 			)}
 			{owner && (
 				<Button component={Link} href="/mypage/travel-mates" variant="outlined" fullWidth>
-					My Travel Mates
+					{t('mates.myMates')}
 				</Button>
 			)}
 			{request?.joinStatus === TravelMateJoinStatus.PENDING && (
 				<>
 					<Typography role="status" variant="body2">
-						Your request is awaiting the creator&apos;s approval.
+						{t('mates.pendingText')}
 					</Typography>
 					<Button variant="outlined" color="error" fullWidth disabled={busy} onClick={() => setLeaveOpen(true)}>
-						Cancel Request
+						{t('mates.cancel')}
 					</Button>
 				</>
 			)}
 			{request?.joinStatus === TravelMateJoinStatus.APPROVED && (
 				<>
-					<Typography role="status" variant="body2">You are an approved traveler on this trip.</Typography>
+					<Typography role="status" variant="body2">{t('mates.approvedText')}</Typography>
 					<Button variant="outlined" color="error" fullWidth disabled={busy} onClick={() => setLeaveOpen(true)}>
-						Leave Trip
+						{t('mates.leave')}
 					</Button>
 				</>
 			)}
 			{request && [TravelMateJoinStatus.REJECTED, TravelMateJoinStatus.CANCELLED].includes(request.joinStatus) && (
-				<Typography variant="body2">An existing request cannot be submitted again.</Typography>
+				<Typography variant="body2">{t('mates.existingRequest')}</Typography>
 			)}
 			{eligible && (
 				<Typography variant="body2" color="text.secondary">
-					The creator will review your request before you join.
+					{t('mates.reviewText')}
 				</Typography>
 			)}
 			{error && (
@@ -481,11 +484,11 @@ function JoinPanel({ post, userId, refresh }: { post: Post; userId?: string; ref
 								void refetch().catch(() => undefined);
 							}}
 						>
-							Retry
+							{t('actions.retry', { ns: 'common' })}
 						</Button>
 					}
 				>
-					Unable to check your request status.
+					{t('mates.requestStatusError')}
 				</Alert>
 			)}
 			{failure && <Alert severity="error">{failure}</Alert>}
@@ -498,33 +501,33 @@ function JoinPanel({ post, userId, refresh }: { post: Post; userId?: string; ref
 				maxWidth="sm"
 				aria-labelledby="request-travel-mate-title"
 			>
-				<DialogTitle id="request-travel-mate-title">Request to Join</DialogTitle>
+				<DialogTitle id="request-travel-mate-title">{t('mates.join')}</DialogTitle>
 				<DialogContent className="travel-mate-request-dialog">
 					<Typography color="text.secondary">
-						Send a short note to the creator. Your request remains pending until they approve it.
+						{t('mates.requestDialogText')}
 					</Typography>
 					<TextField
-						label="Message (optional)"
-						placeholder="Introduce yourself and share why this trip interests you."
+						label={t('mates.messageOptional')}
+						placeholder={t('mates.messagePlaceholder')}
 						multiline
 						minRows={5}
 						fullWidth
 						value={message}
 						onChange={(event) => setMessage(event.target.value)}
 						error={message.trim().length === 1}
-						helperText={message.trim().length === 1 ? 'Use at least 2 characters or leave the message empty.' : `${message.length}/500`}
+						helperText={message.trim().length === 1 ? t('mates.messageMin') : `${message.length}/500`}
 						slotProps={{ htmlInput: { maxLength: 500 } }}
 					/>
 					{failure && <Alert severity="error">{failure}</Alert>}
 				</DialogContent>
 				<DialogActions>
-					<Button disabled={busy} onClick={() => setJoinOpen(false)}>Cancel</Button>
+					<Button disabled={busy} onClick={() => setJoinOpen(false)}>{t('actions.cancel', { ns: 'common' })}</Button>
 					<Button
 						variant="contained"
 						disabled={busy || message.trim().length === 1}
 						onClick={() => void submit()}
 					>
-						{busy ? 'Sending…' : 'Send Request'}
+						{busy ? t('mates.sending') : t('mates.sendRequest')}
 					</Button>
 				</DialogActions>
 			</Dialog>
@@ -538,20 +541,20 @@ function JoinPanel({ post, userId, refresh }: { post: Post; userId?: string; ref
 				aria-labelledby="leave-travel-mate-title"
 			>
 				<DialogTitle id="leave-travel-mate-title">
-					{request?.joinStatus === TravelMateJoinStatus.APPROVED ? 'Leave this trip?' : 'Cancel this request?'}
+					{t(request?.joinStatus === TravelMateJoinStatus.APPROVED ? 'mates.leaveTitle' : 'mates.cancelTitle')}
 				</DialogTitle>
 				<DialogContent>
 					<Typography>
 						{request?.joinStatus === TravelMateJoinStatus.APPROVED
-							? 'Your approved place will be released for another traveler.'
-							: 'Your pending request will be removed.'}
+							? t('mates.leavePrompt')
+							: t('mates.cancelPrompt')}
 					</Typography>
 					{failure && <Alert severity="error">{failure}</Alert>}
 				</DialogContent>
 				<DialogActions>
-					<Button disabled={busy} onClick={() => setLeaveOpen(false)}>Keep It</Button>
+					<Button disabled={busy} onClick={() => setLeaveOpen(false)}>{t('mates.keep')}</Button>
 					<Button color="error" variant="contained" disabled={busy} onClick={() => void removeRequest()}>
-						{busy ? 'Updating…' : request?.joinStatus === TravelMateJoinStatus.APPROVED ? 'Leave Trip' : 'Cancel Request'}
+						{busy ? t('states.updating', { ns: 'common' }) : t(request?.joinStatus === TravelMateJoinStatus.APPROVED ? 'mates.leave' : 'mates.cancel')}
 					</Button>
 				</DialogActions>
 			</Dialog>
@@ -559,6 +562,7 @@ function JoinPanel({ post, userId, refresh }: { post: Post; userId?: string; ref
 	);
 }
 function MorePosts({ id }: { id: string }) {
+	const { t, i18n } = useTranslation(['community', 'common']);
 	const { data, loading, error, refetch } = useQuery(GET_MORE_TRAVEL_MATES, {
 		variables: { input: { page: 1, limit: 4, sort: 'createdAt', direction: 'DESC' } },
 	});
@@ -566,7 +570,7 @@ function MorePosts({ id }: { id: string }) {
 	if (!loading && !error && !posts.length) return null;
 	return (
 		<section className="travel-mate-more">
-			<Typography component="h2">More Travel Mates</Typography>
+			<Typography component="h2">{t('mates.more')}</Typography>
 			{loading ? (
 				<Skeleton height={180} />
 			) : error ? (
@@ -578,27 +582,27 @@ function MorePosts({ id }: { id: string }) {
 								void refetch().catch(() => undefined);
 							}}
 						>
-							Retry
+							{t('actions.retry', { ns: 'common' })}
 						</Button>
 					}
 				>
-					Unable to load more posts.
+					{t('mates.moreError')}
 				</Alert>
 			) : (
 				<div>
 					{posts.map((post) => (
 						<Paper key={post._id} variant="outlined">
-							<Chip size="small" label={statusLabel(post)} />
+							<Chip size="small" label={t(statusKey(post))} />
 							<Typography color="text.secondary">
 								{post.destinationCity}, {post.destinationCountry}
 							</Typography>
 							<Typography component="h3">{post.matePostTitle}</Typography>
-							<Typography>{formatScheduleDate(post.travelDate)}</Typography>
+							<Typography>{formatScheduleDate(post.travelDate, i18n.language)}</Typography>
 							<Typography>
-								{post.currentMembers} / {post.maxMembers} travelers
+								{t('mates.travelers', { current: post.currentMembers, maximum: post.maxMembers })}
 							</Typography>
 							<Button component={Link} href={`/community/travel-mate/${post._id}`} variant="outlined">
-								View Post
+								{t('mates.viewPost')}
 							</Button>
 						</Paper>
 					))}

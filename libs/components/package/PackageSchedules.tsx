@@ -4,17 +4,18 @@ import { Alert, Button, Chip, Paper, Skeleton, Stack, Typography } from '@mui/ma
 import CalendarMonthOutlined from '@mui/icons-material/CalendarMonthOutlined';
 import PeopleOutline from '@mui/icons-material/PeopleOutlined';
 import { ScheduleStatus } from '@/libs/enums/package.enum';
+import { useTranslation } from 'react-i18next';
 
-const dateFormatter = new Intl.DateTimeFormat('en-US', {
-	month: 'short',
-	day: '2-digit',
-	year: 'numeric',
-	timeZone: 'UTC',
-});
-
-export function formatScheduleDate(value: string) {
+export function formatScheduleDate(value: string, locale = 'en-US') {
 	const date = new Date(value);
-	return Number.isNaN(date.getTime()) ? 'Date unavailable' : dateFormatter.format(date);
+	return Number.isNaN(date.getTime())
+		? 'Date unavailable'
+		: new Intl.DateTimeFormat(locale, {
+				month: 'short',
+				day: '2-digit',
+				year: 'numeric',
+				timeZone: 'UTC',
+			}).format(date);
 }
 
 interface PackageSchedulesProps {
@@ -35,13 +36,14 @@ interface PackageSchedulesProps {
 }
 
 export default function PackageSchedules({ query, selectedScheduleId, onSelectSchedule }: PackageSchedulesProps) {
+	const { t, i18n } = useTranslation(['packages', 'common']);
 	const { data, loading, error, refetch } = query;
 
 	return (
 		<section className="detail-section" aria-labelledby="available-dates-title" aria-busy={loading}>
-			<h2 id="available-dates-title">Available Dates</h2>
+			<h2 id="available-dates-title">{t('detail.availableDates')}</h2>
 			{loading ? (
-				<Stack spacing={2} role="status" aria-label="Loading available dates">
+				<Stack spacing={2} role="status" aria-label={t('detail.loadingDates')}>
 					<Skeleton variant="rounded" height={116} />
 					<Skeleton variant="rounded" height={116} />
 				</Stack>
@@ -55,14 +57,14 @@ export default function PackageSchedules({ query, selectedScheduleId, onSelectSc
 								void refetch().catch(() => undefined);
 							}}
 						>
-							Retry
+							{t('actions.retry', { ns: 'common' })}
 						</Button>
 					}
 				>
-					Available dates could not be loaded. Please try again.
+					{t('detail.datesError')}
 				</Alert>
 			) : data.getPackageSchedules.length === 0 ? (
-				<Alert severity="info">No available dates at the moment. Please check back later for new departures.</Alert>
+				<Alert severity="info">{t('detail.noDates')}</Alert>
 			) : (
 				<Stack spacing={2}>
 					{data.getPackageSchedules.map((schedule) => {
@@ -93,18 +95,18 @@ export default function PackageSchedules({ query, selectedScheduleId, onSelectSc
 												variant="subtitle2"
 												sx={{ color: 'primary.main', overflowWrap: 'anywhere' }}
 											>
-												<time dateTime={schedule.startDate}>{formatScheduleDate(schedule.startDate)}</time> →{' '}
-												<time dateTime={schedule.endDate}>{formatScheduleDate(schedule.endDate)}</time>
+												<time dateTime={schedule.startDate}>{formatScheduleDate(schedule.startDate, i18n.language)}</time> →{' '}
+												<time dateTime={schedule.endDate}>{formatScheduleDate(schedule.endDate, i18n.language)}</time>
 											</Typography>
 										</Stack>
 										<Stack direction="row" spacing={1} useFlexGap sx={{ alignItems: 'center', flexWrap: 'wrap' }}>
 											<PeopleOutline fontSize="small" color="action" />
 											<Typography variant="body2" color="text.secondary">
-												{schedule.availableSeats} {schedule.availableSeats === 1 ? 'seat' : 'seats'} available
+												{t('detail.seatAvailable', { count: schedule.availableSeats })}
 											</Typography>
 											<Chip
 												size="small"
-												label={available ? 'Available' : 'Unavailable'}
+												label={t(available ? 'detail.available' : 'detail.unavailable')}
 												color={available ? 'success' : 'default'}
 												variant="outlined"
 											/>
@@ -114,11 +116,15 @@ export default function PackageSchedules({ query, selectedScheduleId, onSelectSc
 										variant={selected ? 'contained' : 'outlined'}
 										disabled={!available}
 										aria-pressed={selected}
-										aria-label={`${selected ? 'Selected' : 'Select'} dates ${formatScheduleDate(schedule.startDate)} to ${formatScheduleDate(schedule.endDate)}`}
+										aria-label={t('detail.selectDatesLabel', {
+											action: t(selected ? 'detail.selected' : 'detail.selectDate'),
+											start: formatScheduleDate(schedule.startDate, i18n.language),
+											end: formatScheduleDate(schedule.endDate, i18n.language),
+										})}
 										onClick={() => onSelectSchedule(schedule._id)}
 										sx={{ flexShrink: 0, minHeight: 44 }}
 									>
-										{selected ? 'Selected' : 'Select Date'}
+										{t(selected ? 'detail.selected' : 'detail.selectDate')}
 									</Button>
 								</Stack>
 							</Paper>

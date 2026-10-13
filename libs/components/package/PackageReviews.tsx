@@ -7,6 +7,7 @@ import { GET_PACKAGE_REVIEWS } from '@/apollo/user/query';
 import { packageImageUrl } from './PackageImage';
 import ReportForm from '../cs/ReportForm';
 import { ReportTargetType } from '@/libs/enums/system.enum';
+import { useTranslation } from 'react-i18next';
 
 export default function PackageReviews({
 	packageId,
@@ -17,6 +18,7 @@ export default function PackageReviews({
 	rating: number;
 	count: number;
 }) {
+	const { t, i18n } = useTranslation(['packages', 'common']);
 	const user = useReactiveVar(currentUserVar);
 	const [page, setPage] = useState(1);
 	const { data, loading, error, refetch } = useQuery(GET_PACKAGE_REVIEWS, {
@@ -27,11 +29,11 @@ export default function PackageReviews({
 	const total = data?.getPackageReviews.metaCounter?.[0]?.total ?? 0;
 	return (
 		<section className="detail-section">
-			<h2>Traveler Reviews</h2>
-			<p>{count > 0 ? `${rating.toFixed(1)} / 5 · ${count} reviews` : 'No reviews yet'}</p>
+			<h2>{t('detail.travelerReviews')}</h2>
+			<p>{count > 0 ? t('detail.ratingSummary', { rating: rating.toFixed(1), count }) : t('detail.noReviews')}</p>
 			{!user ? (
 				<Button component={Link} href="/account/login">
-					Log in to read reviews
+					{t('detail.loginReviews')}
 				</Button>
 			) : loading ? (
 				<Skeleton height={100} />
@@ -44,11 +46,11 @@ export default function PackageReviews({
 								void refetch().catch(() => undefined);
 							}}
 						>
-							Retry
+							{t('actions.retry', { ns: 'common' })}
 						</Button>
 					}
 				>
-					Reviews could not be loaded.
+					{t('detail.reviewsError')}
 				</Alert>
 			) : (
 				<>
@@ -60,7 +62,7 @@ export default function PackageReviews({
 									<div>
 										{review.memberData?.memberNick}
 										<time dateTime={review.createdAt}>
-											{new Date(review.createdAt).toLocaleDateString('en-US', { timeZone: 'UTC' })}
+											{new Date(review.createdAt).toLocaleDateString(i18n.language, { timeZone: 'UTC' })}
 										</time>
 									</div>
 								</div>
@@ -68,7 +70,7 @@ export default function PackageReviews({
 									<ReportForm
 										targetId={review._id}
 										targetType={ReportTargetType.REVIEW}
-										targetLabel={review.reviewTitle || 'Package review'}
+										targetLabel={review.reviewTitle || t('detail.reviewFallback')}
 									/>
 								) : null}
 							</div>

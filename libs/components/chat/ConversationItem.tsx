@@ -2,6 +2,7 @@ import { Avatar, Badge, Typography } from '@mui/material';
 import { packageImageUrl } from '@/libs/components/package/PackageImage';
 import type { PrivateConversation } from '@/libs/types/chat/private-conversation';
 import { chatMemberName, chatTime, conversationMember } from './chatUtils';
+import { useTranslation } from 'react-i18next';
 
 export default function ConversationItem({
 	conversation,
@@ -14,6 +15,7 @@ export default function ConversationItem({
 	selected: boolean;
 	onSelect: () => void;
 }) {
+	const { t } = useTranslation('chat');
 	const member = conversationMember(conversation, currentMemberId);
 	const name = chatMemberName(member);
 	return (
@@ -28,7 +30,7 @@ export default function ConversationItem({
 			</Badge>
 			<span className="chat-conversation-copy">
 				<span className="chat-conversation-title"><Typography component="strong">{name}</Typography><time>{chatTime(conversation.lastMessageAt)}</time></span>
-				<Typography component="span" color="text.secondary" noWrap>{conversation.lastMessage || 'Start the conversation'}</Typography>
+				<Typography component="span" color="text.secondary" noWrap>{conversation.lastMessage || t('start')}</Typography>
 			</span>
 		</button>
 	);

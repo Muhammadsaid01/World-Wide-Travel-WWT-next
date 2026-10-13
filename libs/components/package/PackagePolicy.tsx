@@ -1,8 +1,10 @@
 import { useQuery } from '@apollo/client';
 import { Alert, Button, Divider, Paper, Skeleton, Stack, Typography } from '@mui/material';
 import { GET_PACKAGE_POLICY } from '@/apollo/user/query';
+import { useTranslation } from 'react-i18next';
 
 export default function PackagePolicy({ packageId }: { packageId: string }) {
+	const { t } = useTranslation(['packages', 'common']);
 	const { data, loading, error, refetch } = useQuery(GET_PACKAGE_POLICY, {
 		variables: { packageId },
 		notifyOnNetworkStatusChange: true,
@@ -10,9 +12,9 @@ export default function PackagePolicy({ packageId }: { packageId: string }) {
 
 	return (
 		<section className="detail-section" aria-labelledby="package-policy-title" aria-busy={loading}>
-			<h2 id="package-policy-title">Package Policy</h2>
+			<h2 id="package-policy-title">{t('detail.policy')}</h2>
 			{loading ? (
-				<Stack spacing={2} role="status" aria-label="Loading package policy">
+				<Stack spacing={2} role="status" aria-label={t('detail.loadingPolicy')}>
 					<Skeleton variant="rounded" height={100} />
 					<Skeleton variant="rounded" height={100} />
 				</Stack>
@@ -26,15 +28,15 @@ export default function PackagePolicy({ packageId }: { packageId: string }) {
 								void refetch().catch(() => undefined);
 							}}
 						>
-							Retry
+							{t('actions.retry', { ns: 'common' })}
 						</Button>
 					}
 				>
-					Policy information could not be loaded. Please try again.
+					{t('detail.policyError')}
 				</Alert>
 			) : !data.getPackagePolicy?.length ? (
 				<Typography variant="body2" color="text.secondary">
-					No policy information available.
+					{t('detail.noPolicy')}
 				</Typography>
 			) : (
 				<Stack spacing={2}>
@@ -47,7 +49,7 @@ export default function PackagePolicy({ packageId }: { packageId: string }) {
 							<Stack spacing={2} divider={<Divider />}>
 								<div>
 									<Typography component="h3" variant="subtitle1" sx={{ fontWeight: 700, color: 'primary.main' }}>
-										Cancellation
+										{t('detail.cancellation')}
 									</Typography>
 									<Typography variant="body2" color="text.secondary" sx={{ whiteSpace: 'pre-wrap', lineHeight: 1.8 }}>
 										{policy.cancelPolicy}
@@ -55,7 +57,7 @@ export default function PackagePolicy({ packageId }: { packageId: string }) {
 								</div>
 								<div>
 									<Typography component="h3" variant="subtitle1" sx={{ fontWeight: 700, color: 'primary.main' }}>
-										Refund
+										{t('detail.refund')}
 									</Typography>
 									<Typography variant="body2" color="text.secondary" sx={{ whiteSpace: 'pre-wrap', lineHeight: 1.8 }}>
 										{policy.refundPolicy}

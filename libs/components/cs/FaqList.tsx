@@ -6,6 +6,7 @@ import { Alert, Button, InputAdornment, Pagination, Skeleton, TextField, Typogra
 import { type ChangeEvent, useEffect, useMemo, useState } from 'react';
 import FaqDetail from './FaqDetail';
 import { FAQ_CATEGORY_OPTIONS } from './faqState';
+import { useTranslation } from 'react-i18next';
 
 const PAGE_SIZE = 10;
 const SEARCH_DELAY = 350;
@@ -15,8 +16,9 @@ const CATEGORIES: { value: 'ALL' | FaqCategory; label: string }[] = [
 ];
 
 function FaqSkeleton() {
+	const { t } = useTranslation('support');
 	return (
-		<div className="faq-skeleton" aria-label="Loading frequently asked questions">
+		<div className="faq-skeleton" aria-label={t('faq.loading')}>
 			{Array.from({ length: 6 }, (_, index) => (
 				<Skeleton key={index} variant="rounded" height={74} />
 			))}
@@ -25,6 +27,7 @@ function FaqSkeleton() {
 }
 
 export default function FaqList() {
+	const { t } = useTranslation(['support', 'common']);
 	const [page, setPage] = useState(1);
 	const [category, setCategory] = useState<'ALL' | FaqCategory>('ALL');
 	const [search, setSearch] = useState('');
@@ -82,18 +85,18 @@ export default function FaqList() {
 			<section className="faq-hero" aria-labelledby="faq-page-title">
 				<div className="faq-hero-content">
 					<Typography component="p" className="faq-kicker">
-						WWT SUPPORT
+						{t('faq.eyebrow')}
 					</Typography>
 					<Typography component="h1" id="faq-page-title">
-						Help Center
+						{t('faq.title')}
 					</Typography>
 					<Typography component="p">
-						Find answers to common questions about travel packages, bookings, payments and more.
+						{t('faq.description')}
 					</Typography>
 					<TextField
 						fullWidth
 						value={search}
-						placeholder="Search questions and answers"
+						placeholder={t('faq.search')}
 						onChange={(event) => setSearch(event.target.value)}
 						slotProps={{
 							input: {
@@ -105,12 +108,12 @@ export default function FaqList() {
 								endAdornment: search ? (
 									<InputAdornment position="end">
 										<Button size="small" onClick={() => setSearch('')}>
-											Clear
+											{t('actions.clear', { ns: 'common' })}
 										</Button>
 									</InputAdornment>
 								) : undefined,
 							},
-							htmlInput: { maxLength: 200, 'aria-label': 'Search frequently asked questions' },
+							htmlInput: { maxLength: 200, 'aria-label': t('faq.searchLabel') },
 						}}
 					/>
 				</div>
@@ -125,7 +128,7 @@ export default function FaqList() {
 							aria-pressed={category === item.value}
 							onClick={() => selectCategory(item.value)}
 						>
-							{item.label}
+							{item.value === 'ALL' ? t('faq.all') : t(`faq.categories.${item.value}`)}
 						</Button>
 					))}
 				</div>
@@ -134,12 +137,12 @@ export default function FaqList() {
 					<div className="faq-results-heading">
 						<div>
 							<Typography component="p" className="faq-kicker">
-								FREQUENTLY ASKED QUESTIONS
+								{t('faq.eyebrow')}
 							</Typography>
 							<Typography component="h2" id="faq-results-title">
 								{category === 'ALL'
-									? 'How can we help?'
-									: `${CATEGORIES.find((item) => item.value === category)?.label} questions`}
+									? t('faq.title')
+									: t('faq.categoryTitle', { category: t(`faq.categories.${category}`) })}
 							</Typography>
 						</div>
 						{!loading && !error ? (
@@ -150,18 +153,16 @@ export default function FaqList() {
 					</div>
 
 					{error ? (
-						<Alert severity="error" action={<Button onClick={() => void refetch()}>Retry</Button>}>
-							Frequently asked questions could not be loaded.
+						<Alert severity="error" action={<Button onClick={() => void refetch()}>{t('actions.retry', { ns: 'common' })}</Button>}>
+							{t('faq.error')}
 						</Alert>
 					) : loading && !data ? (
 						<FaqSkeleton />
 					) : faqs.length === 0 ? (
 						<div className="faq-empty">
-							<Typography component="h2">No answers found</Typography>
+							<Typography component="h2">{t('faq.empty')}</Typography>
 							<Typography>
-								{debouncedSearch || category !== 'ALL'
-									? 'Try a different search or category.'
-									: 'No published FAQs are available yet.'}
+								{t('faq.emptyHelp')}
 							</Typography>
 							{debouncedSearch || category !== 'ALL' ? (
 								<Button
@@ -170,7 +171,7 @@ export default function FaqList() {
 										selectCategory('ALL');
 									}}
 								>
-									Clear filters
+									{t('actions.clearAll', { ns: 'common' })}
 								</Button>
 							) : null}
 						</div>

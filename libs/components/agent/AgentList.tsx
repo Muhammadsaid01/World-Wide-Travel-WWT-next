@@ -24,33 +24,35 @@ import { currentUserVar } from '@/apollo/store';
 import { GET_AGENTS } from '@/apollo/user/query';
 import { AgentVerificationStatus, MemberType } from '@/libs/enums/member.enum';
 import AgentCard, { type AgentCardNotice } from './AgentCard';
+import { useTranslation } from 'react-i18next';
 
 const LIMIT = 6;
 const sorts = [
-	{ value: 'agentRank', label: 'Recommended' },
-	{ value: 'agentRating', label: 'Highest Rated' },
-	{ value: 'agentReviewCount', label: 'Most Reviews' },
-	{ value: 'createdAt', label: 'Newest' },
+	{ value: 'agentRank', labelKey: 'sort.recommended' },
+	{ value: 'agentRating', labelKey: 'sort.rating' },
+	{ value: 'agentReviewCount', labelKey: 'sort.reviews' },
+	{ value: 'createdAt', labelKey: 'sort.newest' },
 ];
 const benefits = [
 	{
-		title: 'Verified Professionals',
-		description: 'Approved agents are clearly identified so travelers can make informed choices.',
+		titleKey: 'benefits.verifiedTitle',
+		descriptionKey: 'benefits.verifiedText',
 		icon: VerifiedOutlined,
 	},
 	{
-		title: 'Trusted Reviews',
-		description: 'Agent ratings and review counts help travelers compare available experts.',
+		titleKey: 'benefits.reviewsTitle',
+		descriptionKey: 'benefits.reviewsText',
 		icon: ReviewsOutlined,
 	},
 	{
-		title: 'Expert Support',
-		description: 'WWT agents can help travelers explore packages and available travel options.',
+		titleKey: 'benefits.supportTitle',
+		descriptionKey: 'benefits.supportText',
 		icon: SupportAgentOutlined,
 	},
 ];
 
 export default function AgentList() {
+	const { t } = useTranslation(['agents', 'common']);
 	const user = useReactiveVar(currentUserVar);
 	const [draft, setDraft] = useState('');
 	const [text, setText] = useState('');
@@ -96,11 +98,11 @@ export default function AgentList() {
 		<div className="agents-page">
 			<section className="agents-hero" aria-labelledby="agents-page-title">
 				<div className="agents-hero-content">
-					<span className="agents-eyebrow">Meet your next travel guide</span>
+					<span className="agents-eyebrow">{t('hero.eyebrow')}</span>
 					<Typography component="h1" id="agents-page-title">
-						Find Your<br />Travel <span>Expert</span>
+						{t('hero.titleBefore')}<br /><span>{t('hero.titleAccent')}</span>
 					</Typography>
-					<Typography>Connect with trusted travel experts and discover your perfect journey.</Typography>
+					<Typography>{t('hero.description')}</Typography>
 					<form
 						className="agents-search"
 						onSubmit={(event) => {
@@ -111,22 +113,22 @@ export default function AgentList() {
 					>
 						<TextField
 							fullWidth
-							placeholder="Search by name, company, location or description..."
+							placeholder={t('hero.placeholder')}
 							value={draft}
 							onChange={(event) => setDraft(event.target.value)}
 							slotProps={{
-								htmlInput: { 'aria-label': 'Search agents by name, company, location or description' },
+								htmlInput: { 'aria-label': t('hero.searchLabel') },
 								input: {
 									startAdornment: <InputAdornment position="start"><Search aria-hidden="true" /></InputAdornment>,
 									endAdornment: draft || text ? (
 										<InputAdornment position="end">
-											<IconButton size="small" aria-label="Clear agent search" onClick={clearSearch}><Close /></IconButton>
+										<IconButton size="small" aria-label={t('actions.clear', { ns: 'common' })} onClick={clearSearch}><Close /></IconButton>
 										</InputAdornment>
 									) : undefined,
 								},
 							}}
 						/>
-						<Button type="submit" variant="contained">Search</Button>
+						<Button type="submit" variant="contained">{t('actions.search', { ns: 'common' })}</Button>
 					</form>
 				</div>
 			</section>
@@ -134,15 +136,15 @@ export default function AgentList() {
 			<section className="agents-list-section" aria-labelledby="travel-agents-title">
 				<header className="agents-section-head">
 					<div>
-						<Typography component="h2" id="travel-agents-title">Travel Agents</Typography>
+						<Typography component="h2" id="travel-agents-title">{t('list.title')}</Typography>
 						{loading ? (
 							<Skeleton width={120} />
 						) : !error && result ? (
-							<Typography color="text.secondary" role="status">{total} agents found</Typography>
+							<Typography color="text.secondary" role="status">{t('list.count', { count: total })}</Typography>
 						) : null}
 					</div>
 					<div className="agents-sort">
-						<span id="agents-sort-label">Sort by:</span>
+						<span id="agents-sort-label">{t('sort.label', { ns: 'common' })}</span>
 						<Select
 							labelId="agents-sort-label"
 							size="small"
@@ -154,14 +156,14 @@ export default function AgentList() {
 								}
 							}}
 						>
-							{sorts.map((option) => <MenuItem key={option.value} value={option.value}>{option.label}</MenuItem>)}
+							{sorts.map((option) => <MenuItem key={option.value} value={option.value}>{t(option.labelKey)}</MenuItem>)}
 						</Select>
 					</div>
 				</header>
 
 				<div className="agents-filter-row">
 					<div className="agents-filter-controls">
-						<span>Filter:</span>
+						<span>{t('list.filter')}</span>
 						<Select
 							className="agents-filter"
 							size="small"
@@ -172,10 +174,10 @@ export default function AgentList() {
 								setPage(1);
 							}}
 						>
-							<MenuItem value="all">All agents</MenuItem>
-							<MenuItem value="verified">Verified only</MenuItem>
+							<MenuItem value="all">{t('list.all')}</MenuItem>
+							<MenuItem value="verified">{t('list.verified')}</MenuItem>
 						</Select>
-						{(text || verified) ? <Button className="agents-clear-button" onClick={clearFilters}>Clear filters</Button> : null}
+						{(text || verified) ? <Button className="agents-clear-button" onClick={clearFilters}>{t('list.clear')}</Button> : null}
 					</div>
 					{showBecomeAgent ? (
 						<Button
@@ -185,14 +187,14 @@ export default function AgentList() {
 							variant="contained"
 							startIcon={<VerifiedOutlined />}
 						>
-							Become Agent
+							{t('list.become')}
 						</Button>
 					) : null}
 				</div>
 
 				<div aria-busy={loading}>
 					{loading ? (
-						<div className="agents-grid" aria-label="Loading agents">
+						<div className="agents-grid" aria-label={t('list.loading')}>
 							{Array.from({ length: LIMIT }, (_, index) => (
 								<Paper className="agent-card agent-card-skeleton" key={index} elevation={0}>
 									<div className="agent-card-media">
@@ -210,14 +212,14 @@ export default function AgentList() {
 					) : error ? (
 						<Alert
 							severity="error"
-							action={<Button onClick={() => void refetch().catch(() => undefined)}>Retry</Button>}
+							action={<Button onClick={() => void refetch().catch(() => undefined)}>{t('actions.retry', { ns: 'common' })}</Button>}
 						>
-							Agents could not be loaded.
+							{t('list.error')}
 						</Alert>
 					) : !result?.list.length ? (
 						<Paper className="agents-empty" elevation={0}>
-							<Typography component="h3">{text || verified ? 'No agents match your search.' : 'No agents found.'}</Typography>
-							{(text || verified || sort !== 'agentRank' || page > 1) ? <Button onClick={clearFilters}>Clear filters</Button> : null}
+							<Typography component="h3">{t(text || verified ? 'list.emptySearch' : 'list.empty')}</Typography>
+							{(text || verified || sort !== 'agentRank' || page > 1) ? <Button onClick={clearFilters}>{t('list.clear')}</Button> : null}
 						</Paper>
 					) : (
 						<div className="agents-grid">
@@ -240,13 +242,13 @@ export default function AgentList() {
 			</section>
 
 			<section className="agents-benefits" aria-labelledby="agents-benefits-title">
-				<Typography component="h2" id="agents-benefits-title">Why Book with WWT Agents</Typography>
+				<Typography component="h2" id="agents-benefits-title">{t('benefits.title')}</Typography>
 				<div>
-					{benefits.map(({ title, description, icon: Icon }) => (
-						<article key={title}>
+					{benefits.map(({ titleKey, descriptionKey, icon: Icon }) => (
+						<article key={titleKey}>
 							<span className="agents-benefit-icon"><Icon aria-hidden="true" /></span>
-							<Typography component="h3">{title}</Typography>
-							<Typography color="text.secondary">{description}</Typography>
+							<Typography component="h3">{t(titleKey)}</Typography>
+							<Typography color="text.secondary">{t(descriptionKey)}</Typography>
 						</article>
 					))}
 				</div>

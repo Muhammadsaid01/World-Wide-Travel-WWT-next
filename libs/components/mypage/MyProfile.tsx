@@ -34,6 +34,7 @@ import PackageImage, { packageImageUrl } from '../package/PackageImage';
 import { formatScheduleDate } from '../package/PackageSchedules';
 import AgentOverview from './AgentOverview';
 import ProfileSidebar from './ProfileSidebar';
+import { useTranslation } from 'react-i18next';
 
 type OverviewBookings = {
 	loading: boolean;
@@ -134,6 +135,7 @@ function DashboardMetric({
 	tone: 'blue' | 'orange' | 'green' | 'purple';
 	icon: ReactNode;
 }) {
+	const { t, i18n } = useTranslation('profile');
 	return (
 		<Paper component="article" className={`profile-metric profile-metric-${tone}`} variant="outlined">
 			<div className="profile-metric-icon" aria-hidden="true">
@@ -144,8 +146,8 @@ function DashboardMetric({
 				{loading ? (
 					<Skeleton width={54} height={42} aria-label={`Loading ${label.toLowerCase()}`} />
 				) : (
-					<strong aria-label={unavailable ? `${label} unavailable` : undefined}>
-						{unavailable || typeof value !== 'number' ? '—' : value.toLocaleString('en-US')}
+					<strong aria-label={unavailable ? `${label}: ${t('overview.unavailable')}` : undefined}>
+						{unavailable || typeof value !== 'number' ? '—' : value.toLocaleString(i18n.language)}
 					</strong>
 				)}
 				<Link href={href} className="profile-metric-link">
@@ -157,18 +159,19 @@ function DashboardMetric({
 }
 
 function RecentActivity({ articles }: { articles: ReturnType<typeof useProfileArticles> }) {
+	const { t } = useTranslation(['profile', 'common', 'community']);
 	const result = articles.data?.getMyBoardArticles;
 	return (
 		<Paper component="section" className="profile-dashboard-card profile-recent" aria-labelledby="recent-activity-title">
 			<div className="profile-card-header">
 				<Typography component="h2" id="recent-activity-title">
-					Recent Activity
+					{t('overview.activity')}
 				</Typography>
-				<Link href="/mypage/articles">View All →</Link>
+				<Link href="/mypage/articles">{t('actions.viewAll', { ns: 'common' })}</Link>
 			</div>
 
 			{articles.loading ? (
-				<div className="profile-activity-skeletons" role="status" aria-label="Loading recent articles">
+				<div className="profile-activity-skeletons" role="status" aria-label={t('states.loading', { ns: 'common' })}>
 					{[0, 1, 2].map((item) => (
 						<div key={item} className="profile-recent-row">
 							<Skeleton variant="rounded" className="profile-recent-image" />
@@ -185,7 +188,7 @@ function RecentActivity({ articles }: { articles: ReturnType<typeof useProfileAr
 					severity="error"
 					action={
 						<Button onClick={() => void articles.refetch().catch(() => undefined)} color="inherit">
-							Retry
+							{t('actions.retry', { ns: 'common' })}
 						</Button>
 					}
 				>
@@ -194,9 +197,9 @@ function RecentActivity({ articles }: { articles: ReturnType<typeof useProfileAr
 			) : !result?.list.length ? (
 				<div className="profile-card-empty">
 					<MenuBookOutlined aria-hidden="true" />
-					<Typography component="h3">No articles yet.</Typography>
+					<Typography component="h3">{t('overview.noArticles')}</Typography>
 					<Button component={Link} href="/community/stories/create" endIcon={<ArrowForward />}>
-						Create Story
+						{t('overview.createStory')}
 					</Button>
 				</div>
 			) : (
@@ -208,7 +211,7 @@ function RecentActivity({ articles }: { articles: ReturnType<typeof useProfileAr
 								key={article._id}
 								href={`/community/stories/${article._id}`}
 								className="profile-recent-row"
-								aria-label={`Read ${article.articleTitle}`}
+								aria-label={`${t('article.read', { ns: 'community' })}: ${article.articleTitle}`}
 							>
 								<div className="profile-recent-image">
 									<PackageImage path={article.articleImages[0]} alt={article.articleTitle} />
@@ -233,20 +236,21 @@ function RecentActivity({ articles }: { articles: ReturnType<typeof useProfileAr
 }
 
 function UpcomingTrips({ bookings }: { bookings: ReturnType<typeof useOverviewBookings> }) {
+	const { t } = useTranslation(['profile', 'common']);
 	const trip = bookings.trip;
 	const destination = [trip?.packageData?.destinationCity, trip?.packageData?.destinationCountry].filter(Boolean).join(', ');
 
 	return (
 		<Paper component="section" className="profile-dashboard-card profile-upcoming" aria-labelledby="upcoming-trips-title">
 			<div className="profile-card-header">
-				<Typography component="h2" id="upcoming-trips-title">Upcoming Trips</Typography>
-				<Link href="/mypage/my-bookings">View All →</Link>
+				<Typography component="h2" id="upcoming-trips-title">{t('overview.trips')}</Typography>
+				<Link href="/mypage/my-bookings">{t('actions.viewAll', { ns: 'common' })}</Link>
 			</div>
 
 			{bookings.loading ? (
-				<Skeleton variant="rounded" height={230} aria-label="Loading upcoming trips" />
+				<Skeleton variant="rounded" height={230} aria-label={t('states.loading', { ns: 'common' })} />
 			) : bookings.error ? (
-				<Alert severity="error" action={<Button onClick={bookings.retry}>Retry</Button>}>{bookings.error}</Alert>
+				<Alert severity="error" action={<Button onClick={bookings.retry}>{t('actions.retry', { ns: 'common' })}</Button>}>{bookings.error}</Alert>
 			) : trip ? (
 				<article className="profile-trip-card">
 					<div className="profile-trip-image">
@@ -254,22 +258,22 @@ function UpcomingTrips({ bookings }: { bookings: ReturnType<typeof useOverviewBo
 						<Chip label={trip.bookingStatus} size="small" />
 					</div>
 					<div className="profile-trip-copy">
-						<Typography component="h3">{trip.packageData?.packageTitle ?? 'Package information unavailable'}</Typography>
+						<Typography component="h3">{trip.packageData?.packageTitle ?? t('overview.packageUnavailable')}</Typography>
 						{destination && <Typography className="profile-trip-detail"><LocationOnOutlined aria-hidden="true" /> {destination}</Typography>}
 						{trip.scheduleData && (
 							<Typography className="profile-trip-detail">
 								<CalendarMonthOutlined aria-hidden="true" /> {formatScheduleDate(trip.scheduleData.startDate)} – {formatScheduleDate(trip.scheduleData.endDate)}
 							</Typography>
 						)}
-						<Button component={Link} href={`/mypage/my-bookings/${trip._id}`} endIcon={<ArrowForward />}>View Details</Button>
+						<Button component={Link} href={`/mypage/my-bookings/${trip._id}`} endIcon={<ArrowForward />}>{t('actions.viewDetails', { ns: 'common' })}</Button>
 					</div>
 				</article>
 			) : (
 				<div className="profile-card-empty profile-trip-empty">
 					<TravelExploreOutlined aria-hidden="true" />
-					<Typography component="h3">No upcoming trips yet.</Typography>
-					<Typography>Start exploring real WWT packages for your next journey.</Typography>
-					<Button component={Link} href="/package" endIcon={<ArrowForward />}>Browse Packages</Button>
+					<Typography component="h3">{t('overview.noTrips')}</Typography>
+					<Typography>{t('overview.noTripsText')}</Typography>
+					<Button component={Link} href="/package" endIcon={<ArrowForward />}>{t('overview.browsePackages')}</Button>
 				</div>
 			)}
 		</Paper>
@@ -277,22 +281,23 @@ function UpcomingTrips({ bookings }: { bookings: ReturnType<typeof useOverviewBo
 }
 
 const quickActions = [
-	{ label: 'Create Story', href: '/community/stories/create', icon: <AddOutlined /> },
-	{ label: 'Find Travel Mate', href: '/community/travel-mate', icon: <GroupsOutlined /> },
-	{ label: 'Browse Packages', href: '/package', icon: <LuggageOutlined /> },
-	{ label: 'Explore Community', href: '/community', icon: <ExploreOutlined /> },
+	{ labelKey: 'overview.createStory', href: '/community/stories/create', icon: <AddOutlined /> },
+	{ labelKey: 'overview.findMate', href: '/community/travel-mate', icon: <GroupsOutlined /> },
+	{ labelKey: 'overview.browsePackages', href: '/package', icon: <LuggageOutlined /> },
+	{ labelKey: 'overview.exploreCommunity', href: '/community', icon: <ExploreOutlined /> },
 ];
 
 function QuickActions() {
+	const { t } = useTranslation('profile');
 	return (
 		<Paper component="section" className="profile-dashboard-card profile-quick-actions" aria-labelledby="quick-actions-title">
 			<div className="profile-card-header">
-				<Typography component="h2" id="quick-actions-title">Quick Actions</Typography>
+				<Typography component="h2" id="quick-actions-title">{t('overview.quickActions')}</Typography>
 			</div>
 			<div className="profile-action-grid">
 				{quickActions.map((action, index) => (
-					<Link key={action.label} href={action.href} className={index === 0 ? 'is-primary' : undefined}>
-						{action.icon}<span>{action.label}</span>
+					<Link key={action.labelKey} href={action.href} className={index === 0 ? 'is-primary' : undefined}>
+						{action.icon}<span>{t(action.labelKey)}</span>
 					</Link>
 				))}
 			</div>
@@ -311,6 +316,7 @@ export default function MyProfile() {
 }
 
 function ProfileContent({ authenticated }: { authenticated: boolean }) {
+	const { t } = useTranslation(['profile', 'common']);
 	const profile = useQuery(GET_MY_PROFILE, { skip: !authenticated, fetchPolicy: 'no-cache' });
 	const member = profile.data?.getMyProfile;
 	const articles = useProfileArticles(!authenticated || !member);
@@ -342,21 +348,21 @@ function ProfileContent({ authenticated }: { authenticated: boolean }) {
 			<section className="profile-hero" aria-labelledby="profile-name">
 				<div className="profile-hero-inner">
 					{profile.loading ? (
-						<div className="profile-hero-loading" role="status" aria-label="Loading profile">
+						<div className="profile-hero-loading" role="status" aria-label={t('hero.loading')}>
 							<Skeleton variant="circular" width={144} height={144} />
 							<div><Skeleton width={360} height={50} /><Skeleton width={240} /><Skeleton width={500} height={54} /></div>
 						</div>
 					) : !authenticated ? (
-						<Alert severity="info" action={<Button component={Link} href="/account/login">Login</Button>}>Log in to view your profile.</Alert>
+						<Alert severity="info" action={<Button component={Link} href="/account/login">{t('account.login', { ns: 'common' })}</Button>}>{t('hero.login')}</Alert>
 					) : profile.error || !member ? (
-						<Alert severity="error" action={<Button onClick={() => void profile.refetch().catch(() => undefined)}>Retry</Button>}>
+						<Alert severity="error" action={<Button onClick={() => void profile.refetch().catch(() => undefined)}>{t('actions.retry', { ns: 'common' })}</Button>}>
 							Your profile could not be loaded.
 						</Alert>
 					) : (
 						<>
 							<div className="profile-avatar-wrap">
 								<Avatar className="profile-avatar" src={packageImageUrl(member.memberImage)} alt={name}>{initials(name)}</Avatar>
-								<IconButton component={Link} href="/mypage/edit-profile" className="profile-avatar-edit" aria-label="Change profile photo">
+								<IconButton component={Link} href="/mypage/edit-profile" className="profile-avatar-edit" aria-label={t('hero.changePhoto')}>
 									<CameraAltOutlined />
 								</IconButton>
 							</div>
@@ -370,13 +376,13 @@ function ProfileContent({ authenticated }: { authenticated: boolean }) {
 									{location && <span><LocationOnOutlined aria-hidden="true" /> {location}</span>}
 								</div>
 								{member.memberDesc && <Typography className="profile-bio">{member.memberDesc}</Typography>}
-								<div className="profile-stats" aria-label="Profile statistics">
-									<Link href="/mypage/articles"><strong>{articles.loading || articles.error ? '—' : (articleTotal ?? 0)}</strong><span>Articles</span></Link>
-									<Link href="/mypage/followers"><strong>{connectionCounts.loading || connectionCounts.error ? '—' : (followerCount ?? 0)}</strong><span>Followers</span></Link>
-									<Link href="/mypage/following"><strong>{connectionCounts.loading || connectionCounts.error ? '—' : (followingCount ?? 0)}</strong><span>Following</span></Link>
+								<div className="profile-stats" aria-label={t('hero.statistics')}>
+									<Link href="/mypage/articles"><strong>{articles.loading || articles.error ? '—' : (articleTotal ?? 0)}</strong><span>{t('hero.articles')}</span></Link>
+									<Link href="/mypage/followers"><strong>{connectionCounts.loading || connectionCounts.error ? '—' : (followerCount ?? 0)}</strong><span>{t('hero.followers')}</span></Link>
+									<Link href="/mypage/following"><strong>{connectionCounts.loading || connectionCounts.error ? '—' : (followingCount ?? 0)}</strong><span>{t('hero.following')}</span></Link>
 								</div>
 							</div>
-							<Button component={Link} href="/mypage/edit-profile" variant="contained" startIcon={<EditOutlined />} className="profile-edit">Edit Profile</Button>
+							<Button component={Link} href="/mypage/edit-profile" variant="contained" startIcon={<EditOutlined />} className="profile-edit">{t('hero.edit')}</Button>
 						</>
 					)}
 				</div>
@@ -389,16 +395,16 @@ function ProfileContent({ authenticated }: { authenticated: boolean }) {
 						{member ? (
 							<>
 								<header className="profile-dashboard-heading">
-									<Typography className="profile-eyebrow">Overview</Typography>
-									<Typography component="h2">Welcome back, {firstName}!</Typography>
-									<Typography>Here&apos;s what&apos;s happening with your travels.</Typography>
+									<Typography className="profile-eyebrow">{t('overview.eyebrow')}</Typography>
+									<Typography component="h2">{t('overview.welcome', { name: firstName })}</Typography>
+									<Typography>{t('overview.subtitle')}</Typography>
 								</header>
 
-								<section className="profile-metrics" aria-label="Profile overview statistics">
-									<DashboardMetric label="My Articles" value={articleTotal} loading={articles.loading} unavailable={Boolean(articles.error)} href="/mypage/articles" linkLabel="View Articles" tone="blue" icon={<ArticleOutlined />} />
-									<DashboardMetric label="My Bookings" value={bookings.total} loading={bookings.loading} unavailable={Boolean(bookings.error)} href="/mypage/my-bookings" linkLabel="View Bookings" tone="orange" icon={<LuggageOutlined />} />
-									<DashboardMetric label="Followers" value={followerCount} loading={connectionCounts.loading} unavailable={Boolean(connectionCounts.error)} href="/mypage/followers" linkLabel="View Followers" tone="green" icon={<GroupsOutlined />} />
-									<DashboardMetric label="Following" value={followingCount} loading={connectionCounts.loading} unavailable={Boolean(connectionCounts.error)} href="/mypage/following" linkLabel="View Following" tone="purple" icon={<PersonAddAlt1Outlined />} />
+								<section className="profile-metrics" aria-label={t('overview.statistics')}>
+									<DashboardMetric label={t('overview.myArticles')} value={articleTotal} loading={articles.loading} unavailable={Boolean(articles.error)} href="/mypage/articles" linkLabel={t('overview.viewArticles')} tone="blue" icon={<ArticleOutlined />} />
+									<DashboardMetric label={t('overview.myBookings')} value={bookings.total} loading={bookings.loading} unavailable={Boolean(bookings.error)} href="/mypage/my-bookings" linkLabel={t('overview.viewBookings')} tone="orange" icon={<LuggageOutlined />} />
+									<DashboardMetric label={t('overview.followers')} value={followerCount} loading={connectionCounts.loading} unavailable={Boolean(connectionCounts.error)} href="/mypage/followers" linkLabel={t('overview.viewFollowers')} tone="green" icon={<GroupsOutlined />} />
+									<DashboardMetric label={t('overview.following')} value={followingCount} loading={connectionCounts.loading} unavailable={Boolean(connectionCounts.error)} href="/mypage/following" linkLabel={t('overview.viewFollowing')} tone="purple" icon={<PersonAddAlt1Outlined />} />
 								</section>
 
 								<div className="profile-dashboard-columns">

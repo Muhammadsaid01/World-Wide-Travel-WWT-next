@@ -22,8 +22,10 @@ import {
 	GET_PUBLIC_MEMBER_ARTICLES,
 } from '@/apollo/user/query';
 import PackageImage, { packageImageUrl } from '../package/PackageImage';
+import { useTranslation } from 'react-i18next';
 
 export function PublicAgentPackages({ agentId, name }: { agentId: string; name: string }) {
+	const { t, i18n } = useTranslation(['agents', 'common']);
 	const [page, setPage] = useState(1);
 	const [draft, setDraft] = useState('');
 	const [text, setText] = useState('');
@@ -43,8 +45,8 @@ export function PublicAgentPackages({ agentId, name }: { agentId: string; name: 
 	return (
 		<section className="agent-packages-tab" aria-busy={loading}>
 			<header className="agent-packages-heading">
-				<Typography component="h2">Travel Packages</Typography>
-				<Typography color="text.secondary">Travel experiences offered by {name}</Typography>
+				<Typography component="h2">{t('tabs.packagesTitle')}</Typography>
+				<Typography color="text.secondary">{t('tabs.packagesBy', { name })}</Typography>
 			</header>
 			<form
 				className="agent-packages-toolbar"
@@ -56,17 +58,17 @@ export function PublicAgentPackages({ agentId, name }: { agentId: string; name: 
 			>
 				<div className="agent-packages-search">
 					<TextField
-						label="Search packages"
+						label={t('tabs.searchPackages')}
 						value={draft}
 						onChange={(event) => setDraft(event.target.value)}
 						size="small"
 					/>
 					<Button type="submit" variant="contained">
-						Search
+						{t('actions.search', { ns: 'common' })}
 					</Button>
 				</div>
 				<div className="agent-packages-sort">
-					<span id="agent-packages-sort-label">Sort by:</span>
+					<span id="agent-packages-sort-label">{t('sort.label', { ns: 'common' })}</span>
 					<Select
 						labelId="agent-packages-sort-label"
 						size="small"
@@ -76,14 +78,14 @@ export function PublicAgentPackages({ agentId, name }: { agentId: string; name: 
 							setPage(1);
 						}}
 					>
-						<MenuItem value="newest">Newest</MenuItem>
-						<MenuItem value="price-low">Price: Low to High</MenuItem>
-						<MenuItem value="price-high">Price: High to Low</MenuItem>
+						<MenuItem value="newest">{t('sort.newest', { ns: 'common' })}</MenuItem>
+						<MenuItem value="price-low">{t('tabs.priceLow')}</MenuItem>
+						<MenuItem value="price-high">{t('tabs.priceHigh')}</MenuItem>
 					</Select>
 				</div>
 			</form>
 			{loading ? (
-				<Paper className="agent-packages-list" aria-label="Loading packages">
+				<Paper className="agent-packages-list" aria-label={t('tabs.loadingPackages')}>
 					{Array.from({ length: 6 }, (_, index) => (
 						<div className="agent-package-row" key={index} aria-hidden="true">
 							<div className="agent-package-summary">
@@ -105,17 +107,17 @@ export function PublicAgentPackages({ agentId, name }: { agentId: string; name: 
 				/>
 			) : !data?.getTravelPackages.list.length ? (
 				<Paper className="agent-detail-card">
-					{text ? 'No packages match your search.' : 'No active packages are available from this agent yet.'}
+					{t(text ? 'tabs.noPackageMatch' : 'tabs.noPackages')}
 				</Paper>
 			) : (
 				<>
-					<Typography className="agent-tab-total">{total} packages</Typography>
+					<Typography className="agent-tab-total">{t('tabs.packageCount', { count: total })}</Typography>
 					<Paper className="agent-packages-list">
 						<div className="agent-package-columns" aria-hidden="true">
-							<span>Package</span>
-							<span>Duration</span>
-							<span>Rating</span>
-							<span>Price</span>
+							<span>{t('tabs.package')}</span>
+							<span>{t('tabs.duration')}</span>
+							<span>{t('tabs.rating')}</span>
+							<span>{t('tabs.price')}</span>
 							<span />
 						</div>
 						<ul>
@@ -134,26 +136,26 @@ export function PublicAgentPackages({ agentId, name }: { agentId: string; name: 
 											</div>
 										</div>
 										<span className="agent-package-duration">
-											<span className="agent-package-mobile-label">Duration</span>
-											{item.packageDays} Days / {item.packageNights} Nights
+											<span className="agent-package-mobile-label">{t('tabs.duration')}</span>
+											{t('tabs.daysNights', { days: item.packageDays, nights: item.packageNights })}
 										</span>
 										<span className="agent-package-rating">
-											<span className="agent-package-mobile-label">Rating</span>
+											<span className="agent-package-mobile-label">{t('tabs.rating')}</span>
 											{item.packageReviewCount > 0 ? (
 												<>
 													<span>
 														<Star aria-hidden="true" />
 														{item.packageRating}
 													</span>
-													<small>{item.packageReviewCount} reviews</small>
+															<small>{t('card.reviews', { count: item.packageReviewCount })}</small>
 												</>
 											) : (
-												<span>No reviews yet</span>
+												<span>{t('tabs.noReviews')}</span>
 											)}
 										</span>
 										<span className="agent-package-price">
-											<span className="agent-package-mobile-label">Price</span>
-											{item.currency} {item.packagePrice.toLocaleString('en-US')}
+											<span className="agent-package-mobile-label">{t('tabs.price')}</span>
+											{item.currency} {item.packagePrice.toLocaleString(i18n.language)}
 										</span>
 										<span className="agent-package-arrow" aria-hidden="true">
 											<ArrowForward fontSize="small" />
@@ -177,8 +179,9 @@ export function PublicAgentPackages({ agentId, name }: { agentId: string; name: 
 	);
 }
 function TabSkeleton() {
+	const { t } = useTranslation('agents');
 	return (
-		<div aria-label="Loading profile content" aria-busy="true">
+		<div aria-label={t('tabs.loadingContent')} aria-busy="true">
 			{[0, 1, 2].map((i) => (
 				<Skeleton key={i} height={100} />
 			))}
@@ -186,13 +189,15 @@ function TabSkeleton() {
 	);
 }
 function TabError({ retry }: { retry: () => void }) {
+	const { t } = useTranslation(['agents', 'common']);
 	return (
-		<Alert severity="error" action={<Button onClick={retry}>Retry</Button>}>
-			This content could not be loaded.
+		<Alert severity="error" action={<Button onClick={retry}>{t('actions.retry', { ns: 'common' })}</Button>}>
+			{t('tabs.contentError')}
 		</Alert>
 	);
 }
 export function PublicConnections({ memberId, type }: { memberId: string; type: 'followers' | 'following' }) {
+	const { t } = useTranslation('agents');
 	const [page, setPage] = useState(1);
 	const followers = useQuery(GET_MEMBER_FOLLOWERS, {
 		variables: { input: { page, limit: 8, search: { followingId: memberId } } },
@@ -211,7 +216,7 @@ export function PublicConnections({ memberId, type }: { memberId: string; type: 
 	const total = result?.metaCounter?.[0]?.total ?? 0;
 	return (
 		<section>
-			<Typography component="h2">{type === 'followers' ? 'Followers' : 'Following'}</Typography>
+			<Typography component="h2">{t(type === 'followers' ? 'detail.followers' : 'detail.followingTab')}</Typography>
 			{query.loading ? (
 				<TabSkeleton />
 			) : query.error ? (
@@ -222,7 +227,7 @@ export function PublicConnections({ memberId, type }: { memberId: string; type: 
 				/>
 			) : !result?.list.length ? (
 				<Paper className="agent-detail-card">
-					{type === 'followers' ? 'No followers yet.' : 'This member is not following anyone yet.'}
+					{t(type === 'followers' ? 'tabs.noFollowers' : 'tabs.noFollowing')}
 				</Paper>
 			) : (
 				<Paper component="ul" className="agent-public-list">
@@ -235,14 +240,14 @@ export function PublicConnections({ memberId, type }: { memberId: string; type: 
 									{name?.slice(0, 1)}
 								</Avatar>
 								<div>
-									<Typography component="h3">{name || 'Member profile unavailable'}</Typography>
+									<Typography component="h3">{name || t('tabs.memberUnavailable')}</Typography>
 									{member?.memberNick && <Typography color="text.secondary">@{member.memberNick}</Typography>}
 									<div className="agent-public-counts">
 										{typeof member?.memberFollowerCount === 'number' && (
-											<span>{member.memberFollowerCount} Followers</span>
+											<span>{t('tabs.followerCount', { count: member.memberFollowerCount })}</span>
 										)}
 										{typeof member?.memberFollowingCount === 'number' && (
-											<span>{member.memberFollowingCount} Following</span>
+											<span>{t('tabs.followingCount', { count: member.memberFollowingCount })}</span>
 										)}
 									</div>
 								</div>
@@ -263,6 +268,7 @@ export function PublicConnections({ memberId, type }: { memberId: string; type: 
 	);
 }
 export function PublicArticles({ memberId }: { memberId: string }) {
+	const { t } = useTranslation('agents');
 	const [page, setPage] = useState(1);
 	const { data, loading, error, refetch } = useQuery(GET_PUBLIC_MEMBER_ARTICLES, {
 		variables: { input: { page, limit: 6, sort: 'createdAt', direction: 'DESC', search: { memberId } } },
@@ -273,7 +279,7 @@ export function PublicArticles({ memberId }: { memberId: string }) {
 	const total = result?.metaCounter?.[0]?.total ?? 0;
 	return (
 		<section>
-			<Typography component="h2">Articles</Typography>
+			<Typography component="h2">{t('detail.articles')}</Typography>
 			{loading ? (
 				<TabSkeleton />
 			) : error ? (
@@ -283,15 +289,14 @@ export function PublicArticles({ memberId }: { memberId: string }) {
 					}}
 				/>
 			) : !result?.list.length ? (
-				<Paper className="agent-detail-card">No public articles yet.</Paper>
+				<Paper className="agent-detail-card">{t('tabs.noArticles')}</Paper>
 			) : (
 				<Paper component="ul" className="agent-public-list">
 					{result.list.map((article) => (
 						<li key={article._id}>
 							<Typography component="h3">{article.articleTitle}</Typography>
 							<Typography color="text.secondary">
-								{article.articleViewCount} views · {article.articleLikeCount} likes · {article.articleCommentCount}{' '}
-								comments
+								{t('tabs.articleStats', { views: article.articleViewCount, likes: article.articleLikeCount, comments: article.articleCommentCount })}
 							</Typography>
 						</li>
 					))}

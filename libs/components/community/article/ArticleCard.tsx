@@ -6,25 +6,8 @@ import VisibilityOutlined from '@mui/icons-material/VisibilityOutlined';
 import type { CommunityArticleItem } from '@/apollo/user/query';
 import PackageImage, { packageImageUrl } from '@/libs/components/package/PackageImage';
 import { formatScheduleDate } from '@/libs/components/package/PackageSchedules';
-import { excerpt, memberName, memberRole } from '../communityState';
-
-const communityCategoryLabels: Record<CommunityArticleItem['articleCategory'], string> = {
-	FREE: 'Story',
-	TRAVEL_TIP: 'Travel Tip',
-	TRAVEL_REVIEW: 'Travel Review',
-	QUESTION: 'Question',
-	FIND_COMPANION: 'Find Companion',
-	NOTICE: 'Notice',
-};
-
-const travelStoryCategoryLabels: Record<CommunityArticleItem['articleCategory'], string> = {
-	FREE: 'Free',
-	TRAVEL_TIP: 'Travel Tips',
-	TRAVEL_REVIEW: 'Travel Reviews',
-	QUESTION: 'Questions',
-	FIND_COMPANION: 'Find Companion',
-	NOTICE: 'Notice',
-};
+import { excerpt, memberName } from '../communityState';
+import { useTranslation } from 'react-i18next';
 
 export default function ArticleCard({
 	article,
@@ -35,8 +18,9 @@ export default function ArticleCard({
 	href?: string;
 	variant?: 'community' | 'travel-stories';
 }) {
-	const author = article.memberData ? memberName(article.memberData) : 'Member unavailable';
-	const authorRole = memberRole(article.memberData);
+	const { t, i18n } = useTranslation('community');
+	const author = article.memberData ? memberName(article.memberData) : t('article.unknownAuthor');
+	const authorRole = t(`article.roles.${article.memberData?.memberType ?? 'UNKNOWN'}`);
 	const isTravelStory = variant === 'travel-stories';
 	const cardClass = isTravelStory ? 'travel-story-card' : 'community-story-card';
 	const imageClass = isTravelStory ? 'travel-story-card-cover' : 'community-story-image';
@@ -46,7 +30,7 @@ export default function ArticleCard({
 	const excerptClass = isTravelStory ? 'travel-story-card-excerpt' : 'community-card-copy';
 	const footerClass = isTravelStory ? 'travel-story-card-footer' : 'community-story-footer';
 	const statsClass = isTravelStory ? 'travel-story-card-stats' : 'community-story-stats';
-	const categoryLabel = (isTravelStory ? travelStoryCategoryLabels : communityCategoryLabels)[article.articleCategory];
+	const categoryLabel = t(`categories.${article.articleCategory}`);
 	const content = (
 		<>
 			<div className={imageClass}>
@@ -66,7 +50,7 @@ export default function ArticleCard({
 					</span>
 				</div>
 				<div className={footerClass}>
-					<div className={statsClass} aria-label="Article engagement">
+					<div className={statsClass} aria-label={t('article.engagement')}>
 						<span>
 							<FavoriteBorder /> {article.articleLikeCount}
 						</span>
@@ -77,13 +61,13 @@ export default function ArticleCard({
 							<VisibilityOutlined /> {article.articleViewCount}
 						</span>
 					</div>
-					<time dateTime={article.createdAt}>{formatScheduleDate(article.createdAt)}</time>
+					<time dateTime={article.createdAt}>{formatScheduleDate(article.createdAt, i18n.language)}</time>
 				</div>
 			</div>
 		</>
 	);
 	return href ? (
-		<Link className={cardClass} href={href} aria-label={`Read ${article.articleTitle}`}>
+		<Link className={cardClass} href={href} aria-label={`${t('article.read')}: ${article.articleTitle}`}>
 			{content}
 		</Link>
 	) : (

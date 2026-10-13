@@ -7,33 +7,40 @@ import { MemberType } from '@/libs/enums/member.enum';
 import { NotificationBadge } from '@/scss/MaterialTheme/styled';
 import { useQuery, useReactiveVar } from '@apollo/client';
 import CloseIcon from '@mui/icons-material/Close';
+import CheckIcon from '@mui/icons-material/Check';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
-import LanguageIcon from '@mui/icons-material/Language';
 import MenuIcon from '@mui/icons-material/Menu';
 import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone';
 import { Avatar, Button, Collapse, Container, IconButton, Menu, MenuItem } from '@mui/material';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { changeAppLanguage, languageOptions, normalizeLanguage } from '@/libs/i18n';
 
 const navigation = [
-	{ label: 'Home', href: '/' },
-	{ label: 'Packages', href: '/package' },
-	{ label: 'Agents', href: '/agent' },
-	{ label: 'Community', href: '/community' },
-	{ label: 'My Profile', href: '/mypage' },
-	{ label: 'CS Center', href: '/faq' },
+	{ key: 'home', href: '/' },
+	{ key: 'packages', href: '/package' },
+	{ key: 'agents', href: '/agent' },
+	{ key: 'community', href: '/community' },
+	{ key: 'profile', href: '/mypage' },
+	{ key: 'support', href: '/faq' },
 ] as const;
 
 export default function Navbar() {
+	const { t, i18n } = useTranslation('common');
 	const currentUser = useReactiveVar(currentUserVar);
 	const [accountAnchor, setAccountAnchor] = useState<HTMLButtonElement | null>(null);
+	const [languageAnchor, setLanguageAnchor] = useState<HTMLButtonElement | null>(null);
 	const [notificationAnchor, setNotificationAnchor] = useState<HTMLButtonElement | null>(null);
 	const [menuOpen, setMenuOpen] = useState(false);
 	const menuToggle = useRef<HTMLButtonElement>(null);
 	const router = useRouter();
+	const activeLanguage = normalizeLanguage(i18n.resolvedLanguage ?? i18n.language);
+	const activeLanguageOption = languageOptions.find((option) => option.code === activeLanguage) ?? languageOptions[0];
 	const canUsePrivateChat =
 		currentUser?.memberType === MemberType.USER ||
 		currentUser?.memberType === MemberType.AGENT ||
@@ -71,13 +78,39 @@ export default function Navbar() {
 		}
 	}
 
+	function languageControl(location: 'desktop' | 'mobile') {
+		const id = `wwt-language-${location}`;
+		const open = languageAnchor?.id === id;
+		return (
+			<Button
+				id={id}
+				className="wwt-language"
+				endIcon={<ExpandMoreIcon />}
+				aria-label={`${t('language.label')}: ${activeLanguageOption.label}`}
+				aria-haspopup="menu"
+				aria-controls={open ? 'wwt-language-menu' : undefined}
+				aria-expanded={open}
+				onClick={(event) => {
+					setAccountAnchor(null);
+					setNotificationAnchor(null);
+					setLanguageAnchor(event.currentTarget);
+				}}
+			>
+				<span className="wwt-language-flag" aria-hidden="true">
+					<Image src={activeLanguageOption.flagSrc} alt="" width={24} height={24} />
+				</span>
+				<span className="wwt-language-name">{activeLanguageOption.label}</span>
+			</Button>
+		);
+	}
+
 	function notificationControl(location: 'desktop' | 'mobile') {
 		const id = `wwt-notifications-${location}`;
 		const open = notificationAnchor?.id === id;
 		return (
 			<IconButton
 				id={id}
-				aria-label={currentUser ? `Notifications${unreadCount ? `, ${unreadCount} unread` : ''}` : 'Notifications and notices'}
+				aria-label={unreadCount ? t('notificationsUnread', { count: unreadCount }) : t('notifications')}
 				aria-haspopup="dialog"
 				aria-controls={open ? 'wwt-notification-panel' : undefined}
 				aria-expanded={open}
@@ -98,7 +131,7 @@ export default function Navbar() {
 		if (!currentUser) {
 			return (
 				<Button component={Link} href="/account/login" className="wwt-login" variant="contained" onClick={() => setMenuOpen(false)}>
-					Login
+					{t('account.login')}
 				</Button>
 			);
 		}
@@ -109,7 +142,7 @@ export default function Navbar() {
 			<Button
 				id={id}
 				className="wwt-account"
-				aria-label={`Account menu for ${currentUser.memberNick}`}
+				aria-label={t('account.menu', { name: currentUser.memberNick })}
 				aria-haspopup="menu"
 				aria-controls={open ? 'wwt-account-menu' : undefined}
 				aria-expanded={open}
@@ -126,7 +159,9 @@ export default function Navbar() {
 	}
 
 	function links() {
-		return navigation.map(({ label, href }) =>
+		return navigation.map(({ key, href }) => {
+			const label = t(`navigation.${key}`);
+			return (
 			href ? (
 				<Link
 					key={label}
@@ -141,8 +176,8 @@ export default function Navbar() {
 				<span key={label} className="wwt-nav-link wwt-unavailable" aria-disabled="true" title={`${label} coming soon`}>
 					{label}
 				</span>
-			),
-		);
+			));
+		});
 	}
 
 	return (
@@ -156,23 +191,21 @@ export default function Navbar() {
 			}}
 		>
 			<Container maxWidth="lg" className="wwt-navbar-inner">
-				<Link href="/" className="wwt-brand" aria-label="WWT home" onClick={() => setMenuOpen(false)}>
+				<Link href="/" className="wwt-brand" aria-label={`WWT ${t('navigation.home')}`} onClick={() => setMenuOpen(false)}>
 					WWT
 					<span className="wwt-brand-dot" aria-hidden="true">
 						.
 					</span>
 				</Link>
-				<nav className="wwt-desktop-nav" aria-label="Main navigation">
+				<nav className="wwt-desktop-nav" aria-label={t('navigation.main')}>
 					{links()}
 				</nav>
 				<div className="wwt-navbar-actions">
-					<Button className="wwt-language" startIcon={<LanguageIcon />} disabled>
-						Language
-					</Button>
+					{languageControl('desktop')}
 					<IconButton
 						component={Link}
 						href="/mypage/saved"
-						aria-label="Saved packages"
+						aria-label={t('savedPackages')}
 						color={router.pathname === '/mypage/saved' ? 'primary' : 'default'}
 					>
 						{router.pathname === '/mypage/saved' ? (
@@ -188,7 +221,7 @@ export default function Navbar() {
 					ref={menuToggle}
 					className="wwt-menu-toggle"
 					color="primary"
-					aria-label={menuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+					aria-label={menuOpen ? t('actions.close') : t('navigation.mobile')}
 					aria-expanded={menuOpen}
 					aria-controls="wwt-mobile-menu"
 					onClick={() => setMenuOpen(!menuOpen)}
@@ -198,17 +231,15 @@ export default function Navbar() {
 			</Container>
 			<Collapse in={menuOpen} className="wwt-mobile-menu" id="wwt-mobile-menu" unmountOnExit>
 				<Container maxWidth="lg">
-					<nav className="wwt-mobile-nav" aria-label="Mobile navigation">
+					<nav className="wwt-mobile-nav" aria-label={t('navigation.mobile')}>
 						{links()}
 					</nav>
 					<div className="wwt-mobile-actions">
-						<Button startIcon={<LanguageIcon />} disabled>
-							Language
-						</Button>
+						{languageControl('mobile')}
 						<IconButton
 							component={Link}
 							href="/mypage/saved"
-							aria-label="Saved packages"
+							aria-label={t('savedPackages')}
 							color={router.pathname === '/mypage/saved' ? 'primary' : 'default'}
 							onClick={() => setMenuOpen(false)}
 						>
@@ -224,6 +255,33 @@ export default function Navbar() {
 				</Container>
 			</Collapse>
 			<Menu
+				id="wwt-language-menu"
+				anchorEl={languageAnchor}
+				open={Boolean(languageAnchor)}
+				onClose={() => setLanguageAnchor(null)}
+				anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+				transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+				slotProps={{ list: { 'aria-label': t('language.menu'), 'aria-labelledby': languageAnchor?.id } }}
+			>
+				{languageOptions.map((option) => (
+					<MenuItem
+						key={option.code}
+						className="wwt-language-option"
+						selected={option.code === activeLanguage}
+						onClick={() => {
+							setLanguageAnchor(null);
+							void changeAppLanguage(option.code);
+						}}
+					>
+						<span className="wwt-language-flag" aria-hidden="true">
+							<Image src={option.flagSrc} alt="" width={24} height={24} />
+						</span>
+						<span>{option.label}</span>
+						{option.code === activeLanguage ? <CheckIcon className="wwt-language-check" fontSize="small" /> : null}
+					</MenuItem>
+				))}
+			</Menu>
+			<Menu
 				id="wwt-account-menu"
 				anchorEl={accountAnchor}
 				open={Boolean(currentUser && accountAnchor)}
@@ -233,10 +291,10 @@ export default function Navbar() {
 				transformOrigin={{ vertical: 'top', horizontal: 'right' }}
 				slotProps={{ list: { 'aria-labelledby': accountAnchor?.id } }}
 			>
-				<MenuItem component={Link} href="/mypage" selected={router.pathname === '/mypage'} onClick={() => { setAccountAnchor(null); setMenuOpen(false); }}>My Profile</MenuItem>
+				<MenuItem component={Link} href="/mypage" selected={router.pathname === '/mypage'} onClick={() => { setAccountAnchor(null); setMenuOpen(false); }}>{t('account.profile')}</MenuItem>
 				{canUsePrivateChat && (
 					<MenuItem component={Link} href="/mypage/chats" selected={router.pathname === '/mypage/chats'} onClick={() => { setAccountAnchor(null); setMenuOpen(false); }}>
-						Chats{chatUnreadCount > 0 && <span className="wwt-chat-menu-count" aria-label={`${chatUnreadCount} unread messages`}>{Math.min(chatUnreadCount, 99)}</span>}
+						{t('account.chats')}{chatUnreadCount > 0 && <span className="wwt-chat-menu-count" aria-label={t('unreadMessages', { count: chatUnreadCount })}>{Math.min(chatUnreadCount, 99)}</span>}
 					</MenuItem>
 				)}
 				{currentUser?.memberType === MemberType.ADMIN && (
@@ -249,10 +307,10 @@ export default function Navbar() {
 							setMenuOpen(false);
 						}}
 					>
-						Admin Dashboard
+						{t('account.admin')}
 					</MenuItem>
 				)}
-				<MenuItem onClick={handleLogout}>Logout</MenuItem>
+				<MenuItem onClick={handleLogout}>{t('account.logout')}</MenuItem>
 			</Menu>
 			<NotificationWidget
 				key={notificationAnchor?.id ?? 'closed-notifications'}

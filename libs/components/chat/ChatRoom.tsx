@@ -18,11 +18,13 @@ import MessageInput from './MessageInput';
 import MessageList from './MessageList';
 import { conversationMember } from './chatUtils';
 import { mergePrivateMessage, privateMessageEventAction } from './chatRealtimeState';
+import { useTranslation } from 'react-i18next';
 
 const PAGE_SIZE = 20;
 const MESSAGE_PAGE_SIZE = 30;
 
 export default function ChatRoom({ memberId, onUnreadChange }: { memberId: string; onUnreadChange?: () => void }) {
+	const { t } = useTranslation('chat');
 	const router = useRouter();
 	const apolloClient = useApolloClient();
 	const requestedId = typeof router.query.conversation === 'string' ? router.query.conversation : '';
@@ -140,14 +142,14 @@ export default function ChatRoom({ memberId, onUnreadChange }: { memberId: strin
 		};
 		const onError = (event: SocketEvent) => {
 			setSending(false);
-			setNotice(event.message || 'The message could not be sent.');
+			setNotice(event.message || t('sendError'));
 		};
 		const unsubscribeNew = subscribe('newMessage', onNewMessage);
 		const unsubscribeSent = subscribe('messageSent', onSent);
 		const unsubscribeError = subscribe('messageError', onError);
 		const unsubscribeConversationError = subscribe('conversationError', onError);
 		return () => { unsubscribeNew(); unsubscribeSent(); unsubscribeError(); unsubscribeConversationError(); };
-	}, [markRead, memberId, refreshConversationState, selectedId, subscribe]);
+	}, [markRead, memberId, refreshConversationState, selectedId, subscribe, t]);
 
 	useEffect(() => {
 		// Socket connectivity is external state; release an in-flight UI lock after disconnect.
@@ -185,7 +187,7 @@ export default function ChatRoom({ memberId, onUnreadChange }: { memberId: strin
 			);
 			setMessagePage(nextPage);
 		} catch {
-			setNotice('Older messages could not be loaded.');
+			setNotice(t('olderError'));
 		} finally {
 			setLoadingOlder(false);
 		}
@@ -217,10 +219,10 @@ export default function ChatRoom({ memberId, onUnreadChange }: { memberId: strin
 					<MessageInput key={`${selected._id}-${sentKey}`} sending={sending} disabled={socketStatus !== 'connected'} onSend={(content) => {
 						setSending(true);
 						if (!sendSocket('privateMessage', { conversationId: selected._id, messageContent: content })) {
-							setSending(false); setNotice('Realtime chat is reconnecting. Please try again.');
+							setSending(false); setNotice(t('reconnecting'));
 						}
 					}} />
-				</> : <div className="chat-room-placeholder"><Typography component="h2">Select a conversation</Typography><Typography color="text.secondary">Choose a member to view your messages.</Typography></div>}
+				</> : <div className="chat-room-placeholder"><Typography component="h2">{t('select')}</Typography><Typography color="text.secondary">{t('selectHelp')}</Typography></div>}
 			</main>
 		</Paper>
 		<Snackbar open={Boolean(notice)} autoHideDuration={5000} message={notice} onClose={() => setNotice('')} />

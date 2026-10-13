@@ -4,6 +4,7 @@ import { Button, IconButton } from '@mui/material';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import SearchBar from './SearchBar';
 
 const slides = [
@@ -40,6 +41,7 @@ const slides = [
 ] as const;
 
 export default function HeroSection() {
+	const { t } = useTranslation('home');
 	const [active, setActive] = useState(0);
 	const timer = useRef<ReturnType<typeof setInterval> | null>(null);
 	const startAutoplay = useCallback(() => {
@@ -57,18 +59,18 @@ export default function HeroSection() {
 	}
 	const slide = slides[active];
 	return (
-		<section className="home-hero" aria-roledescription="carousel" aria-label="Featured destinations">
+		<section className="home-hero" aria-roledescription="carousel" aria-label={t('hero.aria')}>
 			<div className="home-hero-background" key={slide.background}>
 				<Image src={slide.background} alt="" fill priority={active === 0} sizes="100vw" />
 			</div>
 			<div className="home-hero-overlay" aria-hidden="true" />
 			<div className="home-container home-hero-content">
 				<div className="home-hero-copy">
-					<span className="home-eyebrow">EXPLORE. DISCOVER. BELONG.</span>
-					<h1>Your Next <span>Journey</span> Starts Here</h1>
-					<p>Discover remarkable places, trusted travel experts, and journeys designed around you.</p>
+					<span className="home-eyebrow">{t('hero.eyebrow')}</span>
+					<h1>{t('hero.titleBefore')} <span>{t('hero.titleAccent')}</span> {t('hero.titleAfter')}</h1>
+					<p>{t('hero.description')}</p>
 					<div className="home-hero-actions">
-						<Button component={Link} href="/package" variant="contained" color="secondary">Explore Packages</Button>
+						<Button component={Link} href="/package" variant="contained" color="secondary">{t('hero.explore')}</Button>
 						<span className="home-slide-theme">{slide.theme}</span>
 					</div>
 				</div>
@@ -81,15 +83,15 @@ export default function HeroSection() {
 					))}
 				</div>
 				<div className="home-carousel-controls">
-					<IconButton onClick={() => selectSlide(active - 1)} aria-label="Previous destination slide"><ArrowBack /></IconButton>
-					<div className="home-carousel-dots" role="group" aria-label="Choose destination slide">
+					<IconButton onClick={() => selectSlide(active - 1)} aria-label={t('hero.previous')}><ArrowBack /></IconButton>
+					<div className="home-carousel-dots" role="group" aria-label={t('hero.choose')}>
 						{slides.map((item, index) => (
 							<button key={item.theme} type="button" className={index === active ? 'is-active' : ''}
-								aria-label={`Show slide ${index + 1}: ${item.theme}`} aria-current={index === active ? 'true' : undefined}
+								aria-label={t('hero.showSlide', { number: index + 1, name: item.theme })} aria-current={index === active ? 'true' : undefined}
 								onClick={() => selectSlide(index)} />
 						))}
 					</div>
-					<IconButton onClick={() => selectSlide(active + 1)} aria-label="Next destination slide"><ArrowForward /></IconButton>
+					<IconButton onClick={() => selectSlide(active + 1)} aria-label={t('hero.next')}><ArrowForward /></IconButton>
 				</div>
 			</div>
 			<SearchBar />

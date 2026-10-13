@@ -10,6 +10,7 @@ import { IconButton } from '@mui/material';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { packageImageUrl } from './PackageImage';
 
@@ -29,6 +30,7 @@ export default function PackageCard({
   favoriteAction?: FavoriteAction;
   variant?: 'default' | 'listing';
 }) {
+  const { t, i18n } = useTranslation('packages');
   const [failedImages, setFailedImages] = useState<Set<string>>(new Set());
   const image = item.packageImages
     .map(packageImageUrl)
@@ -51,7 +53,7 @@ export default function PackageCard({
         <Link
           className="package-card-overlay"
           href={`/package/${item._id}`}
-          aria-label={`View ${item.packageTitle}`}
+          aria-label={t('card.view', { name: item.packageTitle })}
         />
       )}
       <div className="home-card-image">
@@ -71,17 +73,17 @@ export default function PackageCard({
             }}
           />
         ) : listing ? (
-          <div className="package-image-fallback" aria-label="Package image unavailable">
+          <div className="package-image-fallback" aria-label={t('card.noImage')}>
             <Image
               src={fallbackImage}
               alt=""
               fill
               sizes="(max-width: 600px) 100vw, (max-width: 1100px) 50vw, 300px"
             />
-            <span>Image unavailable</span>
+            <span>{t('card.noImage')}</span>
           </div>
         ) : (
-          <div className="packages-image-placeholder" aria-label="Package image unavailable"><LandscapeOutlined /></div>
+          <div className="packages-image-placeholder" aria-label={t('card.noImage')}><LandscapeOutlined /></div>
         )}
 
         {favoriteAction && (
@@ -95,8 +97,8 @@ export default function PackageCard({
             }}
             aria-label={
               isSaved
-                ? `Remove ${item.packageTitle} from saved packages`
-                : `Save ${item.packageTitle}`
+                ? t('card.removeSaved', { name: item.packageTitle })
+                : t('card.save', { name: item.packageTitle })
             }
           >
             {isSaved ? (
@@ -123,8 +125,8 @@ export default function PackageCard({
             className="home-rating"
             aria-label={
               item.packageReviewCount > 0
-                ? `${item.packageRating.toFixed(1)} out of 5 from ${item.packageReviewCount} reviews`
-                : 'No reviews yet'
+				? t('card.ratingLabel', { rating: item.packageRating.toFixed(1), count: item.packageReviewCount })
+                : t('card.noReviews')
             }
           >
             <Star />
@@ -135,7 +137,7 @@ export default function PackageCard({
                 {(isSaved || listing) && ` (${item.packageReviewCount})`}
               </>
             ) : (
-              <span>No reviews yet</span>
+              <span>{t('card.noReviews')}</span>
             )}
           </p>
         </div>
@@ -146,14 +148,14 @@ export default function PackageCard({
 
         <p className="home-duration">
           <AccessTime />
-          {item.packageDays} days / {item.packageNights} nights
+          {t('card.daysNights', { days: item.packageDays, nights: item.packageNights })}
         </p>
 
         <div className="home-price">
           <span>
-            Price{' '}
+            {t('card.from')}{' '}
             <strong>
-              {item.currency} {item.packagePrice.toLocaleString('en-US')}
+              {item.currency} {item.packagePrice.toLocaleString(i18n.language)}
             </strong>
           </span>
 

@@ -9,12 +9,14 @@ import { currentUserVar } from '@/apollo/store';
 import { CREATE_BOARD_ARTICLE, UPLOAD_ARTICLE_IMAGE } from '@/apollo/user/mutation';
 import { restoreUserFromToken } from '@/libs/auth';
 import ArticleForm, { type ArticleFormValues } from '../article/ArticleForm';
+import { useTranslation } from 'react-i18next';
 
 function errorMessage(error: unknown, fallback: string) {
 	return error instanceof Error && error.message ? `${fallback} ${error.message}` : fallback;
 }
 
 export default function TravelStoryCreate() {
+	const { t } = useTranslation(['community', 'common']);
 	const router = useRouter();
 	const user = useReactiveVar(currentUserVar);
 	const [submitError, setSubmitError] = useState('');
@@ -48,9 +50,9 @@ export default function TravelStoryCreate() {
 				try {
 					const uploadResponse = await uploadImage({ variables: { file: values.coverFile } });
 					uploadedPath = uploadResponse.data?.imageUploader ?? '';
-					if (!uploadedPath) throw new Error('The cover image upload did not return a file path.');
+					if (!uploadedPath) throw new Error(t('create.uploadNoPath'));
 				} catch (error: unknown) {
-					setSubmitError(errorMessage(error, 'Unable to upload the cover image.'));
+					setSubmitError(errorMessage(error, t('create.uploadError')));
 					return;
 				}
 			}
@@ -69,15 +71,15 @@ export default function TravelStoryCreate() {
 					},
 				});
 			} catch (error: unknown) {
-				setSubmitError(errorMessage(error, 'Unable to publish your story.'));
+				setSubmitError(errorMessage(error, t('create.publishError')));
 				return;
 			}
 			if (cancelRequested.current) return;
 			const createdArticle = createResponse.data?.createBoardArticle;
-			if (!createdArticle?._id) throw new Error('The story was created without an article ID.');
+			if (!createdArticle?._id) throw new Error(t('create.missingId'));
 			await router.push(`/community/stories/${createdArticle._id}`);
 		} catch (error: unknown) {
-			setSubmitError(errorMessage(error, 'Unable to publish your story. Please try again.'));
+			setSubmitError(errorMessage(error, t('create.publishRetry')));
 		} finally {
 			submitLock.current = false;
 			setSubmitting(false);
@@ -87,7 +89,7 @@ export default function TravelStoryCreate() {
 	if (!router.isReady || !user?._id) {
 		return (
 			<div className="travel-story-create">
-				<Skeleton className="travel-story-create-checking" aria-label="Checking authentication" height={240} />
+				<Skeleton className="travel-story-create-checking" aria-label={t('create.checking')} height={240} />
 			</div>
 		);
 	}
@@ -95,14 +97,14 @@ export default function TravelStoryCreate() {
 	return (
 		<div className="travel-story-create">
 			<div className="travel-stories-container">
-				<Breadcrumbs separator="›" aria-label="Breadcrumb">
-					<Link href="/"><HomeOutlined fontSize="small" /> Home</Link>
-					<Link href="/community">Community</Link>
-					<Link href="/community/stories">Travel Stories</Link>
-					<span aria-current="page">Share a Story</span>
+				<Breadcrumbs separator="›" aria-label={t('create.breadcrumb')}>
+					<Link href="/"><HomeOutlined fontSize="small" /> {t('navigation.home', { ns: 'common' })}</Link>
+					<Link href="/community">{t('navigation.community', { ns: 'common' })}</Link>
+					<Link href="/community/stories">{t('stories.title')}</Link>
+					<span aria-current="page">{t('create.breadcrumb')}</span>
 				</Breadcrumbs>
 				<Button component={Link} href="/community/stories" startIcon={<ArrowBack />} className="travel-story-detail-back">
-					Back to Travel Stories
+					{t('create.back')}
 				</Button>
 				<ArticleForm
 					member={user}

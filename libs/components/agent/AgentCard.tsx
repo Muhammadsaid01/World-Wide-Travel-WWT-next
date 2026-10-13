@@ -14,17 +14,9 @@ import Verified from '@mui/icons-material/Verified';
 import { currentUserVar } from '@/apollo/store';
 import { CREATE_CONVERSATION, SUBSCRIBE_MEMBER, UNSUBSCRIBE_MEMBER } from '@/apollo/user/mutation';
 import { GET_MEMBER_FOLLOW_STATE, type AgentListItem } from '@/apollo/user/query';
-import { AgentVerificationStatus, MemberLanguage } from '@/libs/enums/member.enum';
+import { AgentVerificationStatus } from '@/libs/enums/member.enum';
 import { packageImageUrl } from '../package/PackageImage';
-
-const languages: Record<MemberLanguage, string> = {
-	ENGLISH: 'English',
-	KOREAN: 'Korean',
-	CHINESE: 'Chinese',
-	RUSSIAN: 'Russian',
-	ARABIC: 'Arabic',
-	UZBEK: 'Uzbek',
-};
+import { useTranslation } from 'react-i18next';
 
 export type AgentCardNotice = {
 	message: string;
@@ -38,6 +30,7 @@ export default function AgentCard({
 	agent: AgentListItem;
 	onNotice: (notice: AgentCardNotice) => void;
 }) {
+	const { t } = useTranslation('agents');
 	const router = useRouter();
 	const user = useReactiveVar(currentUserVar);
 	const member = agent.memberData;
@@ -74,7 +67,7 @@ export default function AgentCard({
 				await follow.refetch();
 			} catch (error) {
 				onNotice({
-					message: error instanceof Error ? error.message : 'Follow status could not be loaded.',
+					message: error instanceof Error ? error.message : t('card.followLoadError'),
 					severity: 'error',
 				});
 			} finally {
@@ -91,7 +84,7 @@ export default function AgentCard({
 			await follow.refetch();
 		} catch (error) {
 			onNotice({
-				message: error instanceof Error ? error.message : 'Follow status could not be updated.',
+				message: error instanceof Error ? error.message : t('card.followUpdateError'),
 				severity: 'error',
 			});
 		} finally {
@@ -112,11 +105,11 @@ export default function AgentCard({
 		try {
 			const response = await createConversation({ variables: { input: { memberTwoId: agent.memberId } } });
 			const conversationId = response.data?.createConversation._id;
-			if (!conversationId) throw new Error('Conversation could not be created.');
+			if (!conversationId) throw new Error(t('card.conversationError'));
 			await router.push({ pathname: '/mypage/chats', query: { conversation: conversationId } });
 		} catch (error) {
 			onNotice({
-				message: error instanceof Error ? error.message : 'The conversation could not be opened.',
+				message: error instanceof Error ? error.message : t('card.conversationError'),
 				severity: 'error',
 			});
 		} finally {
@@ -138,7 +131,7 @@ export default function AgentCard({
 				</Avatar>
 				{verified ? (
 					<span className="agent-card-badge">
-						<Verified aria-hidden="true" /> Verified
+						<Verified aria-hidden="true" /> {t('card.verified')}
 					</span>
 				) : null}
 			</div>
@@ -148,7 +141,7 @@ export default function AgentCard({
 					<div className="agent-card-primary">
 						<div className="agent-card-name">
 							<Typography component="h3">{name}</Typography>
-							{verified ? <Verified titleAccess="Verified agent" /> : null}
+							{verified ? <Verified titleAccess={t('card.verifiedAgent')} /> : null}
 						</div>
 						<Typography className="agent-card-company">{agent.companyName}</Typography>
 
@@ -157,10 +150,10 @@ export default function AgentCard({
 								<>
 									<Star aria-hidden="true" />
 									<strong>{agent.agentRating.toFixed(1)}</strong>
-									<span>({agent.agentReviewCount} reviews)</span>
+									<span>{t('card.reviews', { count: agent.agentReviewCount })}</span>
 								</>
 							) : (
-								<span>No reviews yet</span>
+								<span>{t('card.noReviews')}</span>
 							)}
 						</div>
 
@@ -178,12 +171,12 @@ export default function AgentCard({
 						) : null}
 						<span>
 							<LuggageOutlined aria-hidden="true" />
-							<span>{agent.agentPackageCount} Packages</span>
+							<span>{t('card.packages', { count: agent.agentPackageCount })}</span>
 						</span>
-						{member?.memberLanguage && languages[member.memberLanguage] ? (
+						{member?.memberLanguage ? (
 							<span>
 								<LanguageOutlined aria-hidden="true" />
-								<span>{languages[member.memberLanguage]}</span>
+								<span>{t(`languages.${member.memberLanguage}`)}</span>
 							</span>
 						) : null}
 					</div>
@@ -199,11 +192,11 @@ export default function AgentCard({
 								disabled={followBusy || followStatePending}
 								onClick={() => void toggleFollow()}
 							>
-								{follow.error ? 'Retry' : isFollowing ? 'Following' : 'Follow'}
+								{follow.error ? t('card.retry') : isFollowing ? t('card.following') : t('card.follow')}
 							</Button>
 							<IconButton
 								className="agent-card-message"
-								aria-label={`Message ${name}`}
+								aria-label={t('card.message', { name })}
 								disabled={messageBusy}
 								onClick={() => void openConversation()}
 							>
@@ -218,7 +211,7 @@ export default function AgentCard({
 						className="agent-card-profile"
 						endIcon={<ArrowForward />}
 					>
-						View Profile
+						{t('card.view')}
 					</Button>
 				</div>
 			</div>

@@ -24,9 +24,11 @@ import {
 import Link from 'next/link';
 import { useState } from 'react';
 import ProfileSidebar from './ProfileSidebar';
+import { useTranslation } from 'react-i18next';
 
 const PAGE_SIZE = 6;
 function BookingCard({ booking }: { booking: PaymentBooking }) {
+	const { t, i18n } = useTranslation(['profile', 'common']);
 	const destination = [booking.packageData?.destinationCity, booking.packageData?.destinationCountry]
 		.filter(Boolean)
 		.join(', ');
@@ -51,7 +53,7 @@ function BookingCard({ booking }: { booking: PaymentBooking }) {
 						</span>
 					)}
 				</div>
-				<Typography component="h2">{booking.packageData?.packageTitle ?? 'Package information unavailable'}</Typography>
+				<Typography component="h2">{booking.packageData?.packageTitle ?? t('overview.packageUnavailable')}</Typography>
 				<div className="my-booking-info">
 					{destination && (
 						<span className="my-booking-location">
@@ -61,15 +63,15 @@ function BookingCard({ booking }: { booking: PaymentBooking }) {
 					)}
 					<span>
 						<PeopleAltOutlined />
-						{booking.peopleCount} {booking.peopleCount === 1 ? 'Traveler' : 'Travelers'}
+						{t('bookings.travelers', { count: booking.peopleCount })}
 					</span>
 				</div>
 				<div className="my-booking-bottom">
 					<div>
-						<Typography className="my-booking-total-label">Total</Typography>
+						<Typography className="my-booking-total-label">{t('bookings.total')}</Typography>
 						<Typography className="my-booking-amount">
 							{booking.currency}{' '}
-							{booking.finalPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+							{booking.finalPrice.toLocaleString(i18n.language, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
 						</Typography>
 					</div>
 
@@ -79,7 +81,7 @@ function BookingCard({ booking }: { booking: PaymentBooking }) {
 						variant="outlined"
 						endIcon={<ArrowForward />}
 					>
-						View Booking
+						{t('bookings.view')}
 					</Button>
 				</div>
 			</div>
@@ -119,6 +121,7 @@ export default function MyBookings() {
 	);
 }
 function MyBookingsContent({ authenticated, allowed }: { authenticated: boolean; allowed: boolean }) {
+	const { t } = useTranslation(['profile', 'common']);
 	const [page, setPage] = useState(1);
 	const [status, setStatus] = useState<BookingStatus | undefined>();
 	const [searchDraft, setSearchDraft] = useState('');
@@ -142,24 +145,24 @@ function MyBookingsContent({ authenticated, allowed }: { authenticated: boolean;
 	const filtered = Boolean(status || text);
 	return (
 		<div className="my-bookings-page">
-			<Breadcrumbs separator="/" className="my-bookings-breadcrumb" aria-label="Breadcrumb">
-				<Link href="/">Home</Link>
-				<span>My Profile</span>
-				<span aria-current="page">My Bookings</span>
+			<Breadcrumbs separator="/" className="my-bookings-breadcrumb" aria-label={t('bookings.title')}>
+				<Link href="/">{t('navigation.home', { ns: 'common' })}</Link>
+				<span>{t('navigation.profile', { ns: 'common' })}</span>
+				<span aria-current="page">{t('bookings.title')}</span>
 			</Breadcrumbs>
 			<div className="my-bookings-layout">
 				<ProfileSidebar />
 				<main className="my-bookings-main">
 					<header className="my-bookings-header">
 						<div>
-							<Typography component="h1">My Bookings</Typography>
+							<Typography component="h1">{t('bookings.title')}</Typography>
 							<Typography color="text.secondary">
-								View and manage your past, present, and future travel itineraries.
+								{t('bookings.description')}
 							</Typography>
 						</div>
 						{allowed && !loading && !error && result && (
 							<span className="my-bookings-count">
-								{total} {filtered ? 'matching bookings' : 'bookings total'}
+								{t(filtered ? 'bookings.matchingCount' : 'bookings.count', { count: total })}
 							</span>
 						)}
 					</header>
@@ -168,28 +171,28 @@ function MyBookingsContent({ authenticated, allowed }: { authenticated: boolean;
 							severity="info"
 							action={
 								<Button component={Link} href="/account/login">
-									Login
+									{t('account.login', { ns: 'common' })}
 								</Button>
 							}
 						>
-							Log in to view your bookings.
+							{t('bookings.login')}
 						</Alert>
 					) : !allowed ? (
-						<Alert severity="info">My Bookings is available to user accounts.</Alert>
+					<Alert severity="info">{t('bookings.unavailable')}</Alert>
 					) : (
 						<>
 							<div className="my-bookings-controls">
 								<div className="my-bookings-tabs" role="group" aria-label="Filter bookings">
 									{[
-										{ label: 'All', value: undefined },
-										{ label: 'Upcoming', value: undefined, disabled: true },
-										{ label: 'Completed', value: BookingStatus.COMPLETED },
-										{ label: 'Cancelled', value: BookingStatus.CANCELLED },
+										{ label: t('bookings.all'), value: undefined },
+										{ label: t('bookings.upcoming'), value: undefined, disabled: true },
+										{ label: t('bookings.completed'), value: BookingStatus.COMPLETED },
+										{ label: t('bookings.cancelled'), value: BookingStatus.CANCELLED },
 									].map((tab) => (
 										<Button
 											key={tab.label}
 											disabled={tab.disabled}
-											title={tab.disabled ? 'Upcoming date filtering is not supported yet.' : undefined}
+											title={tab.disabled ? t('bookings.upcomingUnsupported') : undefined}
 											aria-pressed={!tab.disabled && status === tab.value}
 											className={!tab.disabled && status === tab.value ? 'is-active' : ''}
 											onClick={() => {
@@ -211,7 +214,7 @@ function MyBookingsContent({ authenticated, allowed }: { authenticated: boolean;
 								>
 									<TextField
 										size="small"
-										placeholder="Search bookings..."
+										placeholder={t('bookings.search')}
 										value={searchDraft}
 										onChange={(event) => setSearchDraft(event.target.value)}
 										slotProps={{
@@ -237,8 +240,8 @@ function MyBookingsContent({ authenticated, allowed }: { authenticated: boolean;
 									}}
 									slotProps={{ htmlInput: { 'aria-label': 'Sort bookings' } }}
 								>
-									<MenuItem value="DESC">Sort: Newest</MenuItem>
-									<MenuItem value="ASC">Sort: Oldest</MenuItem>
+											<MenuItem value="DESC">{t('sort.newest', { ns: 'common' })}</MenuItem>
+											<MenuItem value="ASC">{t('sort.oldest', { ns: 'common' })}</MenuItem>
 								</TextField>
 							</div>
 							<div className="my-bookings-list" aria-busy={loading}>
@@ -253,16 +256,16 @@ function MyBookingsContent({ authenticated, allowed }: { authenticated: boolean;
 													void refetch().catch(() => undefined);
 												}}
 											>
-												Retry
+												{t('actions.retry', { ns: 'common' })}
 											</Button>
 										}
 									>
-										Bookings could not be loaded. {error.message}
+										{t('bookings.error')} {error.message}
 									</Alert>
 								) : !result?.list.length ? (
 									<div className="my-bookings-empty">
 										<Typography component="h2">
-											{filtered ? 'No bookings match your filters.' : "You don't have any bookings yet."}
+											{t(filtered ? 'bookings.emptyFiltered' : 'bookings.empty')}
 										</Typography>
 										{filtered ? (
 											<Button
@@ -273,11 +276,11 @@ function MyBookingsContent({ authenticated, allowed }: { authenticated: boolean;
 													setPage(1);
 												}}
 											>
-												Clear filters
+												{t('actions.clearAll', { ns: 'common' })}
 											</Button>
 										) : (
 											<Button component={Link} href="/package" variant="contained">
-												Browse Packages
+												{t('overview.browsePackages')}
 											</Button>
 										)}
 									</div>

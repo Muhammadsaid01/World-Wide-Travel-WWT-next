@@ -1,0 +1,69 @@
+{
+	"skipToContent": "본문으로 건너뛰기",
+	"navigation": {
+		"main": "주요 메뉴",
+		"mobile": "모바일 메뉴",
+		"home": "홈",
+		"packages": "여행 상품",
+		"agents": "여행 전문가",
+		"community": "커뮤니티",
+		"profile": "내 프로필",
+		"support": "고객센터"
+	},
+	"language": { "label": "언어", "menu": "언어 선택" },
+	"account": {
+		"login": "로그인",
+		"menu": "{{name}}님의 계정 메뉴",
+		"profile": "내 프로필",
+		"chats": "채팅",
+		"admin": "관리자 대시보드",
+		"logout": "로그아웃"
+	},
+	"actions": {
+		"search": "검색",
+		"clear": "지우기",
+		"clearAll": "모두 지우기",
+		"clearFilters": "필터 초기화",
+		"retry": "다시 시도",
+		"viewAll": "전체 보기 →",
+		"viewDetails": "상세 보기",
+		"back": "뒤로",
+		"cancel": "취소",
+		"save": "저장",
+		"delete": "삭제",
+		"edit": "수정",
+		"close": "닫기",
+		"submit": "제출",
+		"loadMore": "더 보기"
+	},
+	"states": {
+		"loading": "불러오는 중…",
+		"updating": "업데이트 중…",
+		"opening": "여는 중…",
+		"unavailable": "이용할 수 없음",
+		"noResults": "검색 결과가 없습니다."
+	},
+	"sort": { "label": "정렬:", "newest": "최신순", "oldest": "오래된순" },
+	"notifications": "알림",
+	"notificationsUnread": "읽지 않은 알림 {{count}}개",
+	"savedPackages": "저장한 여행 상품",
+	"unreadMessages": "읽지 않은 메시지 {{count}}개",
+	"footer": {
+		"brand": "월드 와이드 트래블",
+		"description": "영감을 주는 여행을 발견하고, 여행 상품을 살펴보며 전 세계 여행자들과 연결해 보세요.",
+		"explore": "둘러보기",
+		"company": "회사",
+		"support": "고객지원",
+		"social": "소셜",
+		"deals": "특가",
+		"coupons": "쿠폰",
+		"about": "회사 소개",
+		"contact": "문의",
+		"faq": "자주 묻는 질문",
+		"terms": "이용약관",
+		"privacy": "개인정보 처리방침",
+		"copyright": "© 2026 World Wide Travel (WWT). All rights reserved.",
+		"languages": "English · 한국어 · Русский · O‘zbekcha",
+		"comingSoon": "{{name}} 서비스 준비 중"
+	}
+}

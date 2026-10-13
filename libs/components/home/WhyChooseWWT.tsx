@@ -2,28 +2,30 @@ import VerifiedUserOutlined from '@mui/icons-material/VerifiedUserOutlined';
 import LockOutlined from '@mui/icons-material/LockOutlined';
 import PublicOutlined from '@mui/icons-material/PublicOutlined';
 import GroupsOutlined from '@mui/icons-material/GroupsOutlined';
+import { useTranslation } from 'react-i18next';
 export default function WhyChooseWWT() {
+	const { t } = useTranslation('home');
 	return (
 		<section className="home-section home-benefits">
-			<h2>Why Choose WWT</h2>
+			<h2>{t('why.title')}</h2>
 			<div className="home-grid-four">
 				{[
 					{
-						title: 'Trusted Agents',
-						text: 'Connect with experienced travel experts who know the destination.',
+						title: t('why.trustedTitle'),
+						text: t('why.trustedText'),
 						Icon: VerifiedUserOutlined,
 					},
 					{
-						title: 'Secure Booking',
-						text: 'Travel with confidence and peace of mind at every step.',
+						title: t('why.secureTitle'),
+						text: t('why.secureText'),
 						Icon: LockOutlined,
 					},
 					{
-						title: 'Best Travel Experiences',
-						text: 'Discover carefully curated journeys and authentic moments.',
+						title: t('why.experiencesTitle'),
+						text: t('why.experiencesText'),
 						Icon: PublicOutlined,
 					},
-					{ title: 'Traveler Community', text: 'Share travel stories and connect with people planning their next journey.', Icon: GroupsOutlined },
+					{ title: t('why.communityTitle'), text: t('why.communityText'), Icon: GroupsOutlined },
 				].map(({ title, text, Icon }) => (
 					<article key={title}>
 						<Icon />

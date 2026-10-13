@@ -8,6 +8,7 @@ import { login, signup } from '@/libs/auth';
 import SocialLogin from '@/libs/components/account/SocialLogin';
 import type { LoginInput, MemberInput } from '@/libs/types/member/member.input';
 import { WWTTextField } from '@/scss/MaterialTheme/styled';
+import { useTranslation } from 'react-i18next';
 
 type AuthMode = 'login' | 'signup';
 
@@ -16,6 +17,7 @@ interface AuthProps {
 }
 
 export default function Auth({ initialMode = 'login' }: AuthProps) {
+	const { t } = useTranslation('auth');
 	const router = useRouter();
 
 	const [mode, setMode] = useState<AuthMode>(initialMode);
@@ -62,9 +64,7 @@ export default function Auth({ initialMode = 'login' }: AuthProps) {
 			await login(input);
 			await router.push('/');
 		} catch {
-			setLoginError(
-				'We couldn’t log you in. Please check your details and try again.',
-			);
+			setLoginError(t('errors.login'));
 		} finally {
 			loginSubmitting.current = false;
 			setIsLoginSubmitting(false);
@@ -84,7 +84,7 @@ export default function Auth({ initialMode = 'login' }: AuthProps) {
 		const data = new FormData(event.currentTarget);
 
 		if (data.get('memberPassword') !== data.get('confirmPassword')) {
-			setPasswordError('Passwords must match.');
+			setPasswordError(t('validation.passwordMatch'));
 
 			event.currentTarget
 				.querySelector<HTMLInputElement>('#signup-confirmPassword')
@@ -115,9 +115,7 @@ export default function Auth({ initialMode = 'login' }: AuthProps) {
 			await signup(input);
 			await router.push('/');
 		} catch {
-			setSignupError(
-				'We couldn’t create your account. Please check your details and try again.',
-			);
+			setSignupError(t('errors.signup'));
 		} finally {
 			signupSubmitting.current = false;
 			setIsSignupSubmitting(false);
@@ -137,17 +135,15 @@ export default function Auth({ initialMode = 'login' }: AuthProps) {
 			>
 				<Card className="wwt-auth-card">
 					<Typography className="wwt-auth-eyebrow">
-						Welcome Back
+						{t('login.eyebrow')}
 					</Typography>
 
 					<Typography component="h1" className="wwt-auth-title">
-						Sign in to your
-						<br />
-						WWT account
+						{t('login.title')}
 					</Typography>
 
 					<Typography className="wwt-auth-description">
-						Continue your journey and explore the world with us.
+						{t('login.description')}
 					</Typography>
 
 					<form
@@ -166,14 +162,14 @@ export default function Auth({ initialMode = 'login' }: AuthProps) {
 						>
 							<div className="wwt-auth-field">
 								<label htmlFor="login-memberNick">
-									Username
+									{t('fields.username')}
 								</label>
 
 								<WWTTextField
 									id="login-memberNick"
 									name="memberNick"
 									autoComplete="username"
-									placeholder="Your username"
+									placeholder={t('fields.usernamePlaceholder')}
 									fullWidth
 									required
 									slotProps={{
@@ -188,7 +184,7 @@ export default function Auth({ initialMode = 'login' }: AuthProps) {
 
 							<div className="wwt-auth-field">
 								<label htmlFor="login-memberPassword">
-									Password
+									{t('fields.password')}
 								</label>
 
 								<WWTTextField
@@ -196,7 +192,7 @@ export default function Auth({ initialMode = 'login' }: AuthProps) {
 									name="memberPassword"
 									type="password"
 									autoComplete="current-password"
-									placeholder="Enter your password"
+									placeholder={t('fields.passwordPlaceholder')}
 									fullWidth
 									required
 									slotProps={{
@@ -220,24 +216,24 @@ export default function Auth({ initialMode = 'login' }: AuthProps) {
 							endIcon={<ArrowForward />}
 						>
 							{isLoginSubmitting
-								? 'Signing in…'
-								: 'Sign In'}
+								? t('login.submitting')
+								: t('login.submit')}
 						</Button>
 					</form>
 
 					<div className="wwt-auth-divider">
-						<span>Or continue with</span>
+						<span>{t('login.social')}</span>
 					</div>
 
 					<SocialLogin />
 
 					<Typography className="wwt-auth-switch">
-						Don’t have an account?{' '}
+						{t('login.new')}{' '}
 						<button
 							type="button"
 							onClick={() => changeMode('signup')}
 						>
-							Sign Up
+							{t('login.signup')}
 						</button>
 					</Typography>
 				</Card>
@@ -250,21 +246,21 @@ export default function Auth({ initialMode = 'login' }: AuthProps) {
 			>
 				<Card className="wwt-auth-card">
 					<Typography className="wwt-auth-eyebrow">
-						Join the Adventure
+						{t('signup.eyebrow')}
 					</Typography>
 
 					<Typography component="h1" className="wwt-auth-title">
-						Create your WWT account
+						{t('signup.title')}
 					</Typography>
 
 					<Typography className="wwt-auth-description">
-						Discover and book unforgettable journeys around the world.
+						{t('signup.description')}
 					</Typography>
 
 					<SocialLogin signup />
 
 					<div className="wwt-auth-divider">
-						<span>Or register with your details</span>
+						<span>{t('signup.details')}</span>
 					</div>
 
 					<form
@@ -283,7 +279,7 @@ export default function Auth({ initialMode = 'login' }: AuthProps) {
 						>
 							<div className="wwt-auth-field">
 								<label htmlFor="signup-memberFullName">
-									Full Name
+									{t('fields.fullName')}
 								</label>
 
 								<WWTTextField
@@ -305,14 +301,14 @@ export default function Auth({ initialMode = 'login' }: AuthProps) {
 
 							<div className="wwt-auth-field">
 								<label htmlFor="signup-memberNick">
-									Username
+									{t('fields.username')}
 								</label>
 
 								<WWTTextField
 									id="signup-memberNick"
 									name="memberNick"
 									autoComplete="username"
-									placeholder="Your username"
+									placeholder={t('fields.usernamePlaceholder')}
 									fullWidth
 									required
 									slotProps={{
@@ -327,7 +323,7 @@ export default function Auth({ initialMode = 'login' }: AuthProps) {
 
 							<div className="wwt-auth-field">
 								<label htmlFor="signup-memberEmail">
-									Email Address (optional)
+									{t('fields.emailOptional')}
 								</label>
 
 								<WWTTextField
@@ -342,7 +338,7 @@ export default function Auth({ initialMode = 'login' }: AuthProps) {
 
 							<div className="wwt-auth-field">
 								<label htmlFor="signup-memberPhone">
-									Phone Number (optional)
+									{t('fields.phoneOptional')}
 								</label>
 
 								<WWTTextField
@@ -350,7 +346,7 @@ export default function Auth({ initialMode = 'login' }: AuthProps) {
 									name="memberPhone"
 									type="tel"
 									autoComplete="tel"
-									placeholder="Your phone number"
+									placeholder={t('fields.phonePlaceholder')}
 									fullWidth
 								/>
 							</div>
@@ -358,7 +354,7 @@ export default function Auth({ initialMode = 'login' }: AuthProps) {
 							<div className="wwt-auth-password-row">
 								<div className="wwt-auth-field">
 									<label htmlFor="signup-memberPassword">
-										Password
+										{t('fields.password')}
 									</label>
 
 									<WWTTextField
@@ -366,7 +362,7 @@ export default function Auth({ initialMode = 'login' }: AuthProps) {
 										name="memberPassword"
 										type="password"
 										autoComplete="new-password"
-										placeholder="6–20 characters"
+										placeholder={t('fields.passwordLength')}
 										fullWidth
 										required
 										slotProps={{
@@ -380,7 +376,7 @@ export default function Auth({ initialMode = 'login' }: AuthProps) {
 
 								<div className="wwt-auth-field">
 									<label htmlFor="signup-confirmPassword">
-										Confirm Password
+										{t('fields.confirmPassword')}
 									</label>
 
 									<WWTTextField
@@ -388,7 +384,7 @@ export default function Auth({ initialMode = 'login' }: AuthProps) {
 										name="confirmPassword"
 										type="password"
 										autoComplete="new-password"
-										placeholder="Repeat password"
+										placeholder={t('fields.confirmPlaceholder')}
 										fullWidth
 										required
 										error={!!passwordError}
@@ -414,9 +410,9 @@ export default function Auth({ initialMode = 'login' }: AuthProps) {
 								/>
 
 								<span>
-									I agree to the{' '}
-									<strong>Terms of Service</strong> and{' '}
-									<strong>Privacy Policy</strong>.
+									{t('signup.termsBefore')}{' '}
+									<strong>{t('signup.terms')}</strong> {t('signup.and')}{' '}
+									<strong>{t('signup.privacy')}</strong>.
 								</span>
 							</label>
 						</fieldset>
@@ -432,18 +428,18 @@ export default function Auth({ initialMode = 'login' }: AuthProps) {
 							endIcon={<ArrowForward />}
 						>
 							{isSignupSubmitting
-								? 'Creating account…'
-								: 'Create Account'}
+								? t('signup.submitting')
+								: t('signup.submit')}
 						</Button>
 					</form>
 
 					<Typography className="wwt-auth-switch">
-						Already have an account?{' '}
+						{t('signup.existing')}{' '}
 						<button
 							type="button"
 							onClick={() => changeMode('login')}
 						>
-							Sign In
+							{t('signup.login')}
 						</button>
 					</Typography>
 				</Card>
@@ -456,20 +452,20 @@ export default function Auth({ initialMode = 'login' }: AuthProps) {
 
 					<Typography className="wwt-auth-overlay-kicker">
 						{mode === 'login'
-							? 'New to WWT?'
-							: 'Already a member?'}
+							? t('overlay.new')
+							: t('overlay.member')}
 					</Typography>
 
 					<h2>
 						{mode === 'login'
-							? 'Join the Adventure'
-							: 'Welcome Back'}
+							? t('overlay.join')
+							: t('overlay.welcome')}
 					</h2>
 
 					<p>
 						{mode === 'login'
-							? 'Discover amazing destinations, unique experiences, and a global community of travelers.'
-							: 'Continue your journey and explore more incredible destinations with WWT.'}
+							? t('overlay.joinText')
+							: t('overlay.welcomeText')}
 					</p>
 
 					<Button
@@ -484,22 +480,22 @@ export default function Auth({ initialMode = 'login' }: AuthProps) {
 							)
 						}
 					>
-						{mode === 'login' ? 'Sign Up' : 'Sign In'}
+						{mode === 'login' ? t('login.signup') : t('login.submit')}
 					</Button>
 
 					<dl className="wwt-auth-stats">
 						<div>
-							<dt>Destinations</dt>
+							<dt>{t('overlay.destinations')}</dt>
 							<dd>140+</dd>
 						</div>
 
 						<div>
-							<dt>Curated Trips</dt>
+							<dt>{t('overlay.trips')}</dt>
 							<dd>850+</dd>
 						</div>
 
 						<div>
-							<dt>Member Rating</dt>
+							<dt>{t('overlay.rating')}</dt>
 							<dd>
 								4.9 <span>★</span>
 							</dd>

@@ -8,8 +8,10 @@ import { useRouter } from 'next/router';
 import { useState } from 'react';
 import AiBot from './AiBot';
 import OpenChat from './OpenChat';
+import { useTranslation } from 'react-i18next';
 
 export default function ChatWidget() {
+	const { t } = useTranslation('chat');
 	const user = useReactiveVar(currentUserVar);
 	const router = useRouter();
 	const [open, setOpen] = useState(false);
@@ -22,17 +24,17 @@ export default function ChatWidget() {
 		<div className={`wwt-chat-widget${open ? ' is-open' : ''}`}>
 			{open && (
 				<Paper className="wwt-chat-panel" role="dialog" aria-modal="false" aria-labelledby="wwt-chat-title">
-					<header><div><Typography id="wwt-chat-title" component="h2">WWT Chat</Typography><Typography color="text.secondary">Connect and plan your journey</Typography></div>
-						<IconButton onClick={() => setOpen(false)} aria-label="Close WWT Chat"><Close /></IconButton></header>
-					<Tabs value={tab} onChange={(_, value: 'open' | 'ai') => setTab(value)} variant="fullWidth" aria-label="WWT chat modes">
-						<Tab value="open" label="Open Chat" /><Tab value="ai" label="AI Assistant" />
+					<header><div><Typography id="wwt-chat-title" component="h2">{t('widget.widgetTitle')}</Typography><Typography color="text.secondary">{t('widget.widgetSubtitle')}</Typography></div>
+						<IconButton onClick={() => setOpen(false)} aria-label={t('widget.closeWidget')}><Close /></IconButton></header>
+					<Tabs value={tab} onChange={(_, value: 'open' | 'ai') => setTab(value)} variant="fullWidth" aria-label={t('widget.modes')}>
+						<Tab value="open" label={t('widget.openChat')} /><Tab value="ai" label={t('widget.aiAssistant')} />
 					</Tabs>
 					<div className="wwt-chat-panel-body">
 						{tab === 'open' ? <OpenChat user={user} socket={socket} /> : <AiBot user={user} socket={socket} />}
 					</div>
 				</Paper>
 			)}
-			<IconButton className="wwt-chat-launcher" onClick={() => setOpen((value) => !value)} aria-label={open ? 'Close WWT Chat' : 'Open WWT Chat'} aria-expanded={open}>
+			<IconButton className="wwt-chat-launcher" onClick={() => setOpen((value) => !value)} aria-label={t(open ? 'widget.closeWidget' : 'widget.openWidget')} aria-expanded={open}>
 				{open ? <Close /> : <ChatBubbleOutline />}
 			</IconButton>
 		</div>

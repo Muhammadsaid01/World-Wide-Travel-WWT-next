@@ -18,30 +18,42 @@
 		min-height: 300px;
 		isolation: isolate;
 		color: #fff;
-		background:
-			linear-gradient(
-				90deg,
-				rgba(5, 28, 53, 0.93) 0%,
-				rgba(6, 39, 70, 0.7) 43%,
-				rgba(6, 39, 70, 0.23) 74%,
-				rgba(6, 39, 70, 0.45) 100%
-			),
-			url('/images/profile/profile-cover.png') center 52% / cover no-repeat,
-			linear-gradient(120deg, #062746, #42657f);
+		background-color: var(--profile-deep-navy);
+		background-image: url('/images/profile/profile-cover.png');
+		background-position: center;
+		background-repeat: no-repeat;
+		background-size: cover;
 		overflow: hidden;
 
+		&::before,
 		&::after {
 			content: '';
 			position: absolute;
-			z-index: -1;
+			z-index: 0;
+			inset: 0;
+			pointer-events: none;
+		}
+
+		&::before {
+			background: linear-gradient(
+				90deg,
+				rgba(5, 28, 53, 0.7) 0%,
+				rgba(6, 39, 70, 0.48) 43%,
+				rgba(6, 39, 70, 0.12) 74%,
+				rgba(6, 39, 70, 0.22) 100%
+			);
+		}
+
+		&::after {
 			inset: auto 0 0;
 			height: 44%;
-			background: linear-gradient(0deg, rgba(3, 24, 46, 0.74), transparent);
-			pointer-events: none;
+			background: linear-gradient(0deg, rgba(3, 24, 46, 0.42), transparent);
 		}
 	}
 
 	.profile-hero-inner {
+		position: relative;
+		z-index: 1;
 		width: min(100%, 1280px);
 		min-height: 300px;
 		margin: 0 auto;
@@ -839,7 +851,6 @@
 	@media (max-width: 700px) {
 		.profile-hero {
 			min-height: 480px;
-			background-position: 63% center;
 		}
 
 		.profile-hero-inner {

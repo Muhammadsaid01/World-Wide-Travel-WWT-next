@@ -27,38 +27,34 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import PackageCard from './PackageCard';
 
 // Confirmed against availablePackageSorts in the backend config.
 const sorts = [
-	{ label: 'Newest', sort: 'createdAt', direction: 'DESC' },
-	{ label: 'Price: low to high', sort: 'packagePrice', direction: 'ASC' },
-	{ label: 'Price: high to low', sort: 'packagePrice', direction: 'DESC' },
-	{ label: 'Highest rated', sort: 'packageRating', direction: 'DESC' },
+	{ labelKey: 'sort.newest', sort: 'createdAt', direction: 'DESC' },
+	{ labelKey: 'sort.priceLow', sort: 'packagePrice', direction: 'ASC' },
+	{ labelKey: 'sort.priceHigh', sort: 'packagePrice', direction: 'DESC' },
+	{ labelKey: 'sort.rating', sort: 'packageRating', direction: 'DESC' },
 ] as const;
 
 const initialInput: PackageListInput = { page: 1, limit: 9, sort: 'createdAt', direction: 'DESC' };
 type FilterKey = 'text' | 'destinationCountry' | 'destinationCity' | 'packageCategory';
 const filterKeys: FilterKey[] = ['text', 'destinationCountry', 'destinationCity', 'packageCategory'];
-const categoryLabel = (value: string) =>
-	value
-		.toLowerCase()
-		.replaceAll('_', ' ')
-		.replace(/^./, (letter) => letter.toUpperCase());
-
-const heroCategories: { label: string; image: string; value?: PackageCategory | '' }[] = [
-	{ label: 'All', image: '/images/packages/catigories/all.png', value: '' },
-	{ label: 'Beach', image: '/images/packages/catigories/beach.png' },
-	{ label: 'City', image: '/images/packages/catigories/city.png' },
-	{ label: 'Mountains', image: '/images/packages/catigories/mountains.png' },
-	{ label: 'Culture', image: '/images/packages/catigories/culture.png', value: PackageCategory.CULTURE },
-	{ label: 'Adventure', image: '/images/packages/catigories/adventure.png', value: PackageCategory.ADVENTURE },
-	{ label: 'Family', image: '/images/packages/catigories/family.png', value: PackageCategory.FAMILY },
-	{ label: 'Luxury', image: '/images/packages/catigories/luxury.png', value: PackageCategory.LUXURY },
+const heroCategories: { key: string; image: string; value?: PackageCategory | '' }[] = [
+	{ key: 'all', image: '/images/packages/catigories/all.png', value: '' },
+	{ key: 'beach', image: '/images/packages/catigories/beach.png' },
+	{ key: 'city', image: '/images/packages/catigories/city.png' },
+	{ key: 'mountains', image: '/images/packages/catigories/mountains.png' },
+	{ key: 'culture', image: '/images/packages/catigories/culture.png', value: PackageCategory.CULTURE },
+	{ key: 'adventure', image: '/images/packages/catigories/adventure.png', value: PackageCategory.ADVENTURE },
+	{ key: 'family', image: '/images/packages/catigories/family.png', value: PackageCategory.FAMILY },
+	{ key: 'luxury', image: '/images/packages/catigories/luxury.png', value: PackageCategory.LUXURY },
 ];
 
 export default function PackageList() {
+	const { t } = useTranslation(['packages', 'common']);
 	const [input, setInput] = useState(initialInput);
 	const [text, setText] = useState('');
 	const [country, setCountry] = useState('');
@@ -203,48 +199,48 @@ export default function PackageList() {
 		return (
 			<form onSubmit={applyFilters} className="packages-filter-form">
 				<div className="packages-filter-heading">
-					<h2>Filters</h2>
+					<h2>{t('filters.title')}</h2>
 					<div>
-						<Button size="small" onClick={resetFilters}>Clear All</Button>
+						<Button size="small" onClick={resetFilters}>{t('actions.clearAll', { ns: 'common' })}</Button>
 						{mobile ? (
-							<IconButton aria-label="Close filters" onClick={() => setMobileFiltersOpen(false)}><CloseIcon /></IconButton>
+							<IconButton aria-label={t('filters.close')} onClick={() => setMobileFiltersOpen(false)}><CloseIcon /></IconButton>
 						) : null}
 					</div>
 				</div>
 				<div className="packages-filter-section">
-					<h3>Destination</h3>
+					<h3>{t('filters.destination')}</h3>
 					<TextField
-						fullWidth size="small" placeholder="Country" value={country}
+						fullWidth size="small" placeholder={t('filters.country')} value={country}
 						onChange={(event) => setCountry(event.target.value)}
 						slotProps={{
-							htmlInput: { 'aria-label': 'Destination country' },
+							htmlInput: { 'aria-label': t('filters.country') },
 							input: { startAdornment: <InputAdornment position="start"><PlaceOutlined /></InputAdornment> },
 						}}
 					/>
 					<TextField
-						fullWidth size="small" placeholder="City" value={city}
+						fullWidth size="small" placeholder={t('filters.city')} value={city}
 						onChange={(event) => setCity(event.target.value)}
 						slotProps={{
-							htmlInput: { 'aria-label': 'Destination city' },
+							htmlInput: { 'aria-label': t('filters.city') },
 							input: { startAdornment: <InputAdornment position="start"><PlaceOutlined /></InputAdornment> },
 						}}
 					/>
 				</div>
 				<div className="packages-filter-section">
-					<h3>Travel Style</h3>
+					<h3>{t('filters.style')}</h3>
 					<RadioGroup
 						name={`${mobile ? 'mobile' : 'desktop'}-package-category`}
 						value={category}
 						onChange={(event) => setCategory(Object.values(PackageCategory).find((value) => value === event.target.value) ?? '')}
 					>
-						<FormControlLabel value="" control={<Radio size="small" />} label="All styles" />
+						<FormControlLabel value="" control={<Radio size="small" />} label={t('filters.allStyles')} />
 						{Object.values(PackageCategory).map((value) => (
-							<FormControlLabel key={value} value={value} control={<Radio size="small" />} label={categoryLabel(value)} />
+							<FormControlLabel key={value} value={value} control={<Radio size="small" />} label={t(`styles.${value}`)} />
 						))}
 					</RadioGroup>
 				</div>
-				<p className="packages-filter-note">Price, duration, and rating filters are unavailable for the current package API.</p>
-				<Button fullWidth type="submit" variant="contained" startIcon={<FilterAltOutlined />}>Apply Filters</Button>
+				<p className="packages-filter-note">{t('filters.note')}</p>
+				<Button fullWidth type="submit" variant="contained" startIcon={<FilterAltOutlined />}>{t('filters.apply')}</Button>
 			</form>
 		);
 	}
@@ -254,9 +250,9 @@ export default function PackageList() {
 			<section className="packages-hero" aria-labelledby="packages-title">
 				<div className="home-container packages-hero-content">
 					<div className="packages-hero-copy">
-						<span className="packages-hero-eyebrow">Explore. Discover. Belong.</span>
-						<h1 id="packages-title">Find Your<br />Next <span>Journey</span></h1>
-						<p>Discover unforgettable travel experiences around the world with WWT. Explore amazing destinations, curated packages, and trusted travel experts.</p>
+						<span className="packages-hero-eyebrow">{t('hero.eyebrow')}</span>
+						<h1 id="packages-title">{t('hero.titleBefore')}<br />{t('hero.titleMiddle')} <span>{t('hero.titleAccent')}</span></h1>
+						<p>{t('hero.description')}</p>
 						<form
 							className="packages-search"
 							onSubmit={(event) => {
@@ -270,30 +266,30 @@ export default function PackageList() {
 						>
 							<SearchIcon aria-hidden="true" />
 							<input
-								aria-label="Search packages"
-								placeholder="Search by destination, city or package name..."
+								aria-label={t('list.searchLabel')}
+								placeholder={t('hero.placeholder')}
 								value={text}
 								onChange={(event) => setText(event.target.value)}
 							/>
-							<Button type="submit" variant="contained">Search</Button>
+							<Button type="submit" variant="contained">{t('actions.search', { ns: 'common' })}</Button>
 						</form>
 					</div>
-					<div className="packages-categories" aria-label="Package categories">
+					<div className="packages-categories" aria-label={t('filters.style')}>
 						{heroCategories.map((item) => {
 							const supported = item.value !== undefined;
 							const selected = supported && appliedCategory === item.value;
 							return (
 								<button
-									key={item.label}
+									key={item.key}
 									type="button"
 									className={selected ? 'is-selected' : undefined}
 									disabled={!supported}
 									aria-pressed={supported ? selected : undefined}
-									title={supported ? `Filter by ${item.label}` : `${item.label} is not supported by the package API`}
+									title={t(`categories.${item.key}`)}
 									onClick={() => { if (item.value !== undefined) selectHeroCategory(item.value); }}
 								>
 									<span><Image src={item.image} alt="" width={52} height={52} /></span>
-									<strong>{item.label}</strong>
+									<strong>{t(`categories.${item.key}`)}</strong>
 								</button>
 							);
 						})}
@@ -306,44 +302,48 @@ export default function PackageList() {
 					className="packages-filter-toggle" variant="contained" startIcon={<TuneIcon />}
 					aria-expanded={mobileFiltersOpen} onClick={() => setMobileFiltersOpen(true)}
 				>
-					Filters{activeFilters.length > 0 ? ` (${activeFilters.length})` : ''}
+					{t('list.mobileFilters')}{activeFilters.length > 0 ? ` (${activeFilters.length})` : ''}
 				</Button>
-				<aside className="packages-sidebar" aria-label="Package filters">{filterForm()}</aside>
+				<aside className="packages-sidebar" aria-label={t('filters.title')}>{filterForm()}</aside>
 				<section className="packages-results" aria-labelledby="packages-results-title" aria-busy={loading}>
 					<div className="packages-results-heading">
 						<div>
-							<h2 id="packages-results-title">Travel Packages</h2>
+							<h2 id="packages-results-title">{t('list.title')}</h2>
 							<p role="status">
 								{loading
-									? 'Finding your next adventure…'
+									? t('list.loading')
 									: !error && total != null
-										? `${total} ${total === 1 ? 'package' : 'packages'} found`
-										: 'Explore available journeys'}
+										? t('list.count', { count: total })
+										: t('list.title')}
 							</p>
 						</div>
 						<TextField
-							className="packages-sort" select size="small" label="Sort by" value={sortIndex}
+							className="packages-sort" select size="small" label={t('sort.label', { ns: 'common' })} value={sortIndex}
 							onChange={(event) => {
 								const sort = sorts[Number(event.target.value)];
 								if (sort) setInput((previous) => ({ ...previous, page: 1, sort: sort.sort, direction: sort.direction }));
 							}}
 						>
-							{sorts.map((sort, index) => <MenuItem key={sort.label} value={index}>{sort.label}</MenuItem>)}
+							{sorts.map((sort, index) => <MenuItem key={sort.labelKey} value={index}>{t(sort.labelKey)}</MenuItem>)}
 						</TextField>
 					</div>
 					{activeFilters.length > 0 ? (
-						<div className="packages-chips" aria-label="Active filters">
+						<div className="packages-chips" aria-label={t('filters.active')}>
 							{activeFilters.map((key) => (
 								<Chip
 									key={key}
-									label={key === 'packageCategory' ? categoryLabel(input.search?.[key] ?? '') : input.search?.[key]}
+									label={
+										key === 'packageCategory' && input.search?.packageCategory
+											? t(`styles.${input.search.packageCategory}`)
+											: input.search?.[key]
+									}
 									onDelete={() => removeFilter(key)}
 								/>
 							))}
 						</div>
 					) : null}
 					{loading ? (
-						<div className="packages-grid" aria-label="Loading packages">
+						<div className="packages-grid" aria-label={t('list.loading')}>
 							{Array.from({ length: initialInput.limit }, (_, index) => (
 								<div className="packages-skeleton" key={index}>
 									<Skeleton variant="rectangular" className="packages-skeleton-image" />
@@ -352,14 +352,13 @@ export default function PackageList() {
 							))}
 						</div>
 					) : error ? (
-						<Alert severity="error" action={<Button color="inherit" onClick={() => void refetch().catch(() => undefined)}>Retry</Button>}>
-							Unable to load packages. Please try again.
+						<Alert severity="error" action={<Button color="inherit" onClick={() => void refetch().catch(() => undefined)}>{t('actions.retry', { ns: 'common' })}</Button>}>
+							{t('list.error')}
 						</Alert>
 					) : list.length === 0 ? (
 						<div className="packages-state" role="status">
-							<SearchIcon /><h2>No packages found</h2>
-							<p>{activeFilters.length ? 'Try a different search or clear your filters.' : 'New journeys will appear here when available.'}</p>
-							{activeFilters.length > 0 ? <Button onClick={resetFilters}>Clear Filters</Button> : null}
+							<SearchIcon /><h2>{t('list.empty')}</h2>
+							{activeFilters.length > 0 ? <Button onClick={resetFilters}>{t('actions.clearAll', { ns: 'common' })}</Button> : null}
 						</div>
 					) : (
 						<div className="packages-grid">
@@ -387,11 +386,11 @@ export default function PackageList() {
 			<div className="home-container packages-offer-wrap">
 				<section className="packages-offer" aria-labelledby="packages-offer-title">
 					<div>
-						<span>Plan your next escape</span>
-						<h2 id="packages-offer-title">Make Your Dream Trip Happen</h2>
-						<p>Discover active WWT travel packages and choose the journey that fits you.</p>
+						<span>{t('promo.eyebrow')}</span>
+						<h2 id="packages-offer-title">{t('promo.title')}</h2>
+						<p>{t('promo.description')}</p>
 					</div>
-					<Button component={Link} href="#packages-results-title" variant="contained">Explore Packages</Button>
+					<Button component={Link} href="#packages-results-title" variant="contained">{t('promo.action')}</Button>
 				</section>
 			</div>
 

@@ -1,8 +1,10 @@
 import { useQuery } from '@apollo/client';
 import { Alert, Box, Button, Skeleton, Stack, Typography } from '@mui/material';
 import { GET_PACKAGE_ITINERARIES } from '@/apollo/user/query';
+import { useTranslation } from 'react-i18next';
 
 export default function PackageItinerary({ packageId }: { packageId: string }) {
+	const { t } = useTranslation(['packages', 'common']);
 	const { data, loading, error, refetch } = useQuery(GET_PACKAGE_ITINERARIES, {
 		variables: { packageId },
 		notifyOnNetworkStatusChange: true,
@@ -10,9 +12,9 @@ export default function PackageItinerary({ packageId }: { packageId: string }) {
 
 	return (
 		<section className="detail-section" aria-labelledby="itinerary-title" aria-busy={loading}>
-			<h2 id="itinerary-title">Itinerary</h2>
+			<h2 id="itinerary-title">{t('detail.itinerary')}</h2>
 			{loading ? (
-				<Stack spacing={2} role="status" aria-label="Loading itinerary">
+				<Stack spacing={2} role="status" aria-label={t('detail.loadingItinerary')}>
 					<Skeleton variant="rounded" height={100} />
 					<Skeleton variant="rounded" height={100} />
 				</Stack>
@@ -26,14 +28,14 @@ export default function PackageItinerary({ packageId }: { packageId: string }) {
 								void refetch().catch(() => undefined);
 							}}
 						>
-							Retry
+							{t('actions.retry', { ns: 'common' })}
 						</Button>
 					}
 				>
-					Itinerary could not be loaded. Please try again.
+					{t('detail.itineraryError')}
 				</Alert>
 			) : data.getItineraries.length === 0 ? (
-				<Alert severity="info">No itinerary information available.</Alert>
+				<Alert severity="info">{t('detail.noItinerary')}</Alert>
 			) : (
 				<Box component="ol" sx={{ listStyle: 'none', p: 0, m: 0 }}>
 					{[...data.getItineraries]
@@ -64,7 +66,7 @@ export default function PackageItinerary({ packageId }: { packageId: string }) {
 								}}
 							>
 								<Typography component="div" variant="overline" sx={{ color: 'primary.main', fontWeight: 700 }}>
-									Day {day.dayNumber}
+									{t('detail.day', { number: day.dayNumber })}
 								</Typography>
 								<Typography component="h3" variant="subtitle1" sx={{ fontWeight: 700 }}>
 									{day.title}

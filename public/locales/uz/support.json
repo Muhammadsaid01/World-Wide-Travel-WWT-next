@@ -1,0 +1,28 @@
+{
+	"faq": {
+		"eyebrow": "YORDAM MARKAZI",
+		"title": "Sizga qanday yordam beramiz?",
+		"description": "WWT sayohat paketlari, bronlar, to‘lovlar, agentlar va hisob bo‘yicha ko‘p so‘raladigan savollarga javob toping.",
+		"search": "Ko‘p so‘raladigan savollarni qidirish…",
+		"searchLabel": "Savollarni qidirish",
+		"all": "Barchasi",
+		"categoryTitle": "{{category}} savollari",
+		"categories": {
+			"GENERAL": "Umumiy",
+			"ACCOUNT": "Hisob",
+			"BOOKING": "Bron",
+			"PAYMENT": "To‘lov",
+			"REFUND": "Qaytarish",
+			"AGENT": "Agentlar",
+			"PACKAGE": "Paketlar",
+			"TRAVEL_MATE": "Sayohatdosh"
+		},
+		"loading": "Savollar yuklanmoqda",
+		"error": "Savollarni yuklab bo‘lmadi.",
+		"empty": "Javoblar topilmadi",
+		"emptyHelp": "Boshqa qidiruv yoki toifani sinab ko‘ring.",
+		"contact": "Yana yordam kerakmi?",
+		"contactText": "Yordam guruhimizga murojaat yuboring, uni ko‘rib chiqamiz.",
+		"report": "Yordamga murojaat"
+	}
+}

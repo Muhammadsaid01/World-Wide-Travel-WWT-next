@@ -7,26 +7,28 @@ import { Avatar, Box, Button, Paper, Snackbar, Stack, Tooltip, Typography } from
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 import { packageImageUrl } from './PackageImage';
+import { useTranslation } from 'react-i18next';
 
 export default function PackageAgentCard({ agent }: { agent: NonNullable<PackageDetailData['agentData']> }) {
+	const { t } = useTranslation('packages');
 	const [notice, setNotice] = useState('');
 	const name =
 		agent.memberData?.memberFullName?.trim() ||
 		agent.memberData?.memberNick?.trim() ||
 		agent.companyName?.trim() ||
-		'Travel Agent';
+		t('detail.agentFallback');
 	const router = useRouter();
 
 	function handleAskQuestion(memberId: string) {
 		if (!memberId) return;
 		// Future createConversation input.memberTwoId must use this Member ID,
 		// never agent._id. Chat components and routing are currently unimplemented.
-		setNotice('Private messaging is not available yet.');
+		setNotice(t('detail.messageUnavailable'));
 	}
 
 	return (
 		<section className="detail-section">
-			<h2>Your Travel Agent</h2>
+			<h2>{t('detail.agent')}</h2>
 			<Paper
 				variant="outlined"
 				sx={{ p: { xs: 2.5, sm: 3 }, borderRadius: 2, boxShadow: '0 4px 18px rgba(7,31,55,0.04)' }}
@@ -50,8 +52,8 @@ export default function PackageAgentCard({ agent }: { agent: NonNullable<Package
 									{name}
 								</Typography>
 								{agent.verificationStatus === AgentVerificationStatus.APPROVED && (
-									<Tooltip title="Verified agent">
-										<Verified fontSize="small" color="primary" aria-label="Verified agent" sx={{ flexShrink: 0 }} />
+									<Tooltip title={t('detail.verifiedAgent')}>
+										<Verified fontSize="small" color="primary" aria-label={t('detail.verifiedAgent')} sx={{ flexShrink: 0 }} />
 									</Tooltip>
 								)}
 							</Stack>
@@ -64,7 +66,7 @@ export default function PackageAgentCard({ agent }: { agent: NonNullable<Package
 								{typeof agent.agentRating === 'number' && (
 									<Stack direction="row" spacing={0.5} sx={{ alignItems: 'center' }}>
 										<Star fontSize="small" sx={{ color: 'secondary.main' }} />
-										<Typography variant="body2" aria-label={`Agent rating ${agent.agentRating} out of 5`}>
+										<Typography variant="body2" aria-label={t('detail.agentRating', { rating: agent.agentRating })}>
 											{agent.agentRating.toFixed(1)}
 										</Typography>
 									</Stack>
@@ -73,7 +75,7 @@ export default function PackageAgentCard({ agent }: { agent: NonNullable<Package
 									<Stack direction="row" spacing={0.5} sx={{ alignItems: 'center' }}>
 										<LuggageOutlined fontSize="small" color="action" />
 										<Typography variant="body2" color="text.secondary">
-											{agent.agentPackageCount} {agent.agentPackageCount === 1 ? 'Package' : 'Packages'}
+											{t('detail.agentPackages', { count: agent.agentPackageCount })}
 										</Typography>
 									</Stack>
 								)}
@@ -82,11 +84,11 @@ export default function PackageAgentCard({ agent }: { agent: NonNullable<Package
 					</Stack>
 					<Stack spacing={1} sx={{ width: { xs: '100%', sm: 170 }, flexShrink: 0 }}>
 						<Button variant="contained" disabled={!agent.memberId} onClick={() => handleAskQuestion(agent.memberId)}>
-							Ask a Question
+							{t('detail.askQuestion')}
 						</Button>
 						{/* No Agent Profile route exists. Future navigation must use agent._id. */}
 						<Button variant="outlined"  aria-describedby="agent-profile-unavailable" onClick={() => router.push(`/agent/${agent._id}`)}>
-							View Profile
+							{t('detail.viewProfile')}
 						</Button>
 					</Stack>
 				</Stack>

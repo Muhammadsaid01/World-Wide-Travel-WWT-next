@@ -1,0 +1,69 @@
+{
+	"skipToContent": "Skip to content",
+	"navigation": {
+		"main": "Main navigation",
+		"mobile": "Mobile navigation",
+		"home": "Home",
+		"packages": "Packages",
+		"agents": "Agents",
+		"community": "Community",
+		"profile": "My Profile",
+		"support": "CS Center"
+	},
+	"language": { "label": "Language", "menu": "Choose language" },
+	"account": {
+		"login": "Login",
+		"menu": "Account menu for {{name}}",
+		"profile": "My Profile",
+		"chats": "Chats",
+		"admin": "Admin Dashboard",
+		"logout": "Logout"
+	},
+	"actions": {
+		"search": "Search",
+		"clear": "Clear",
+		"clearAll": "Clear All",
+		"clearFilters": "Clear filters",
+		"retry": "Retry",
+		"viewAll": "View All →",
+		"viewDetails": "View Details",
+		"back": "Back",
+		"cancel": "Cancel",
+		"save": "Save",
+		"delete": "Delete",
+		"edit": "Edit",
+		"close": "Close",
+		"submit": "Submit",
+		"loadMore": "Load more"
+	},
+	"states": {
+		"loading": "Loading…",
+		"updating": "Updating…",
+		"opening": "Opening…",
+		"unavailable": "Unavailable",
+		"noResults": "No results found."
+	},
+	"sort": { "label": "Sort by:", "newest": "Newest", "oldest": "Oldest" },
+	"notifications": "Notifications",
+	"notificationsUnread": "Notifications, {{count}} unread",
+	"savedPackages": "Saved packages",
+	"unreadMessages": "{{count}} unread messages",
+	"footer": {
+		"brand": "World Wide Travel",
+		"description": "Discover inspiring journeys, explore travel packages, and connect with a world of fellow travelers.",
+		"explore": "Explore",
+		"company": "Company",
+		"support": "Support",
+		"social": "Social",
+		"deals": "Deals",
+		"coupons": "Coupons",
+		"about": "About",
+		"contact": "Contact",
+		"faq": "FAQ",
+		"terms": "Terms",
+		"privacy": "Privacy",
+		"copyright": "© 2026 World Wide Travel (WWT). All rights reserved.",
+		"languages": "English · 한국어 · Русский · O‘zbekcha",
+		"comingSoon": "{{name}} coming soon"
+	}
+}

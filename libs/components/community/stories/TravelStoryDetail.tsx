@@ -13,30 +13,22 @@ import { useCallback, useRef, useState } from 'react';
 import { currentUserVar } from '@/apollo/store';
 import { LIKE_TARGET_BOARD_ARTICLE } from '@/apollo/user/mutation';
 import { GET_COMMUNITY_ARTICLE_DETAIL, type CommunityArticleDetail } from '@/apollo/user/query';
-import { ArticleCategory } from '@/libs/enums/community.enum';
 import PackageImage, { packageImageUrl } from '../../package/PackageImage';
 import { formatScheduleDate } from '../../package/PackageSchedules';
 import CommentSection from '../article/CommentSection';
-import { memberName, memberRole } from '../communityState';
+import { memberName } from '../communityState';
 import ReportForm from '../../cs/ReportForm';
 import { ReportTargetType } from '@/libs/enums/system.enum';
-
-const categoryLabels: Record<ArticleCategory, string> = {
-	[ArticleCategory.FREE]: 'Free',
-	[ArticleCategory.TRAVEL_TIP]: 'Travel Tips',
-	[ArticleCategory.TRAVEL_REVIEW]: 'Travel Reviews',
-	[ArticleCategory.QUESTION]: 'Questions',
-	[ArticleCategory.FIND_COMPANION]: 'Find Companion',
-	[ArticleCategory.NOTICE]: 'Notice',
-};
+import { useTranslation } from 'react-i18next';
 
 function isNotFoundError(message?: string) {
 	return message?.toLowerCase().includes('no data found') ?? false;
 }
 
 function LoadingState() {
+	const { t } = useTranslation('community');
 	return (
-		<article className="travel-story-article" aria-label="Loading travel story">
+		<article className="travel-story-article" aria-label={t('stories.loading')}>
 			<Skeleton variant="rectangular" height={410} />
 			<div className="travel-story-detail-body">
 				<Skeleton width={90} />
@@ -50,26 +42,28 @@ function LoadingState() {
 }
 
 function NotFoundState() {
+	const { t } = useTranslation('community');
 	return (
 		<div className="travel-story-detail-empty">
-			<Typography component="h1">Story not found</Typography>
-			<Typography>This travel story is no longer available.</Typography>
+			<Typography component="h1">{t('stories.notFound')}</Typography>
 			<Button component={Link} href="/community/stories">
-				Back to Travel Stories
+				{t('stories.back')}
 			</Button>
 		</div>
 	);
 }
 
 function ErrorState({ onRetry }: { onRetry: () => void }) {
+	const { t } = useTranslation(['community', 'common']);
 	return (
-		<Alert severity="error" action={<Button onClick={onRetry}>Retry</Button>}>
-			Travel story could not be loaded.
+		<Alert severity="error" action={<Button onClick={onRetry}>{t('actions.retry', { ns: 'common' })}</Button>}>
+			{t('stories.error')}
 		</Alert>
 	);
 }
 
 function ArticleContent({ article }: { article: CommunityArticleDetail }) {
+	const { t } = useTranslation('community');
 	const paragraphs = article.articleContent
 		.split(/\r?\n+/)
 		.map((paragraph) => paragraph.trim())
@@ -78,11 +72,12 @@ function ArticleContent({ article }: { article: CommunityArticleDetail }) {
 	return paragraphs.length ? (
 		paragraphs.map((paragraph, index) => <Typography key={`${article._id}-paragraph-${index}`}>{paragraph}</Typography>)
 	) : (
-		<Typography>This story does not have any content yet.</Typography>
+		<Typography>{t('stories.emptyContent')}</Typography>
 	);
 }
 
 export default function TravelStoryDetail({ id, ready }: { id: string; ready: boolean }) {
+	const { t, i18n } = useTranslation(['community', 'common']);
 	const router = useRouter();
 	const user = useReactiveVar(currentUserVar);
 	const valid = /^[a-f\d]{24}$/i.test(id);
@@ -103,8 +98,8 @@ export default function TravelStoryDetail({ id, ready }: { id: string; ready: bo
 		(!valid ||
 			error?.graphQLErrors.some((item) => isNotFoundError(item.message)) ||
 			(!loading && !error && !article));
-	const author = article?.memberData ? memberName(article.memberData) : 'Member unavailable';
-	const authorRole = memberRole(article?.memberData);
+	const author = article?.memberData ? memberName(article.memberData) : t('article.unknownAuthor');
+	const authorRole = t(`article.roles.${article?.memberData?.memberType ?? 'UNKNOWN'}`);
 	const currentLikeOverride = likeOverride?.articleId === article?._id ? likeOverride : null;
 	const isLiked = currentLikeOverride?.liked ?? Boolean(article?.meLiked?.[0]?.meLiked);
 	const likeCount = currentLikeOverride?.count ?? article?.articleLikeCount ?? 0;
@@ -127,10 +122,10 @@ export default function TravelStoryDetail({ id, ready }: { id: string; ready: bo
 		try {
 			const response = await likeArticle({ variables: { articleId: article._id } });
 			const nextCount = response.data?.likeTargetBoardArticle.articleLikeCount;
-			if (typeof nextCount !== 'number') throw new Error('The like count was not returned.');
+			if (typeof nextCount !== 'number') throw new Error(t('stories.likeError'));
 			setLikeOverride({ articleId: article._id, liked: !isLiked, count: nextCount });
 		} catch (failure: unknown) {
-			setLikeError(failure instanceof Error ? failure.message : 'Unable to update the like. Please try again.');
+			setLikeError(failure instanceof Error ? failure.message : t('stories.likeError'));
 		} finally {
 			likeLock.current = false;
 			setLikeBusy(false);
@@ -140,17 +135,17 @@ export default function TravelStoryDetail({ id, ready }: { id: string; ready: bo
 	return (
 		<div className="travel-story-detail">
 			<Head>
-				<title>{article?.articleTitle || 'Travel Story'} | WWT</title>
+				<title>{article?.articleTitle || t('stories.title')} | WWT</title>
 			</Head>
 			<div className="travel-stories-container">
-				<Breadcrumbs separator="›" aria-label="Breadcrumb">
-					<Link href="/"><HomeOutlined fontSize="small" /> Home</Link>
-					<Link href="/community">Community</Link>
-					<Link href="/community/stories">Travel Stories</Link>
-					<span aria-current="page">{article?.articleTitle || 'Travel Story'}</span>
+				<Breadcrumbs separator="›" aria-label={t('stories.breadcrumb')}>
+					<Link href="/"><HomeOutlined fontSize="small" /> {t('navigation.home', { ns: 'common' })}</Link>
+					<Link href="/community">{t('navigation.community', { ns: 'common' })}</Link>
+					<Link href="/community/stories">{t('stories.title')}</Link>
+					<span aria-current="page">{article?.articleTitle || t('stories.title')}</span>
 				</Breadcrumbs>
 				<Button component={Link} href="/community/stories" startIcon={<ArrowBack />} className="travel-story-detail-back">
-					Back to Travel Stories
+					{t('stories.back')}
 				</Button>
 				{!ready || loading ? (
 					<LoadingState />
@@ -165,7 +160,7 @@ export default function TravelStoryDetail({ id, ready }: { id: string; ready: bo
 								<PackageImage path={article.articleImages[0]} alt={article.articleTitle} />
 							</div>
 							<div className="travel-story-detail-body">
-								<Chip label={categoryLabels[article.articleCategory]} size="small" />
+								<Chip label={t(`categories.${article.articleCategory}`)} size="small" />
 								<Typography component="h1">{article.articleTitle}</Typography>
 								<div className="travel-story-detail-meta">
 									<div className="travel-story-detail-author">
@@ -177,7 +172,7 @@ export default function TravelStoryDetail({ id, ready }: { id: string; ready: bo
 											<small>{authorRole}</small>
 										</span>
 									</div>
-									<time dateTime={article.createdAt}>{formatScheduleDate(article.createdAt)}</time>
+									<time dateTime={article.createdAt}>{formatScheduleDate(article.createdAt, i18n.language)}</time>
 									{user?._id !== article.memberData?._id ? (
 										<ReportForm
 											targetId={article._id}
@@ -187,22 +182,22 @@ export default function TravelStoryDetail({ id, ready }: { id: string; ready: bo
 										/>
 									) : null}
 								</div>
-								<div className="travel-story-detail-stats" aria-label="Story engagement">
+								<div className="travel-story-detail-stats" aria-label={t('stories.engagement')}>
 									<span className="travel-story-like-stat">
 										<button
 											type="button"
 											className={`travel-story-like-control${isLiked ? ' is-liked' : ''}`}
 											disabled={likeBusy}
-											aria-label={`${isLiked ? 'Unlike' : 'Like'} this travel story (${likeCount} likes)`}
+											aria-label={t(isLiked ? 'stories.unlike' : 'stories.like')}
 											aria-pressed={isLiked}
 											onClick={() => void handleLike()}
 										>
 											{isLiked ? <Favorite /> : <FavoriteBorder />}
-											{likeCount} likes
+											{t('stories.likes', { count: likeCount })}
 										</button>
 									</span>
-									<span><ChatBubbleOutline /> {commentCount} comments</span>
-									<span><VisibilityOutlined /> {article.articleViewCount} views</span>
+									<span><ChatBubbleOutline /> {t('stories.comments', { count: commentCount })}</span>
+									<span><VisibilityOutlined /> {t('stories.views', { count: article.articleViewCount })}</span>
 								</div>
 								{likeError && <Alert severity="error" className="travel-story-like-error">{likeError}</Alert>}
 								<div className="travel-story-detail-content">

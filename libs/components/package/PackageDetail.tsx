@@ -25,8 +25,10 @@ import PackagePolicy from './PackagePolicy';
 import PackageReviews from './PackageReviews';
 import PackageSchedules from './PackageSchedules';
 import PackageTags from './PackageTags';
+import { useTranslation } from 'react-i18next';
 
 export default function PackageDetail({ id, ready }: { id: string; ready: boolean }) {
+	const { t } = useTranslation(['packages', 'common']);
 	// The route keys this component by package ID, resetting selection on navigation.
 	const [selectedScheduleId, setSelectedScheduleId] = useState<string | null>(null);
 	const user = useReactiveVar(currentUserVar);
@@ -134,7 +136,7 @@ async function handleFavoriteToggle(packageId: string) {
 
 	if (!ready || loading)
 		return (
-			<div className="package-detail detail-container" aria-busy="true" aria-label="Loading package">
+			<div className="package-detail detail-container" aria-busy="true" aria-label={t('detail.loading')}>
 				<Skeleton width="40%" height={40} />
 				<Skeleton height={80} />
 				<Skeleton variant="rounded" height={420} />
@@ -147,25 +149,25 @@ async function handleFavoriteToggle(packageId: string) {
 	if (notFound || (!error && !item))
 		return (
 			<div className="package-detail detail-container detail-state">
-				<h1>Package not found</h1>
+				<h1>{t('detail.notFound')}</h1>
 				<Button component={Link} href="/package">
-					Back to Packages
+					{t('detail.back')}
 				</Button>
 			</div>
 		);
 	if (error || !item)
 		return (
 			<div className="package-detail detail-container detail-state">
-				<Alert severity="error">Unable to load this package.</Alert>
+				<Alert severity="error">{t('detail.error')}</Alert>
 				<Button
 					onClick={() => {
 						void refetch().catch(() => undefined);
 					}}
 				>
-					Retry
+					{t('actions.retry', { ns: 'common' })}
 				</Button>
 				<Button component={Link} href="/package">
-					Back to Packages
+					{t('detail.back')}
 				</Button>
 			</div>
 		);
@@ -179,8 +181,8 @@ async function handleFavoriteToggle(packageId: string) {
 			</Head>
 			<div className="detail-container">
 				<Breadcrumbs className="detail-breadcrumbs">
-					<Link href="/">Home</Link>
-					<Link href="/package">Packages</Link>
+					<Link href="/">{t('navigation.home', { ns: 'common' })}</Link>
+					<Link href="/package">{t('navigation.packages', { ns: 'common' })}</Link>
 					<span aria-current="page">{item.packageTitle}</span>
 				</Breadcrumbs>
 				<header className="detail-header">
@@ -192,18 +194,18 @@ async function handleFavoriteToggle(packageId: string) {
 								{item.destinationCity}, {item.destinationCountry}
 							</span>
 							<span>
-								{item.packageDays} days / {item.packageNights} nights
+								{t('card.daysNights', { days: item.packageDays, nights: item.packageNights })}
 							</span>
 							<span>
 								{item.packageReviewCount > 0
-									? `★ ${item.packageRating.toFixed(1)} (${item.packageReviewCount} reviews)`
-									: 'No reviews yet'}
+									? `★ ${item.packageRating.toFixed(1)} ${t('card.reviews', { count: item.packageReviewCount })}`
+									: t('card.noReviews')}
 							</span>
 						</div>
 					</div>
 					<div className="detail-actions">
 						<Button disabled startIcon={<ShareOutlined />}>
-							Share
+							{t('detail.share')}
 						</Button>
 						<Button
 							disabled={favoriteBusyId === item._id}
@@ -218,7 +220,7 @@ async function handleFavoriteToggle(packageId: string) {
 								void handleFavoriteToggle(item._id);
 							}}
 						>
-							{savedIds.has(item._id) ? 'Saved' : 'Save'}
+							{savedIds.has(item._id) ? t('detail.saved') : t('detail.save')}
 						</Button>
 					</div>
 				</header>
@@ -240,7 +242,7 @@ async function handleFavoriteToggle(packageId: string) {
 							onSelectSchedule={setSelectedScheduleId}
 						/>
 						<section className="detail-section">
-							<h2>About this journey</h2>
+							<h2>{t('detail.about')}</h2>
 							{item.packageShortDesc && <p className="detail-lead detail-prose">{item.packageShortDesc}</p>}
 							<p className="detail-prose">{item.packageDesc}</p>
 						</section>
@@ -261,8 +263,8 @@ async function handleFavoriteToggle(packageId: string) {
 				</div>
 				{!related.error && relatedItems.length > 0 && (
 					<section className="detail-related">
-						<h2>You May Also Like</h2>
-						<p>More journeys in the same category.</p>
+						<h2>{t('detail.related')}</h2>
+						<p>{t('detail.relatedText')}</p>
 						<div className="detail-related-grid">
 							{relatedItems.map((entry) => (
 								<PackageCard

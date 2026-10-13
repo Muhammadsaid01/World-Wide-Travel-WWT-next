@@ -1,0 +1,98 @@
+{
+	"hero": {
+		"aria": "Tavsiya etilgan manzillar",
+		"eyebrow": "KASHF ETING. O‘RGANING. BIRGA SAYOHAT QILING.",
+		"titleBefore": "Keyingi",
+		"titleAccent": "sayohatingiz",
+		"titleAfter": "shu yerdan boshlanadi",
+		"description": "Ajoyib manzillar, ishonchli sayohat agentlari va sizga mos sayohatlarni kashf eting.",
+		"explore": "Paketlarni ko‘rish",
+		"previous": "Oldingi manzil slaydi",
+		"next": "Keyingi manzil slaydi",
+		"choose": "Manzil slaydini tanlash",
+		"showSlide": "{{number}}-slaydni ko‘rsatish: {{name}}"
+	},
+	"search": {
+		"destination": "Manzil",
+		"destinationPlaceholder": "Qayerga bormoqchisiz?",
+		"dates": "Sayohat sanalari",
+		"datesPlaceholder": "Sanalarni tanlang",
+		"travelers": "Sayohatchilar",
+		"travelersValue": "{{count}} sayohatchi",
+		"aria": "Sayohat paketlarini qidirish"
+	},
+	"categories": {
+		"eyebrow": "Sayohat uslubingizni toping",
+		"title": "Toifa bo‘yicha ko‘ring",
+		"aria": "Sayohat uslubini tanlash",
+		"adventure": "Sarguzasht",
+		"beach": "Sohil",
+		"culture": "Madaniyat",
+		"food": "Taomlar",
+		"nature": "Tabiat",
+		"luxury": "Hashamatli",
+		"family": "Oilaviy",
+		"city": "Shahar",
+		"honeymoon": "Asal oyi",
+		"business": "Biznes"
+	},
+	"flags": "Dunyo bo‘ylab manzillarni kashf eting",
+	"offers": {
+		"eyebrow": "Sayohatingizdan ko‘proq bahra oling",
+		"title": "Maxsus takliflar",
+		"loading": "Maxsus takliflar yuklanmoqda",
+		"error": "Takliflar vaqtincha mavjud emas.",
+		"empty": "Hozircha ochiq takliflar mavjud emas.",
+		"minimum": "Eng kam {{amount}} · {{date}} gacha amal qiladi",
+		"percentOff": "{{value}}% chegirma",
+		"amountOff": "{{value}} chegirma",
+		"explore": "Ko‘rish"
+	},
+	"destinations": {
+		"eyebrow": "Keyingi sayohat uchun g‘oyalar",
+		"title": "Mashhur manzillar",
+		"all": "Barcha paketlarni ko‘rish →",
+		"error": "Manzillarni yuklab bo‘lmadi.",
+		"empty": "Hozircha manzillar mavjud emas."
+	},
+	"packages": {
+		"eyebrow": "Saralangan sayohatlar",
+		"title": "Mashhur sayohat paketlari",
+		"all": "Barcha paketlarni ko‘rish →",
+		"error": "Paketlarni yuklab bo‘lmadi.",
+		"empty": "Hozircha faol sayohat paketlari yo‘q."
+	},
+	"agents": {
+		"eyebrow": "Ishonchli yo‘l-yo‘riq",
+		"title": "Eng yaxshi sayohat agentlari",
+		"all": "Barcha agentlarni ko‘rish →",
+		"error": "Agentlarni yuklab bo‘lmadi.",
+		"empty": "Hozircha faol sayohat agentlari yo‘q."
+	},
+	"why": {
+		"title": "Nega WWTni tanlashadi",
+		"trustedTitle": "Ishonchli agentlar",
+		"trustedText": "Tekshirilgan va tajribali sayohat mutaxassislari.",
+		"secureTitle": "Xavfsiz bron",
+		"secureText": "Ishonchli va xavfsiz bron qilish jarayoni.",
+		"experiencesTitle": "Eng yaxshi sayohatlar",
+		"experiencesText": "Sinchiklab tanlangan sayohat paketlari.",
+		"supportTitle": "24/7 yordam",
+		"supportText": "Kerak bo‘lgan paytda sayohat yordami.",
+		"communityTitle": "Sayohatchilar hamjamiyati",
+		"communityText": "Sayohat hikoyalarini ulashing va keyingi safarni rejalashtirayotganlar bilan bog‘laning."
+	},
+	"stories": {
+		"eyebrow": "Hamjamiyatimiz hikoyalari",
+		"title": "Sayohat hikoyalari",
+		"description": "Haqiqiy sayohatlar, foydali maslahatlar va boshqa sayohatchilardan ilhom.",
+		"all": "Barcha hikoyalarni ko‘rish →",
+		"error": "Hikoyalarni yuklab bo‘lmadi.",
+		"empty": "Hozircha sayohat hikoyalari chop etilmagan."
+	},
+	"cta": {
+		"title": "Keyingi sayohatingiz shu yerdan boshlanadi",
+		"description": "Ajoyib joylarni kashf eting va unutilmas xotiralar yarating.",
+		"button": "Paketlarni ko‘rish"
+	}
+}

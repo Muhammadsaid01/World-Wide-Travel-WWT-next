@@ -9,14 +9,16 @@ import { GET_COMMUNITY_ARTICLES, GET_MORE_TRAVEL_MATES } from '@/apollo/user/que
 import ArticleList from './article/ArticleList';
 import TravelMateList from './travel-mate/TravelMateList';
 import { COMMUNITY_LIMIT, escapeTravelMateSearch, type CommunityDirection, type CommunityTab } from './communityState';
+import { useTranslation } from 'react-i18next';
 
-const tabs: { value: CommunityTab; label: string }[] = [
-	{ value: 'all', label: 'All' },
-	{ value: 'stories', label: 'Travel Stories' },
-	{ value: 'mates', label: 'Travel Mate' },
+const tabs: { value: CommunityTab; labelKey: string }[] = [
+	{ value: 'all', labelKey: 'home.all' },
+	{ value: 'stories', labelKey: 'home.stories' },
+	{ value: 'mates', labelKey: 'home.mates' },
 ];
 
 export default function CommunityHome() {
+	const { t } = useTranslation(['community', 'common']);
 	const user = useReactiveVar(currentUserVar);
 	const [tab, setTab] = useState<CommunityTab>('all');
 	const [draft, setDraft] = useState('');
@@ -65,7 +67,7 @@ export default function CommunityHome() {
 	};
 	const discoveryControls = (
 		<div className="community-discovery-controls">
-			<div className="community-tabs" role="tablist" aria-label="Community content">
+			<div className="community-tabs" role="tablist" aria-label={t('navigation.community', { ns: 'common' })}>
 				{tabs.map((item) => (
 					<Button
 						key={item.value}
@@ -77,12 +79,12 @@ export default function CommunityHome() {
 							setArticlePage(1);
 						}}
 					>
-						{item.label}
+						{t(item.labelKey)}
 					</Button>
 				))}
 			</div>
 			<div className="community-sort">
-				<Typography component="span">Sort by:</Typography>
+				<Typography component="span">{t('sort.label', { ns: 'common' })}</Typography>
 				<TextField
 					select
 					size="small"
@@ -93,8 +95,8 @@ export default function CommunityHome() {
 					}}
 					slotProps={{ htmlInput: { 'aria-label': 'Sort community content' } }}
 				>
-					<MenuItem value="DESC">Newest</MenuItem>
-					<MenuItem value="ASC">Oldest</MenuItem>
+					<MenuItem value="DESC">{t('sort.newest', { ns: 'common' })}</MenuItem>
+					<MenuItem value="ASC">{t('sort.oldest', { ns: 'common' })}</MenuItem>
 				</TextField>
 			</div>
 		</div>
@@ -103,21 +105,21 @@ export default function CommunityHome() {
 		<section className="community-promo" aria-labelledby="community-promo-title">
 			<div className="community-promo-copy">
 				<Typography component="span" className="community-eyebrow">
-					Join our global community
+					{t('home.bannerEyebrow')}
 				</Typography>
 				<Typography component="h2" id="community-promo-title">
-					Share Your Story with the World
+					{t('home.bannerTitle')}
 				</Typography>
 				<Typography>
-					Inspire fellow travelers, exchange travel tips, and connect with amazing people.
+					{t('home.bannerText')}
 				</Typography>
 			</div>
 			<div className="community-promo-actions">
 				<Button component={Link} href={user ? '/community/stories/create' : '/account/login'} variant="contained">
-					Share a Story
+					{t('home.share')}
 				</Button>
 				<Button component={Link} href="/community/travel-mate" variant="outlined">
-					Find Travel Mate
+					{t('home.findMate')}
 				</Button>
 			</div>
 		</section>
@@ -127,21 +129,21 @@ export default function CommunityHome() {
 			<section className="community-hero">
 				<div className="community-shell">
 					<Typography component="span" className="community-hero-eyebrow">
-						Share. Inspire. Explore Together.
+						{t('home.eyebrow')}
 					</Typography>
 					<Typography component="h1">
-						WWT <strong>Community</strong>
+						{t('home.titleBefore')} <strong>{t('home.titleAccent')}</strong>
 					</Typography>
 					<Typography component="p">
-						Share your journey, discover real travel stories, and find the perfect companion for your next adventure.
+						{t('home.description')}
 					</Typography>
 					<form className="community-hero-search" role="search" onSubmit={submitSearch}>
 						<TextField
-							placeholder="Search stories or travel-mate titles..."
+							placeholder={t('home.search')}
 							value={draft}
 							onChange={(event) => setDraft(event.target.value)}
 							slotProps={{
-								htmlInput: { 'aria-label': 'Search community' },
+								htmlInput: { 'aria-label': t('home.searchLabel') },
 								input: {
 									startAdornment: (
 										<InputAdornment position="start">
@@ -150,7 +152,7 @@ export default function CommunityHome() {
 									),
 									endAdornment: (draft || search) && (
 										<InputAdornment position="end">
-											<IconButton aria-label="Clear community search" size="small" onClick={clearSearch}>
+										<IconButton aria-label={t('home.clear')} size="small" onClick={clearSearch}>
 												<Close />
 											</IconButton>
 										</InputAdornment>
@@ -159,7 +161,7 @@ export default function CommunityHome() {
 							}}
 						/>
 						<Button type="submit" variant="contained">
-							Search
+							{t('actions.search', { ns: 'common' })}
 						</Button>
 					</form>
 				</div>

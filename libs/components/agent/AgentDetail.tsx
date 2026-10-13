@@ -15,8 +15,10 @@ import { PublicAgentPackages, PublicArticles, PublicConnections } from './AgentP
 import { packageImageUrl } from '../package/PackageImage';
 import ReportForm from '../cs/ReportForm';
 import { ReportTargetType } from '@/libs/enums/system.enum';
+import { useTranslation } from 'react-i18next';
 
 function Profile({ agent, user }: { agent: AgentDetailData; user: CustomJwtPayload | null }) {
+	const { t } = useTranslation(['agents', 'common']);
 	const router = useRouter();
 	const userId = user?._id;
 	const member = agent.memberData;
@@ -79,10 +81,10 @@ function Profile({ agent, user }: { agent: AgentDetailData; user: CustomJwtPaylo
 		setActionError('');
 		try {
 			const response = await createConversation({ variables: { input: { memberTwoId: agent.memberId } } });
-			if (!response.data?.createConversation._id) throw new Error('Conversation could not be created.');
+			if (!response.data?.createConversation._id) throw new Error(t('card.conversationError'));
 			await router.push({ pathname: '/mypage/chats', query: { conversation: response.data.createConversation._id } });
 		} catch (error) {
-			setActionError(error instanceof Error ? error.message : 'Unable to create a conversation.');
+			setActionError(error instanceof Error ? error.message : t('card.conversationError'));
 		} finally {
 			messageLock.current = false;
 			setMessageBusy(false);
@@ -92,51 +94,51 @@ function Profile({ agent, user }: { agent: AgentDetailData; user: CustomJwtPaylo
 	const tabs = ['overview', 'packages', 'articles', 'travel-mates', 'followers', 'following'] as const;
 	const tab = tabs.find((value) => value === router.query.tab) ?? 'overview';
 	const groups = [
-		{ title: 'Profile', items: [{ id: 'overview', label: 'Overview' }] },
-		{ title: 'Agent', items: [{ id: 'packages', label: 'Packages' }] },
+		{ title: t('detail.profile'), items: [{ id: 'overview', label: t('detail.overview') }] },
+		{ title: t('detail.agent'), items: [{ id: 'packages', label: t('detail.packages') }] },
 		{
-			title: 'Community',
+			title: t('detail.community'),
 			items: [
-				{ id: 'articles', label: 'Articles' },
-				{ id: 'travel-mates', label: 'Travel Mates' },
+				{ id: 'articles', label: t('detail.articles') },
+				{ id: 'travel-mates', label: t('detail.travelMates') },
 			],
 		},
 		{
-			title: 'Connections',
+			title: t('detail.connections'),
 			items: [
-				{ id: 'followers', label: 'Followers' },
-				{ id: 'following', label: 'Following' },
+				{ id: 'followers', label: t('detail.followers') },
+				{ id: 'following', label: t('detail.followingTab') },
 			],
 		},
 	];
 	const stats = [
-		{ label: 'Packages', value: agent.agentPackageCount },
-		{ label: 'Followers', value: counts?.memberFollowerCount ?? member?.memberFollowerCount },
-		{ label: 'Following', value: counts?.memberFollowingCount ?? member?.memberFollowingCount },
+		{ label: t('fields.packages'), value: agent.agentPackageCount },
+		{ label: t('fields.followers'), value: counts?.memberFollowerCount ?? member?.memberFollowerCount },
+		{ label: t('fields.following'), value: counts?.memberFollowingCount ?? member?.memberFollowingCount },
 	];
 	const agencyRows: [string, string | number | undefined][] = [
-		['Company', agent.companyName],
-		['License Number', agent.licenseNumber],
-		['Office Address', agent.officeAddress],
-		['Phone', agent.companyPhone],
-		['Email', agent.companyEmail],
-		['Verification', agent.verificationStatus],
-		['Rating', agent.agentRating],
-		['Reviews', agent.agentReviewCount],
-		['Packages', agent.agentPackageCount],
-		['Bookings', agent.agentBookingCount],
-		['Rank', agent.agentRank > 0 ? agent.agentRank : undefined],
+		[t('fields.company'), agent.companyName],
+		[t('fields.license'), agent.licenseNumber],
+		[t('fields.address'), agent.officeAddress],
+		[t('fields.phone'), agent.companyPhone],
+		[t('fields.email'), agent.companyEmail],
+		[t('fields.verification'), agent.verificationStatus],
+		[t('fields.rating'), agent.agentRating],
+		[t('fields.reviews'), agent.agentReviewCount],
+		[t('fields.packages'), agent.agentPackageCount],
+		[t('fields.bookings'), agent.agentBookingCount],
+		[t('fields.rank'), agent.agentRank > 0 ? agent.agentRank : undefined],
 	];
 	const personalRows: [string, string | number | undefined][] = [
 		[
-			'Language',
+			t('fields.language'),
 			member?.memberLanguage
 				? member.memberLanguage.charAt(0) + member.memberLanguage.slice(1).toLowerCase()
 				: undefined,
 		],
-		['Country', member?.memberCountry],
-		['City', member?.memberCity],
-		['Profile Views', member?.memberViewCount],
+		[t('fields.country'), member?.memberCountry],
+		[t('fields.city'), member?.memberCity],
+		[t('fields.views'), member?.memberViewCount],
 	];
 	function details(rows: [string, string | number | undefined][]) {
 		return (
@@ -159,12 +161,12 @@ function Profile({ agent, user }: { agent: AgentDetailData; user: CustomJwtPaylo
 				<title>{name} | WWT Agent</title>
 			</Head>
 			<Breadcrumbs separator="/" className="agent-detail-breadcrumb">
-				<Link href="/">Home</Link>
-				<Link href="/agent">Agents</Link>
+				<Link href="/">{t('navigation.home', { ns: 'common' })}</Link>
+				<Link href="/agent">{t('navigation.agents', { ns: 'common' })}</Link>
 				<span aria-current="page">{name}</span>
 			</Breadcrumbs>
 			<div className="agent-detail-layout">
-				<aside className="agent-public-sidebar" aria-label="Agent profile navigation">
+				<aside className="agent-public-sidebar" aria-label={t('detail.navigation')}>
 					<Paper className="agent-public-profile">
 						<Avatar className="agent-detail-avatar" src={packageImageUrl(member?.memberImage)} alt={name}>
 							{name.slice(0, 1).toUpperCase()}
@@ -172,7 +174,7 @@ function Profile({ agent, user }: { agent: AgentDetailData; user: CustomJwtPaylo
 						<Typography component="h1">{name}</Typography>
 						{location && <Typography color="text.secondary">{location}</Typography>}
 						{approved && (
-							<Chip icon={<Verified />} label="VERIFIED AGENT" color="primary" variant="outlined" size="small" />
+							<Chip icon={<Verified />} label={t('detail.verified')} color="primary" variant="outlined" size="small" />
 						)}
 						<Typography>{agent.companyName}</Typography>
 						{!self && (
@@ -185,12 +187,12 @@ function Profile({ agent, user }: { agent: AgentDetailData; user: CustomJwtPaylo
 									}}
 								>
 									{followBusy
-										? 'Updating…'
+										? t('states.updating', { ns: 'common' })
 										: userId && follow.loading
-											? 'Loading…'
+											? t('states.loading', { ns: 'common' })
 											: isFollowing
-												? 'Following'
-												: 'Follow Agent'}
+												? t('detail.following')
+												: t('detail.follow')}
 								</Button>
 								{canMessage && <Button
 									variant="outlined"
@@ -200,7 +202,7 @@ function Profile({ agent, user }: { agent: AgentDetailData; user: CustomJwtPaylo
 										void message();
 									}}
 								>
-									{messageBusy ? 'Opening…' : 'Message'}
+									{messageBusy ? t('states.opening', { ns: 'common' }) : t('detail.message')}
 								</Button>}
 								<ReportForm
 									targetId={agent.memberId}
@@ -248,30 +250,30 @@ function Profile({ agent, user }: { agent: AgentDetailData; user: CustomJwtPaylo
 										void follow.refetch().catch(() => undefined);
 									}}
 								>
-									Retry
+									{t('actions.retry', { ns: 'common' })}
 								</Button>
 							}
 						>
-							Follow status could not be loaded.
+							{t('detail.followError')}
 						</Alert>
 					)}
 					{tab === 'overview' && (
 						<>
 							<Paper component="section" className="agent-detail-card">
-								<Typography component="h2">About {name}</Typography>
+								<Typography component="h2">{t('detail.about', { name })}</Typography>
 								<Typography className="agent-detail-bio">
 									{member?.memberDesc?.trim() ||
 										agent.agentDesc?.trim() ||
-										'This member has not added a description yet.'}
+										t('detail.noDescription')}
 								</Typography>
 								{details(personalRows)}
 							</Paper>
 							<Paper component="section" className="agent-detail-card">
-								<Typography component="h2">Agent Information</Typography>
+								<Typography component="h2">{t('detail.information')}</Typography>
 								{details(agencyRows)}
 							</Paper>
 							<Paper component="section" className="agent-detail-card">
-								<Typography component="h2">Community &amp; Stats</Typography>
+								<Typography component="h2">{t('detail.communityStats')}</Typography>
 								<div className="agent-detail-stats">
 									{stats
 										.filter((stat) => typeof stat.value === 'number')
@@ -289,8 +291,8 @@ function Profile({ agent, user }: { agent: AgentDetailData; user: CustomJwtPaylo
 					{tab === 'articles' && <PublicArticles memberId={agent.memberId} />}
 					{tab === 'travel-mates' && (
 						<Paper className="agent-detail-card">
-							<Typography component="h2">Travel Mates</Typography>
-							<Typography color="text.secondary">Travel mate posts for this member are not available yet.</Typography>
+							<Typography component="h2">{t('detail.travelMates')}</Typography>
+							<Typography color="text.secondary">{t('detail.travelMateEmpty')}</Typography>
 						</Paper>
 					)}
 					{(tab === 'followers' || tab === 'following') && (
@@ -306,6 +308,7 @@ function Profile({ agent, user }: { agent: AgentDetailData; user: CustomJwtPaylo
 	);
 }
 export default function AgentDetail() {
+	const { t } = useTranslation(['agents', 'common']);
 	const router = useRouter();
 	const user = useReactiveVar(currentUserVar);
 	const id = typeof router.query.agentId === 'string' ? router.query.agentId : '';
@@ -318,10 +321,10 @@ export default function AgentDetail() {
 	return (
 		<div className="agent-detail-page">
 			<Head>
-				<title>Agent Profile | WWT</title>
+				<title>{t('detail.pageTitle')}</title>
 			</Head>
 			{!router.isReady || loading ? (
-				<div aria-label="Loading agent profile" aria-busy="true">
+				<div aria-label={t('detail.loading')} aria-busy="true">
 					<Skeleton height={40} width="45%" />
 					<div className="agent-detail-layout">
 						<Skeleton variant="rounded" height={320} />
@@ -333,11 +336,11 @@ export default function AgentDetail() {
 					severity="error"
 					action={
 						<Button component={Link} href="/agent">
-							Back to Agents
+							{t('detail.back')}
 						</Button>
 					}
 				>
-					Agent could not be found.
+					{t('detail.notFound')}
 				</Alert>
 			) : (
 				<Profile key={`${id}-${user?._id ?? 'guest'}`} agent={data.getAgent} user={user} />

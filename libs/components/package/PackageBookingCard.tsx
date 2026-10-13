@@ -9,12 +9,13 @@ import type { PackageSchedule } from '@/libs/types/package/package-schedule';
 import type { BookingInput } from '@/libs/types/booking/booking.input';
 import { ScheduleStatus } from '@/libs/enums/package.enum';
 import { formatScheduleDate } from './PackageSchedules';
+import { useTranslation } from 'react-i18next';
 
 type Counts = Required<Pick<BookingInput, 'adultCount' | 'childCount' | 'infantCount'>>;
 const travelerTypes = [
-	['adultCount', 'Adults'],
-	['childCount', 'Children'],
-	['infantCount', 'Infants'],
+	['adultCount', 'detail.adults'],
+	['childCount', 'detail.children'],
+	['infantCount', 'detail.infants'],
 ] as const;
 
 interface Props {
@@ -25,6 +26,7 @@ interface Props {
 }
 
 export default function PackageBookingCard({ item, selectedScheduleId, schedule, schedulesReady }: Props) {
+	const { t, i18n } = useTranslation('packages');
 	const router = useRouter();
 	const minimum = Math.max(1, item.minPeople);
 	const capacity = Math.max(0, Math.min(item.maxPeople, schedule?.availableSeats ?? 0));
@@ -46,7 +48,8 @@ export default function PackageBookingCard({ item, selectedScheduleId, schedule,
 		item.packagePrice * counts.infantCount;
 	const valid =
 		available && peopleCount >= minimum && peopleCount <= capacity && Number.isFinite(total) && item.packagePrice >= 0;
-	const money = (value: number) => `${item.currency} ${value.toLocaleString('en-US', { maximumFractionDigits: 2 })}`;
+	const money = (value: number) =>
+		`${item.currency} ${value.toLocaleString(i18n.language, { maximumFractionDigits: 2 })}`;
 
 	function changeCount(field: keyof Counts, change: number) {
 		setCounts((previous) => {
@@ -70,35 +73,38 @@ export default function PackageBookingCard({ item, selectedScheduleId, schedule,
 	}
 
 	return (
-		<aside className="detail-booking" aria-label="Booking information">
+		<aside className="detail-booking" aria-label={t('detail.bookingInfo')}>
 			<Stack spacing={2.5}>
 				<div>
 					<Typography variant="body2" color="text.secondary">
-						Price per traveler
+						{t('detail.pricePerTraveler')}
 					</Typography>
 					<strong className="detail-price">{money(item.packagePrice)}</strong>
 				</div>
 				<div>
-					<Typography variant="subtitle2">Selected Date</Typography>
+					<Typography variant="subtitle2">{t('detail.selectedDate')}</Typography>
 					{schedule ? (
 						<Typography variant="body2" color="text.secondary">
-							{formatScheduleDate(schedule.startDate)} → {formatScheduleDate(schedule.endDate)}
+							{formatScheduleDate(schedule.startDate, i18n.language)} →{' '}
+							{formatScheduleDate(schedule.endDate, i18n.language)}
 						</Typography>
 					) : (
 						<Typography variant="body2" color="text.secondary">
-							Select an available date to continue.
+							{t('detail.selectDateHint')}
 						</Typography>
 					)}
 				</div>
 				{schedule && !available && (
-					<Alert severity="info">This departure is unavailable or has too few seats for the minimum group size.</Alert>
+					<Alert severity="info">{t('detail.departureUnavailable')}</Alert>
 				)}
 				<Divider />
 				<div>
 					<Typography variant="subtitle2" sx={{ mb: 1 }}>
-						Travelers
+						{t('detail.travelers')}
 					</Typography>
-					{travelerTypes.map(([field, label]) => (
+					{travelerTypes.map(([field, labelKey]) => {
+						const label = t(labelKey);
+						return (
 						<Stack
 							key={field}
 							direction="row"
@@ -108,7 +114,7 @@ export default function PackageBookingCard({ item, selectedScheduleId, schedule,
 							<Typography variant="body2">{label}</Typography>
 							<Stack direction="row" sx={{ alignItems: 'center' }}>
 								<IconButton
-									aria-label={`Remove ${label.toLowerCase()}`}
+									aria-label={t('detail.removeTraveler', { type: label })}
 									disabled={!available || counts[field] === 0}
 									onClick={() => changeCount(field, -1)}
 									sx={{ width: 44, height: 44 }}
@@ -119,7 +125,7 @@ export default function PackageBookingCard({ item, selectedScheduleId, schedule,
 									{counts[field]}
 								</Typography>
 								<IconButton
-									aria-label={`Add ${label.toLowerCase()}`}
+									aria-label={t('detail.addTraveler', { type: label })}
 									disabled={!available || peopleCount >= capacity}
 									onClick={() => changeCount(field, 1)}
 									sx={{ width: 44, height: 44 }}
@@ -128,18 +134,19 @@ export default function PackageBookingCard({ item, selectedScheduleId, schedule,
 								</IconButton>
 							</Stack>
 						</Stack>
-					))}
+						);
+					})}
 					<Typography variant="caption" color="text.secondary">
-						Package group size: {minimum}–{item.maxPeople} travelers.
-						{schedule ? ` ${schedule.availableSeats} seats available.` : ''}
+						{t('detail.groupRange', { min: minimum, max: item.maxPeople })}
+						{schedule ? ` ${t('detail.seatsAvailable', { count: schedule.availableSeats })}` : ''}
 					</Typography>
 					{available && peopleCount < minimum && (
 						<Alert severity="info">
-							Select at least {minimum} {minimum === 1 ? 'traveler' : 'travelers'}.
+							{t('detail.minimumTravelers', { count: minimum })}
 						</Alert>
 					)}
 					{peopleCount > capacity && schedule && (
-						<Alert severity="warning">Reduce the traveler count to {capacity} or fewer.</Alert>
+					<Alert severity="warning">{t('detail.reduceTravelers', { count: capacity })}</Alert>
 					)}
 				</div>
 				<Divider />
@@ -148,11 +155,11 @@ export default function PackageBookingCard({ item, selectedScheduleId, schedule,
 						{peopleCount} × {money(item.packagePrice)}
 					</Typography>
 					<Typography variant="h6" color="primary" sx={{ overflowWrap: 'anywhere' }}>
-						Total: {money(total)}
+						{t('detail.total')}: {money(total)}
 					</Typography>
 				</div>
 				<Button fullWidth variant="contained" disabled={!valid} onClick={handleContinueBooking}>
-					Continue Booking
+					{t('detail.continueBooking')}
 				</Button>
 			</Stack>
 		</aside>

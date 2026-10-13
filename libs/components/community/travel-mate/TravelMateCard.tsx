@@ -9,8 +9,10 @@ import type { CommunityTravelMateItem } from '@/apollo/user/query';
 import { packageImageUrl } from '@/libs/components/package/PackageImage';
 import { formatScheduleDate } from '@/libs/components/package/PackageSchedules';
 import { excerpt, memberName } from '../communityState';
+import { useTranslation } from 'react-i18next';
 
 export default function TravelMateCard({ post }: { post: CommunityTravelMateItem }) {
+	const { t, i18n } = useTranslation('community');
 	const author = memberName(post.memberData);
 	const remaining = Math.max(0, post.maxMembers - post.currentMembers);
 	const progress = post.maxMembers > 0 ? Math.min(100, (post.currentMembers / post.maxMembers) * 100) : 0;
@@ -23,7 +25,7 @@ export default function TravelMateCard({ post }: { post: CommunityTravelMateItem
 						{post.destinationCity}, {post.destinationCountry}
 					</span>
 				</div>
-				<Chip size="small" className={remaining ? 'is-open' : 'is-full'} label={remaining ? 'OPEN' : 'FULL'} />
+				<Chip size="small" className={remaining ? 'is-open' : 'is-full'} label={t(remaining ? 'mates.open' : 'mates.full')} />
 			</header>
 			<div className="community-mate-date">
 				<CalendarMonthOutlined />
@@ -33,9 +35,9 @@ export default function TravelMateCard({ post }: { post: CommunityTravelMateItem
 			<Typography className="community-card-copy">{excerpt(post.matePostContent, 120)}</Typography>
 			<div className="community-mate-capacity">
 				<span>
-					<PeopleAltOutlined /> {post.currentMembers} / {post.maxMembers} travelers
+					<PeopleAltOutlined /> {t('mates.travelers', { current: post.currentMembers, maximum: post.maxMembers })}
 				</span>
-				<small>{remaining ? `${remaining} spots left` : 'Group full'}</small>
+				<small>{remaining ? t('mates.spots', { count: remaining }) : t('mates.full')}</small>
 			</div>
 			<LinearProgress
 				variant="determinate"
@@ -44,7 +46,7 @@ export default function TravelMateCard({ post }: { post: CommunityTravelMateItem
 			/>
 			{typeof post.matePostViewCount === 'number' && (
 				<div className="community-mate-views">
-					<VisibilityOutlined /> {post.matePostViewCount.toLocaleString('en-US')} views
+					<VisibilityOutlined /> {t('stories.views', { count: post.matePostViewCount.toLocaleString(i18n.language) })}
 				</div>
 			)}
 			<footer>
@@ -58,7 +60,7 @@ export default function TravelMateCard({ post }: { post: CommunityTravelMateItem
 					</span>
 				</div>
 				<Button component={Link} href={`/community/travel-mate/${post._id}`} endIcon={<ArrowForward />}>
-					View
+					{t('mates.view')}
 				</Button>
 			</footer>
 		</article>

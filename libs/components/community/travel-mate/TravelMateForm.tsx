@@ -11,6 +11,8 @@ import {
 import CalendarMonthOutlined from '@mui/icons-material/CalendarMonthOutlined';
 import PeopleAltOutlined from '@mui/icons-material/PeopleAltOutlined';
 import PlaceOutlined from '@mui/icons-material/PlaceOutlined';
+import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 
 export interface TravelMateFormValues {
 	departureCountry?: string;
@@ -48,26 +50,26 @@ function createDraft(initialValues?: TravelMateFormValues): Draft {
 	};
 }
 
-function validate(draft: Draft, minimumCapacity: number): Errors {
+function validate(draft: Draft, minimumCapacity: number, t: TFunction): Errors {
 	const errors: Errors = {};
 	const title = draft.matePostTitle.trim();
 	const content = draft.matePostContent.trim();
 	const maximum = Number(draft.maxMembers);
 
-	if (!title) errors.matePostTitle = 'Enter a title.';
-	else if (title.length < 3 || title.length > 200) errors.matePostTitle = 'Use between 3 and 200 characters.';
-	if (!draft.destinationCountry.trim()) errors.destinationCountry = 'Enter the destination country.';
-	if (!draft.destinationCity.trim()) errors.destinationCity = 'Enter the destination city.';
-	if (!draft.travelDate) errors.travelDate = 'Choose a travel date.';
+	if (!title) errors.matePostTitle = t('mates.titleRequired');
+	else if (title.length < 3 || title.length > 200) errors.matePostTitle = t('mates.titleLength');
+	if (!draft.destinationCountry.trim()) errors.destinationCountry = t('mates.countryRequired');
+	if (!draft.destinationCity.trim()) errors.destinationCity = t('mates.cityRequired');
+	if (!draft.travelDate) errors.travelDate = t('mates.dateRequired');
 	if (!Number.isInteger(maximum) || maximum < minimumCapacity) {
 		errors.maxMembers =
 			minimumCapacity > 2
-				? `The group already has ${minimumCapacity} travelers.`
-				: 'The group must allow at least 2 travelers.';
+				? t('mates.groupExisting', { count: minimumCapacity })
+				: t('mates.groupMinimum');
 	}
-	if (!content) errors.matePostContent = 'Tell travelers about the trip.';
+	if (!content) errors.matePostContent = t('mates.contentRequired');
 	else if (content.length < 10 || content.length > 5000)
-		errors.matePostContent = 'Use between 10 and 5,000 characters.';
+		errors.matePostContent = t('mates.contentLength');
 
 	return errors;
 }
@@ -89,13 +91,14 @@ export default function TravelMateForm({
 	onSubmit: (values: TravelMateFormValues) => void;
 	onCancel: () => void;
 }) {
+	const { t } = useTranslation(['community', 'common']);
 	const [draft, setDraft] = useState<Draft>(() => createDraft(initialValues));
 	const [errors, setErrors] = useState<Errors>({});
-	const title = mode === 'create' ? 'Create Travel Mate' : 'Edit Travel Mate';
+	const title = t(mode === 'create' ? 'mates.create' : 'mates.edit');
 	const description =
 		mode === 'create'
-			? 'Share your trip plan and meet travelers heading the same way.'
-			: 'Update the information travelers use to understand your trip.';
+			? t('mates.formCreateDescription')
+			: t('mates.formEditDescription');
 
 	function update<K extends keyof Draft>(field: K, value: Draft[K]) {
 		setDraft((current) => ({ ...current, [field]: value }));
@@ -104,7 +107,7 @@ export default function TravelMateForm({
 
 	function submit(event: React.FormEvent<HTMLFormElement>) {
 		event.preventDefault();
-		const nextErrors = validate(draft, minimumCapacity);
+		const nextErrors = validate(draft, minimumCapacity, t);
 		setErrors(nextErrors);
 		if (Object.keys(nextErrors).length) return;
 
@@ -132,26 +135,26 @@ export default function TravelMateForm({
 						<div className="travel-mate-form-section-title">
 							<PlaceOutlined />
 							<div>
-								<Typography component="h2">Trip route</Typography>
-								<Typography color="text.secondary">Add where the trip starts and where you are going.</Typography>
+								<Typography component="h2">{t('mates.route')}</Typography>
+								<Typography color="text.secondary">{t('mates.routeDescription')}</Typography>
 							</div>
 						</div>
 						<div className="travel-mate-form-grid">
 							<TextField
-								label="Departure country (optional)"
+								label={t('mates.departureCountry')}
 								value={draft.departureCountry}
 								onChange={(event) => update('departureCountry', event.target.value)}
 								slotProps={{ htmlInput: { maxLength: 100 } }}
 							/>
 							<TextField
-								label="Departure city (optional)"
+								label={t('mates.departureCity')}
 								value={draft.departureCity}
 								onChange={(event) => update('departureCity', event.target.value)}
 								slotProps={{ htmlInput: { maxLength: 100 } }}
 							/>
 							<TextField
 								required
-								label="Destination country"
+								label={t('mates.destinationCountry')}
 								value={draft.destinationCountry}
 								onChange={(event) => update('destinationCountry', event.target.value)}
 								error={Boolean(errors.destinationCountry)}
@@ -160,7 +163,7 @@ export default function TravelMateForm({
 							/>
 							<TextField
 								required
-								label="Destination city"
+								label={t('mates.destinationCity')}
 								value={draft.destinationCity}
 								onChange={(event) => update('destinationCity', event.target.value)}
 								error={Boolean(errors.destinationCity)}
@@ -176,15 +179,15 @@ export default function TravelMateForm({
 						<div className="travel-mate-form-section-title">
 							<CalendarMonthOutlined />
 							<div>
-								<Typography component="h2">Date and group size</Typography>
-								<Typography color="text.secondary">Set the departure date and total capacity, including you.</Typography>
+								<Typography component="h2">{t('mates.dateGroup')}</Typography>
+								<Typography color="text.secondary">{t('mates.dateGroupDescription')}</Typography>
 							</div>
 						</div>
 						<div className="travel-mate-form-grid">
 							<TextField
 								required
 								type="date"
-								label="Travel date"
+								label={t('mates.travelDate')}
 								value={draft.travelDate}
 								onChange={(event) => update('travelDate', event.target.value)}
 								error={Boolean(errors.travelDate)}
@@ -194,15 +197,15 @@ export default function TravelMateForm({
 							<TextField
 								required
 								type="number"
-								label="Maximum travelers"
+								label={t('mates.maximumTravelers')}
 								value={draft.maxMembers}
 								onChange={(event) => update('maxMembers', event.target.value)}
 								error={Boolean(errors.maxMembers)}
 								helperText={
 									errors.maxMembers ||
 									(minimumCapacity > 2
-										? `At least ${minimumCapacity} travelers are already approved, including you.`
-										: 'The creator is included in this number.')
+										? t('mates.approvedMinimum', { count: minimumCapacity })
+										: t('mates.creatorIncluded'))
 								}
 								slotProps={{
 									htmlInput: { min: minimumCapacity, step: 1 },
@@ -215,12 +218,12 @@ export default function TravelMateForm({
 					<Divider />
 
 					<section>
-						<Typography component="h2">Trip details</Typography>
+					<Typography component="h2">{t('mates.tripDetails')}</Typography>
 						<TextField
 							required
 							fullWidth
-							label="Post title"
-							placeholder="Give travelers a clear summary of the trip"
+							label={t('mates.postTitle')}
+							placeholder={t('mates.postTitlePlaceholder')}
 							value={draft.matePostTitle}
 							onChange={(event) => update('matePostTitle', event.target.value)}
 							error={Boolean(errors.matePostTitle)}
@@ -232,8 +235,8 @@ export default function TravelMateForm({
 							fullWidth
 							multiline
 							minRows={8}
-							label="About the trip"
-							placeholder="Describe the plan, pace, and the kind of travel mate you hope to meet."
+							label={t('mates.about')}
+							placeholder={t('mates.aboutPlaceholder')}
 							value={draft.matePostContent}
 							onChange={(event) => update('matePostContent', event.target.value)}
 							error={Boolean(errors.matePostContent)}
@@ -245,20 +248,20 @@ export default function TravelMateForm({
 					{submitError && <Alert severity="error">{submitError}</Alert>}
 					<div className="travel-mate-form-actions">
 						<Button type="button" variant="outlined" disabled={submitting} onClick={onCancel}>
-							Cancel
+							{t('actions.cancel', { ns: 'common' })}
 						</Button>
 						<Button type="submit" variant="contained" disabled={submitting}>
-							{submitting ? 'Saving…' : mode === 'create' ? 'Create Travel Mate' : 'Save Changes'}
+							{submitting ? t('mates.saving') : mode === 'create' ? t('mates.create') : t('mates.saveChanges')}
 						</Button>
 					</div>
 				</Paper>
 
 				<Paper component="aside" variant="outlined" className="travel-mate-form-guide">
-					<Typography component="h2">Before you publish</Typography>
+					<Typography component="h2">{t('mates.beforePublish')}</Typography>
 					<ul>
-						<li>Use the real destination and date so travelers can plan accurately.</li>
-						<li>The group size includes you as the trip creator.</li>
-						<li>Join requests remain pending until you approve them.</li>
+						<li>{t('mates.guideDestination')}</li>
+						<li>{t('mates.guideCapacity')}</li>
+						<li>{t('mates.guideRequests')}</li>
 					</ul>
 				</Paper>
 			</div>

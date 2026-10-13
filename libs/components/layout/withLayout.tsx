@@ -3,9 +3,11 @@ import { useTheme } from '@mui/material/styles';
 import Navbar from '@/libs/components/common/Navbar';
 import Footer from '@/libs/components/common/Footer';
 import ChatWidget from '@/libs/components/common/ChatWidget/ChatWidget';
+import { useTranslation } from 'react-i18next';
 
 export function PublicLayout({ children }: { children: ReactNode }) {
   const theme = useTheme();
+  const { t } = useTranslation('common');
   const style: CSSProperties & Record<`--wwt-${string}`, string> = {
     '--wwt-primary': theme.palette.primary.main,
     '--wwt-accent': theme.palette.secondary.main,
@@ -18,7 +20,7 @@ export function PublicLayout({ children }: { children: ReactNode }) {
 
   return (
     <div className="wwt-public-layout" style={style}>
-      <a className="wwt-skip-link" href="#wwt-page-content">Skip to content</a>
+      <a className="wwt-skip-link" href="#wwt-page-content">{t('skipToContent')}</a>
       <Navbar />
       <main id="wwt-page-content" className="wwt-page-content" tabIndex={-1}>
         {children}

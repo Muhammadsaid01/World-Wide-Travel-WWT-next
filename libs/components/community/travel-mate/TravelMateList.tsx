@@ -4,6 +4,7 @@ import Link from 'next/link';
 import type { QueryResult } from '@apollo/client';
 import type { CommunityTravelMateItem, MyTravelMatesInput } from '@/apollo/user/query';
 import TravelMateCard from './TravelMateCard';
+import { useTranslation } from 'react-i18next';
 
 type MateResult = { getTravelMatePosts: { list: CommunityTravelMateItem[]; metaCounter?: { total: number }[] | null } };
 
@@ -16,23 +17,24 @@ export default function TravelMateList({
 	filtered: boolean;
 	toolbar?: ReactNode;
 }) {
+	const { t } = useTranslation(['community', 'common']);
 	const posts = query.data?.getTravelMatePosts.list ?? [];
 	return (
 		<section className="community-section community-mates" id="community-mates" aria-labelledby="community-mates-title">
 			<header className="community-section-heading">
 				<div>
-					<Typography variant="overline">Plan the next journey together</Typography>
+					<Typography variant="overline">{t('home.matesEyebrow')}</Typography>
 					<Typography component="h2" id="community-mates-title">
-						Find a Travel Mate
+						{t('home.matesTitle')}
 					</Typography>
 				</div>
 				<Button component={Link} href="/community/travel-mate" className="community-view-all">
-					View All →
+					{t('actions.viewAll', { ns: 'common' })}
 				</Button>
 			</header>
 			{toolbar}
 			{query.loading ? (
-				<div className="community-mate-grid" aria-label="Loading travel mates">
+				<div className="community-mate-grid" aria-label={t('mates.loading')}>
 					{Array.from({ length: 3 }, (_, index) => (
 						<Skeleton key={index} variant="rounded" height={330} />
 					))}
@@ -40,14 +42,14 @@ export default function TravelMateList({
 			) : query.error ? (
 				<Alert
 					severity="error"
-					action={<Button onClick={() => void query.refetch().catch(() => undefined)}>Retry</Button>}
+					action={<Button onClick={() => void query.refetch().catch(() => undefined)}>{t('actions.retry', { ns: 'common' })}</Button>}
 				>
-					Travel-mate posts could not be loaded.
+					{t('mates.error')}
 				</Alert>
 			) : !posts.length ? (
 				<div className="community-empty">
 					<Typography component="h3">
-						{filtered ? 'No travel-mate posts match your search.' : 'No open travel-mate trips are available yet.'}
+						{t(filtered ? 'mates.empty' : 'mates.emptyOpen')}
 					</Typography>
 				</div>
 			) : (
