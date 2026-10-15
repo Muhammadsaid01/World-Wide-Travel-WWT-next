@@ -1,0 +1,22 @@
+version: '1.1'
+
+services:
+  wwt-next:
+    container_name: wwt-next
+    restart: always
+    image: node:20.19.6
+    ports:
+      - '4000:3000'
+    environment:
+      - PORT=3000
+    volumes:
+      - ./:/usr/src/wwt-next
+    working_dir: /usr/src/wwt-next
+    networks:
+      - client-network
+
+    command: bash -c "yarn && yarn run build && yarn run start"
+
+networks:
+  client-network:
+    driver: bridge
