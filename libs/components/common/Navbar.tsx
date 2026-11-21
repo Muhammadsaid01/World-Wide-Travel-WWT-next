@@ -1,13 +1,14 @@
-import { GET_MY_UNREAD_MESSAGE_COUNT, GET_UNREAD_NOTIFICATION_COUNT, type NotificationQueryInput } from '@/apollo/user/query';
 import { currentUserVar } from '@/apollo/store';
+import { GET_MY_UNREAD_MESSAGE_COUNT, GET_UNREAD_NOTIFICATION_COUNT, type NotificationQueryInput } from '@/apollo/user/query';
 import { logout } from '@/libs/auth';
 import NotificationWidget from '@/libs/components/common/NotificationWidget/NotificationWidget';
 import { packageImageUrl } from '@/libs/components/package/PackageImage';
 import { MemberType } from '@/libs/enums/member.enum';
+import { changeAppLanguage, languageOptions, normalizeLanguage } from '@/libs/i18n';
 import { NotificationBadge } from '@/scss/MaterialTheme/styled';
 import { useQuery, useReactiveVar } from '@apollo/client';
-import CloseIcon from '@mui/icons-material/Close';
 import CheckIcon from '@mui/icons-material/Check';
+import CloseIcon from '@mui/icons-material/Close';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
@@ -19,7 +20,6 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { changeAppLanguage, languageOptions, normalizeLanguage } from '@/libs/i18n';
 
 const navigation = [
 	{ key: 'home', href: '/' },
@@ -33,6 +33,7 @@ const navigation = [
 export default function Navbar() {
 	const { t, i18n } = useTranslation('common');
 	const currentUser = useReactiveVar(currentUserVar);
+	const isLoggedIn = Boolean(currentUser?._id);
 	const [accountAnchor, setAccountAnchor] = useState<HTMLButtonElement | null>(null);
 	const [languageAnchor, setLanguageAnchor] = useState<HTMLButtonElement | null>(null);
 	const [notificationAnchor, setNotificationAnchor] = useState<HTMLButtonElement | null>(null);
@@ -158,27 +159,39 @@ export default function Navbar() {
 		);
 	}
 
-	function links() {
-		return navigation.map(({ key, href }) => {
-			const label = t(`navigation.${key}`);
-			return (
-			href ? (
-				<Link
-					key={label}
-					href={href}
-					className="wwt-nav-link"
-					aria-current={router.pathname === href ? 'page' : undefined}
-					onClick={() => setMenuOpen(false)}
-				>
-					{label}
-				</Link>
-			) : (
-				<span key={label} className="wwt-nav-link wwt-unavailable" aria-disabled="true" title={`${label} coming soon`}>
-					{label}
-				</span>
-			));
-		});
-	}
+
+
+function links() {
+  const isLoggedIn = Boolean(currentUser?._id);
+
+  return navigation
+    .filter((item) => {
+      if (item.key === 'profile' && !isLoggedIn) {
+        return false;
+      }
+
+      return true;
+    })
+    .map(({ key, href }) => {
+      const label = t(`navigation.${key}`);
+
+      return (
+        <Link
+          key={key}
+          href={href}
+          className="wwt-nav-link"
+          aria-current={
+            router.pathname === href ? 'page' : undefined
+          }
+          onClick={() => setMenuOpen(false)}
+        >
+          {label}
+        </Link>
+      );
+    });
+}
+
+
 
 	return (
 		<header
@@ -200,23 +213,36 @@ export default function Navbar() {
 				<nav className="wwt-desktop-nav" aria-label={t('navigation.main')}>
 					{links()}
 				</nav>
+				
 				<div className="wwt-navbar-actions">
 					{languageControl('desktop')}
-					<IconButton
-						component={Link}
-						href="/mypage/saved"
-						aria-label={t('savedPackages')}
-						color={router.pathname === '/mypage/saved' ? 'primary' : 'default'}
-					>
-						{router.pathname === '/mypage/saved' ? (
-							<FavoriteIcon />
-						) : (
-							<FavoriteBorderIcon />
-						)}
-					</IconButton>
-					{notificationControl('desktop')}
+
+					{isLoggedIn && (
+						<>
+							<IconButton
+								component={Link}
+								href="/mypage/saved"
+								aria-label={t('savedPackages')}
+								color={
+									router.pathname === '/mypage/saved'
+										? 'primary'
+										: 'default'
+								}
+							>
+								{router.pathname === '/mypage/saved' ? (
+									<FavoriteIcon />
+								) : (
+									<FavoriteBorderIcon />
+								)}
+							</IconButton>
+
+							{notificationControl('desktop')}
+						</>
+					)}
+
 					{accountControl('desktop')}
 				</div>
+
 				<IconButton
 					ref={menuToggle}
 					className="wwt-menu-toggle"
@@ -234,24 +260,37 @@ export default function Navbar() {
 					<nav className="wwt-mobile-nav" aria-label={t('navigation.mobile')}>
 						{links()}
 					</nav>
+					
 					<div className="wwt-mobile-actions">
 						{languageControl('mobile')}
-						<IconButton
-							component={Link}
-							href="/mypage/saved"
-							aria-label={t('savedPackages')}
-							color={router.pathname === '/mypage/saved' ? 'primary' : 'default'}
-							onClick={() => setMenuOpen(false)}
-						>
-							{router.pathname === '/mypage/saved' ? (
-								<FavoriteIcon />
-							) : (
-								<FavoriteBorderIcon />
-							)}
-						</IconButton>
-						{notificationControl('mobile')}
+
+						{isLoggedIn && (
+							<>
+								<IconButton
+									component={Link}
+									href="/mypage/saved"
+									aria-label={t('savedPackages')}
+									color={
+										router.pathname === '/mypage/saved'
+											? 'primary'
+											: 'default'
+									}
+									onClick={() => setMenuOpen(false)}
+								>
+									{router.pathname === '/mypage/saved' ? (
+										<FavoriteIcon />
+									) : (
+										<FavoriteBorderIcon />
+									)}
+								</IconButton>
+
+								{notificationControl('mobile')}
+							</>
+						)}
+
 						{accountControl('mobile')}
 					</div>
+
 				</Container>
 			</Collapse>
 			<Menu
